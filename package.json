@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node tools/dev.mjs",
     "build": "node tools/build.mjs",
-    "serve": "npx --yes http-server site -p 8080 -c-1",
+    "serve": "npx --yes http-server public -p 8080 -c-1",
     "test:vr": "node tools/test.mjs vr",
     "test:ui": "node tools/test.mjs ui",
     "test:atmosphere": "node tools/test.mjs atmosphere",

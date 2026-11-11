@@ -20,9 +20,9 @@ Use the Scenes menu to preview later scenes. Stop the server with Ctrl+C.
 ## Play it
 
 - **Online:** the published link (claude.ai artifact) runs the desktop version.
-- **On this computer:** double-click **`Start The Long Way Home.bat`**. It serves the `site` folder at
+- **On this computer:** double-click **`Start The Long Way Home.bat`**. It serves the `public` folder at
   `http://localhost:8080` and opens it in your browser (close the black window to stop). Any other local
-  web server works too, e.g. `python -m http.server 8080` inside `site`.
+  web server works too, e.g. `python -m http.server 8080` inside `public`.
 
 ## Play it in VR
 
@@ -30,8 +30,8 @@ There is no app to install: the headset opens the game as a web page and **Enter
 Scenes; it only appears where VR is available) takes it into the headset. It needs **controllers** (not hand tracking). WebXR only works over
 `https://` or on `localhost`, so there are two ways in:
 
-1. **Standalone headset (Meta Quest 2/3/Pro, Pico):** put the `site` folder online over https (GitHub Pages
-   — see below — or Netlify Drop: drag the `site` folder onto app.netlify.com/drop). Open the link in the
+1. **Standalone headset (Meta Quest 2/3/Pro, Pico):** put the `public` folder online over https (GitHub Pages
+   — see below — or Netlify Drop: drag the `public` folder onto app.netlify.com/drop). Open the link in the
    headset's own browser → **Enter VR**.
 2. **Headset tethered to a Windows PC (Quest Link / Air Link, SteamVR, Windows Mixed Reality):** start the
    headset's PC link first, then double-click `Start The Long Way Home.bat`, open the page in **Chrome or Edge**
@@ -43,15 +43,25 @@ The Edition picker applies to VR too. In VR the story starts from Scene 1.
 ## Put it on GitHub (and GitHub Pages for VR)
 
 The folder is ready to be a repository as it is: `.gitignore` leaves out `node_modules/` and `backups/`,
-all paths in `site/` are relative, and `site/.nojekyll` stops Pages from touching the files.
+all paths in `public/` are relative, and `public/.nojekyll` stops Pages from touching the files.
 
 1. `git init`, `git add .`, `git commit -m "V3"`, then push to a new GitHub repository (branch `main`).
 2. Move `docs/github-pages-workflow.yml` to `.github/workflows/pages.yml` (create the two folders), then
-   Repository → Settings → Pages → Source: **GitHub Actions**. The workflow publishes the `site/` folder on every push.
+   Repository → Settings → Pages → Source: **GitHub Actions**. The workflow publishes the `public/` folder on every push.
 3. Open the `https://<user>.github.io/<repo>/` link on desktop or in the headset browser → **Enter VR**.
 
-`site/app.js` is already built, so nothing has to be compiled on GitHub. After changing `src/`, run
+`public/app.js` is already built, so nothing has to be compiled on GitHub. After changing `src/`, run
 `npm install` once and `npm run build`.
+
+## Publish on Vercel
+
+Import this repository into Vercel with the repository root as the Root Directory.
+The root `vercel.json` configures the framework preset as **Other**, runs `npm run build`,
+and publishes `public/` as the Output Directory. The HTML, styles, fonts, and audio already
+live in that folder; the build generates `public/app.js` alongside them.
+
+Commit and push these files, then redeploy. If you previously set the Output Directory
+to `site` in the dashboard, change it to `public` or disable that override.
 
 ## Scenes
 
@@ -80,11 +90,11 @@ Add `?debug` to the address for the story phase and frame rate; N skips a beat.
 ## Code organization
 
 `src/main.js` coordinates the game. Source modules are grouped into `scenes/`, `systems/`,
-`rendering/`, `characters/`, `world/`, `ui/`, and `config/`. The current page is `site/index.html`;
-`site/app.js` is generated. Styles are in `site/styles/`, imported by `site/style.css`.
+`rendering/`, `characters/`, `world/`, `ui/`, and `config/`. The current page is `public/index.html`;
+`public/app.js` is generated. Styles are in `public/styles/`, imported by `public/style.css`.
 
 See [the code guide](docs/CODE_GUIDE.md) for the source map, scene lifecycle, VR conventions,
-formatting, and tests. Older `site/js/`, `site/css/`, `site/play.html`, and `site-public/` files are
+formatting, and tests. Older `public/js/`, `public/css/`, `public/play.html`, and `site-public/` files are
 retained references; the current game builds from `src/`.
 
 Format source files using the Prettier extension in VS Code.
@@ -93,8 +103,8 @@ Install the test browser once with `npx playwright install chromium`.
 
 ## Typography and atmosphere
 
-The playable `site/` build serves Spectral titles and Gowun Batang body text locally, including the
-caption and ending boards in VR. Font licenses are in `site/fonts/`.
+The playable `public/` build serves Spectral titles and Gowun Batang body text locally, including the
+caption and ending boards in VR. Font licenses are in `public/fonts/`.
 
 `src/rendering/atmosphere.js` adds slowly drifting, height-dependent haze to world materials in both eyes,
 without a post-processing pass. The factory keeps its window shafts and floating dust at every

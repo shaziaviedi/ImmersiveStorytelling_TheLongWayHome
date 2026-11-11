@@ -1,6 +1,6 @@
 # Tiny local web server for The Long Way Home (no install needed).
 # Started by "Start The Long Way Home.bat". Close this window to stop it.
-$root = (Resolve-Path (Join-Path $PSScriptRoot '..\site')).Path
+$root = (Resolve-Path (Join-Path $PSScriptRoot '..\public')).Path
 $port = 8080
 $listener = New-Object System.Net.HttpListener
 while ($true) {

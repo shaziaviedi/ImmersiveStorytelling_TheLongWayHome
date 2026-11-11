@@ -18,29 +18,29 @@ transitions between them, and runs the frame loop.
   interface instead of manipulating the caption layout themselves.
 - `src/config/settings.js` loads and saves browser preferences, with defaults when storage is blocked.
 
-`site/index.html` is the current page. `site/app.js` is generated from `src/main.js`; edit the sources
+`public/index.html` is the current page. `public/app.js` is generated from `src/main.js`; edit the sources
 and rebuild instead of editing that bundle. Both `npm run dev` and `npm run build` use
 `tools/build-options.mjs`, so their bundles use the same configuration. `build.sh` remains a wrapper
 for older launch instructions.
 
-The old `site/js/`, `site/css/`, and `site/play.html` files are retained reference sources, not the
-entry point for the current build. `site-public/` is an older exported build. These original paths
-also appear in the historical authorship records. Use `site/` and `src/` for current development.
+The old `public/js/`, `public/css/`, and `public/play.html` files are retained reference sources, not the
+entry point for the current build. `site-public/` is an older exported build. The former `site/` paths
+also appear in the historical authorship records. Use `public/` and `src/` for current development.
 
 ## Where to edit styles
 
-`site/style.css` imports the focused stylesheets in order. That order preserves the existing cascade.
+`public/style.css` imports the focused stylesheets in order. That order preserves the existing cascade.
 
-- `site/styles/base.css`: fonts, theme colors, shared typography, canvas, and full-screen overlays.
-- `site/styles/panels.css`: dialogs, settings controls, and scene selection.
-- `site/styles/menu.css`: the title, shared edge margins, edition picker, loading screen, and title thread.
-- `site/styles/hud.css`: captions, hints, interaction feedback, and thread-shaped progress indicators.
-- `site/styles/ending.css`: statistics, credits, and ending text wrapping.
+- `public/styles/base.css`: fonts, theme colors, shared typography, canvas, and full-screen overlays.
+- `public/styles/panels.css`: dialogs, settings controls, and scene selection.
+- `public/styles/menu.css`: the title, shared edge margins, edition picker, loading screen, and title thread.
+- `public/styles/hud.css`: captions, hints, interaction feedback, and thread-shaped progress indicators.
+- `public/styles/ending.css`: statistics, credits, and ending text wrapping.
 
 On the title screen, `--menu-inset` keeps the menu options, edition picker, and title aligned. The
 loading and menu SVGs share their curve with the VR progress renderer. The `--progress` custom
 property is a fraction from zero to one; the SVG's normalized path length turns it into a stroke
-reveal. Keep the curve definitions in `site/index.html` in sync when changing its shape.
+reveal. Keep the curve definitions in `public/index.html` in sync when changing its shape.
 
 ## Scene lifecycle and state
 

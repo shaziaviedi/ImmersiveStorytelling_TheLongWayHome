@@ -7,6 +7,6 @@ export const buildOptions = {
   target: 'es2020',
   legalComments: 'none',
   banner: { js: '/*! The Long Way Home V3. Includes three.js (MIT License). */' },
-  outfile: 'site/app.js',
+  outfile: 'public/app.js',
   logLevel: 'info',
 };

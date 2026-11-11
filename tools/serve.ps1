@@ -1,9 +1,9 @@
-# The Long Way Home: a small local web server for the site folder (no install needed).
+# The Long Way Home: a small local web server for the public folder (no install needed).
 # Started by "Start The Long Way Home.bat". Serves http://localhost:8080 and opens it in the browser.
 # WebXR (Enter VR) is allowed on localhost, so a PC headset (Quest Link / Air Link, SteamVR) works from here.
 param([int]$Port = 8080)
 $ErrorActionPreference = 'Stop'
-$root = (Resolve-Path (Join-Path $PSScriptRoot '..\site')).Path.TrimEnd('\') + '\'
+$root = (Resolve-Path (Join-Path $PSScriptRoot '..\public')).Path.TrimEnd('\') + '\'
 $types = @{
   '.html' = 'text/html; charset=utf-8'; '.js' = 'text/javascript; charset=utf-8'; '.css' = 'text/css; charset=utf-8'
   '.json' = 'application/json; charset=utf-8'; '.mp3' = 'audio/mpeg'; '.png' = 'image/png'; '.jpg' = 'image/jpeg'

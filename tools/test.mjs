@@ -15,7 +15,7 @@ if (!selected.length || selected.some((name) => !suites[name])) {
 // Tests share a freshly built site on an isolated local port; no manually started server is needed.
 const ctx = await context(buildOptions);
 try {
-  const { port } = await ctx.serve({ servedir: 'site', host: '127.0.0.1', port: 0 });
+  const { port } = await ctx.serve({ servedir: 'public', host: '127.0.0.1', port: 0 });
   const env = { ...process.env, TLWH_TEST_URL: `http://127.0.0.1:${port}` };
   for (const suite of selected) {
     for (const args of suites[suite]) {

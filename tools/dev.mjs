@@ -6,7 +6,7 @@ const ctx = await context(buildOptions);
 
 await ctx.watch();
 try {
-  const { port } = await ctx.serve({ servedir: 'site', host: '127.0.0.1', port: 8080 });
+  const { port } = await ctx.serve({ servedir: 'public', host: '127.0.0.1', port: 8080 });
   console.log(
     `\nThe Long Way Home: http://localhost:${port}/?debug\nSource changes rebuild automatically. Refresh your browser to see them.\n`,
   );
