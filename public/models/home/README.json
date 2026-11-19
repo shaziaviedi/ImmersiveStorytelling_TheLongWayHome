@@ -1,0 +1,8 @@
+{
+  "purpose": "Scene 4 (home) props and brick walls from the Unity/Sketchfab export",
+  "gltf": "home-space.gltf",
+  "status": "incomplete_export",
+  "missing": ["home space.bin", "78 external png textures"],
+  "how_used": "home.js places individual GLBs at the original procedural anchors (table, stove, lamp, blanket, brick wall slots). Mother/brother Mixamo GLBs are present but unused (T-pose). Do not load the full Unity scene graph — its X rotations lay walls flat.",
+  "layout_json": "Node transforms from home-space.gltf for reference only; live placement is in src/scenes/home.js"
+}

@@ -1,12 +1,29 @@
-// Home scene: arrival, sharing food, and sleep; both editions converge on the same ending.
+// Home scene (Space 4): arrival, sharing food, sleep — both editions share this ending.
+//
+// Layout strategy:
+//   • Procedural room shell (floor, roof, door, lights, story beats) keeps the original
+//     HOME footprint and interaction anchors.
+//   • Unity/Sketchfab GLBs from models/home/ replace key props and brick walls, each
+//     placed at those anchors — not the full Unity scene graph (its X rotations laid
+//     walls flat on the floor/ceiling).
+//   • Mother and brother stay procedural (Mixamo GLBs are T-pose; posing was unreliable).
 import * as THREE from 'three';
 import * as TX from '../world/textures.js';
 import { M, G, Batcher, slab, lerp, ease, damp, clamp } from '../world/builders.js';
 import { makePerson, poseFloor, poseLie, poseStand, animateIdle } from '../characters/people.js';
 import { GRIP } from '../characters/first-person.js';
 import { T, texMat } from '../world/city.js';
+import {
+  loadModel,
+  normalizeHeight,
+  normalizeXZ,
+  prepareShadows,
+  groundModel,
+} from '../world/gltf-assets.js';
 
+/** World AABB of the home room (x along the lane, z depth into the house). */
 export const HOME = { x0: 82, x1: 88, z0: 10, z1: 15.4, h: 2.8, door: { z0: 12, z1: 13.4 } };
+const MODEL_BASE = 'models/home/';
 
 export function buildHome(ctx) {
   const { scene, audio, interactor, player, ui, thread, hands, bagCtl, lights } = ctx;
@@ -50,6 +67,9 @@ export function buildHome(ctx) {
     g.fillRect(0, 430, 512, 82);
     mud.needsUpdate = true;
   }
+  // Wall planes stay as solid backing; brick_wall_section GLBs overlay them at these slots.
+  const shellWalls = [];
+  const wallSlots = []; // { x, y, z, ry, w, hh }
   const wallM = (w, hh) => {
     const t = mud.clone();
     t.needsUpdate = true;
@@ -57,11 +77,13 @@ export function buildHome(ctx) {
     return new THREE.MeshStandardMaterial({ map: t, roughness: 1 });
   };
   const wp = (w, hh, x, y, z, ry) => {
+    wallSlots.push({ w, hh, x, y, z, ry });
     const m = new THREE.Mesh(new THREE.PlaneGeometry(w + 0.08, hh + 0.04), wallM(w, hh));
     m.position.set(x, y, z);
     m.rotation.y = ry;
     m.receiveShadow = true;
     root.add(m);
+    shellWalls.push(m);
   };
   wp(W, h, cx, h / 2, z0, 0);
   wp(W, h, cx, h / 2, z1, Math.PI);
@@ -192,11 +214,18 @@ export function buildHome(ctx) {
   root.add(sib);
   const resetArms = () => {
     const J = sib.userData.J;
+    if (!J) return;
     ['shL', 'shR', 'elL', 'elR', 'spine', 'neck', 'head'].forEach((n) =>
       J[n].rotation.set(0, 0, 0),
     );
   };
   function sibLie() {
+    if (sib.userData.gltf) {
+      sib.rotation.set(0, 0, Math.PI / 2);
+      sib.position.set(mat.position.x, 0.08, mat.position.z);
+      sib.userData.lying = true;
+      return;
+    }
     poseStand(sib);
     resetArms();
     poseLie(sib);
@@ -217,6 +246,12 @@ export function buildHome(ctx) {
     sib.userData.lying = true;
   }
   function sibSit() {
+    if (sib.userData.gltf) {
+      sib.rotation.set(0, -2.2, 0);
+      sib.position.set(86.5, 0, 11.05);
+      sib.userData.lying = false;
+      return;
+    }
     poseStand(sib);
     resetArms();
     poseFloor(sib, { hug: true });
@@ -290,6 +325,12 @@ export function buildHome(ctx) {
   mother.position.set(86.55, 0, 14.15);
   mother.rotation.y = Math.PI / 2 + 0.5;
   root.add(mother);
+  // Seat flush to floor after poseFloor (skinned bounds can leave a small float)
+  {
+    mother.updateMatrixWorld(true);
+    const mb = new THREE.Box3().setFromObject(mother);
+    if (Number.isFinite(mb.min.y)) mother.position.y -= mb.min.y;
+  }
   {
     const J = mother.userData.J;
     J.shL.rotation.set(-0.9, 0, 0.2);
@@ -399,6 +440,158 @@ export function buildHome(ctx) {
     B.add(G.box(0.015, 0.5, 0.02), M(0x1a1a1a), 84.15 + k * 0.175, 1.8, z0 + 0.03);
   B.build(root, { cast: true, receive: true });
 
+  // ---------- Scene 4 assets: GLBs at procedural anchors (not the Unity scene TRS) ----------
+  let gltfSource = 'pending';
+  const ready = (async () => {
+    const load = async (file, opts = {}) => {
+      const model = await loadModel(MODEL_BASE + file, opts);
+      prepareShadows(model);
+      return model;
+    };
+    const worldBox = (obj) => {
+      obj.updateMatrixWorld(true);
+      return new THREE.Box3().setFromObject(obj);
+    };
+    const worldSize = (obj) => worldBox(obj).getSize(new THREE.Vector3());
+
+    /** Fit brick_wall_section.glb into each wallSlots entry (yaw only; mesh is already upright). */
+    async function placeBrickWalls() {
+      const brickTemplate = await load('brick_wall_section.glb', { clone: true });
+      brickTemplate.traverse((o) => {
+        if (!o.isMesh) return;
+        const mats = Array.isArray(o.material) ? o.material : [o.material];
+        for (const mat of mats) {
+          if (!mat) continue;
+          mat.side = THREE.DoubleSide;
+          mat.roughness = 0.92;
+          // Export has no albedo maps — lift baked colours so bricks read under the oil lamp
+          if (mat.color) mat.color.offsetHSL(0.02, 0.05, 0.14);
+        }
+      });
+      const native = worldSize(brickTemplate);
+
+      // Solid mud backing behind the GLB (brick mesh has gaps between blocks)
+      shellWalls.forEach((plane, i) => {
+        const slot = wallSlots[i];
+        const t = mud.clone();
+        t.needsUpdate = true;
+        t.repeat.set(Math.max(1, slot.w / 2.5), Math.max(1, slot.hh / 2.5));
+        plane.material = new THREE.MeshStandardMaterial({
+          map: t,
+          color: 0x6a3a28,
+          roughness: 1,
+        });
+        plane.visible = true;
+      });
+
+      wallSlots.forEach((slot, i) => {
+        const wall = brickTemplate.clone(true);
+        const sx = slot.w / Math.max(native.x, 1e-4);
+        const sy = slot.hh / Math.max(native.y, 1e-4);
+        const sz = THREE.MathUtils.clamp((sx + sy) * 0.5 * 0.55, 0.35, 1.1);
+        wall.scale.set(sx, sy, sz);
+
+        const g = new THREE.Group();
+        g.name = `brick-wall-${i}`;
+        g.add(wall);
+        const c = worldBox(wall).getCenter(new THREE.Vector3());
+        wall.position.set(-c.x, -c.y, -c.z);
+
+        // PlaneGeometry normal after rotation.y is (sin ry, 0, cos ry) — inset into the room
+        const inset = 0.04;
+        g.position.set(
+          slot.x + Math.sin(slot.ry) * inset,
+          slot.y,
+          slot.z + Math.cos(slot.ry) * inset,
+        );
+        g.rotation.y = slot.ry;
+        root.add(g);
+      });
+    }
+
+    /** Swap one GLB onto a placeholder group; failures keep the procedural stand-in. */
+    const swap = async (file, apply) => {
+      try {
+        apply(await load(file));
+      } catch (e) {
+        console.warn('[home] asset failed', file, e);
+      }
+    };
+
+    /** Table, meal, stove, bedding, lamp — sized to the original placeholder footprints. */
+    async function placeProps() {
+      await Promise.all([
+        swap('old_decorative_wooden_round_table.glb', (m) => {
+          normalizeXZ(m, 0.9); // ~placeholder chowki width
+          m.updateMatrixWorld(true);
+          const h0 = worldSize(m).y;
+          if (h0 > 0.36) m.scale.y *= 0.34 / h0; // keep it low like a floor table
+          groundModel(m);
+          table.children.forEach((c) => {
+            if (c !== meal) c.visible = false;
+          });
+          m.position.x = 0;
+          m.position.z = 0;
+          table.add(m);
+          meal.position.set(0, worldBox(m).max.y + 0.01, 0);
+        }),
+        swap('thali.glb', (m) => {
+          normalizeXZ(m, 0.36);
+          groundModel(m);
+          while (meal.children.length) meal.remove(meal.children[0]);
+          meal.add(m);
+        }),
+        swap('clay_cooking_stove.glb', (m) => {
+          normalizeXZ(m, 0.6);
+          groundModel(m);
+          chulha.children.forEach((c) => {
+            if (c !== ember) c.visible = false;
+          });
+          m.position.x = 0;
+          m.position.z = 0;
+          chulha.add(m);
+          ember.position.set(0, Math.max(0.12, worldBox(m).max.y * 0.45), 0);
+        }),
+        swap('blanket_and_pillows.glb', (m) => {
+          normalizeXZ(m, 1.45);
+          groundModel(m);
+          m.name = 'blanket-gltf';
+          m.position.set(mat.position.x, 0, mat.position.z);
+          m.rotation.y = Math.PI / 2;
+          root.add(m);
+        }),
+        swap('oil_lamp_small.glb', (m) => {
+          normalizeHeight(m, 0.18);
+          groundModel(m);
+          [...lamp.children]
+            .filter((c) => c !== flame && c !== halo)
+            .forEach((c) => {
+              c.visible = false;
+            });
+          m.position.x = 0;
+          m.position.z = 0;
+          lamp.add(m);
+          const top = worldBox(m).max.y;
+          flame.position.y = top + 0.02;
+          halo.position.y = top + 0.02;
+        }),
+      ]);
+    }
+
+    try {
+      await placeBrickWalls();
+    } catch (e) {
+      console.warn('[home] brick walls failed — keeping mud planes', e);
+    }
+    await placeProps();
+
+    gltfSource = 'placeholder-aligned GLBs (brick meshes+props; people placeholders)';
+    if (typeof window !== 'undefined') {
+      window.__homeGltf = { url: MODEL_BASE, source: gltfSource, mode: 'placeholder-aligned' };
+    }
+    console.info('[home] Scene 4:', gltfSource);
+  })();
+
   const colliders = [
     { minX: x0 - 0.3, maxX: x0, minZ: z0, maxZ: dz0 },
     { minX: x0 - 0.3, maxX: x0, minZ: dz1, maxZ: z1 },
@@ -462,6 +655,7 @@ export function buildHome(ctx) {
     add('wind', audio.loop('wind', { volume: 0.04 }));
     add('yells', audio.loop('yells', { object: passer, volume: 0.55, ref: 2, rate: 0.9 }));
     add('heart', audio.loop('heartbeat', { volume: 0 })); // still pounding from the run; it slows as you calm down
+    add('bgm', audio.loop('homeBgm', { volume: 0.18 }));
   }
 
   const head = new THREE.Vector3(),
@@ -574,7 +768,8 @@ export function buildHome(ctx) {
     }
     doorGlow.intensity = S.phase === 'idle' ? 5 : 0;
     flame.scale.set(1 + Math.sin(t * 17) * 0.1, 1.8 + Math.sin(t * 11) * 0.3, 1);
-    animateIdle(mother, t, dt);
+    if (!mother.userData.gltf) animateIdle(mother, t, dt);
+    else mother.rotation.y += Math.sin(t * 0.7) * 0.0008;
     if (S.phase === 'idle' || S.phase === 'done' || !active) return;
     S.t += dt;
     S.idle += dt;
@@ -602,7 +797,7 @@ export function buildHome(ctx) {
     });
     if (sib.userData.lying)
       sib.rotation.z = Math.PI / 2 + 0.01 * Math.sin(t * 1.4); // breathing in his sleep
-    else {
+    else if (sib.userData.J) {
       const J = sib.userData.J,
         a = Math.atan2(head.x - sib.position.x, head.z - sib.position.z);
       J.head.rotation.y = damp(
@@ -612,6 +807,7 @@ export function buildHome(ctx) {
         dt,
       );
     }
+    if (snd.bgm && S.relief != null) snd.bgm.setVolume(0.12 + 0.12 * (S.relief || 0));
 
     switch (S.phase) {
       // ---------- Extra edition ----------
@@ -781,6 +977,7 @@ export function buildHome(ctx) {
         if (snd.machines) snd.machines.setVolume(0.3 * k);
         if (snd.sew) snd.sew.setVolume(0.5 * k);
         if (snd.fire) snd.fire.setVolume(0.45 * (1 - k));
+        if (snd.bgm) snd.bgm.setVolume(0.18 * (1 - k));
         if (S.t > 0.3 && S.t - dt <= 0.3) ui.thought('Tomorrow is a new day.', 3.6);
         if (S.t > 4.4 && S.t - dt <= 4.4) ui.thought('…', 2.5);
         if (S.t > 7.5 && !S.ended) {
@@ -810,6 +1007,10 @@ export function buildHome(ctx) {
   let onEndFn = null;
   return {
     root,
+    ready,
+    get gltfSource() {
+      return gltfSource;
+    },
     update,
     start,
     stop,

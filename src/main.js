@@ -270,6 +270,15 @@ async function buildRest() {
     const sp = builders[i](ctx);
     spaces[i + 1] = sp;
     built = i + 2;
+    // Spaces that async-load GLBs (e.g. home) expose `.ready` — wait so assets are in place
+    // before the title finishes and the player can jump to that space.
+    if (sp.ready) {
+      try {
+        await sp.ready;
+      } catch (e) {
+        console.warn('[load] space assets failed', sp.name || i, e);
+      }
+    }
     atmosphere.install(sp.root);
     sp.root.visible = false;
     sp.onEnd((next) => onSpaceEnd(next));

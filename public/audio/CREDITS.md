@@ -13,9 +13,13 @@ Real recordings, all from freesound.org via the CC0 "Hibiki scene packs" (github
 | thunder.mp3                 | Heavy Thunder Strike - no Rain - QUADRO.wav | BlueDelta                                                      | CC0                             |
 | chase-yells.mp3             | People screaming when charging into battle  | florianreichelt                                                | CC0                             |
 | home-fire.mp3               | Fireplace.wav                               | inchadney                                                      | CC0                             |
+| home-fire-unity.wav         | Fireplace fire                              | vital_sounds (freesound 713522)                                | check freesound listing         |
 | home-drip.mp3               | Water Dripping in Cave.wav                  | Sclolex                                                        | CC0                             |
 | wind.mp3                    | Rolling Wind - looping                      | ERR0                                                           | CC0                             |
 | chains.mp3                  | Chain Rattling                              | Kp69606                                                        | CC0                             |
 | door-wood.mp3               | Door, Church, Close, E.wav                  | **InspectorJ** (freesound.org/people/InspectorJ/sounds/339677) | **CC BY 4.0 — credit required** |
+| door-slam.wav               | Door slam                                   | magedu (freesound 367422)                                      | check freesound listing         |
+| men-yelling-fade.wav        | Men yelling fade (Unity Scene 4)            | project asset                                                  | project                         |
+| home-guitar.wav             | Sad music on guitar                         | veterok777 (freesound 720183)                                  | check freesound listing         |
 
 The sewing machines, factory, bells, whistle, heartbeat, footsteps and schoolyard voices are generated in code (`js/audio.js`) until real recordings replace them.

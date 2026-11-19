@@ -7,10 +7,11 @@
   "whispers": "whispers.mp3",
   "scream": "monster-scream.mp3",
   "thunder": "thunder.mp3",
-  "yells": "chase-yells.mp3",
-  "fire": "home-fire.mp3",
+  "yells": "men-yelling-fade.wav",
+  "fire": "home-fire-unity.wav",
   "drip": "home-drip.mp3",
-  "doorWood": "door-wood.mp3",
+  "doorWood": "door-slam.wav",
   "wind": "wind.mp3",
-  "chains": "chains.mp3"
+  "chains": "chains.mp3",
+  "homeBgm": "home-guitar.wav"
 }
