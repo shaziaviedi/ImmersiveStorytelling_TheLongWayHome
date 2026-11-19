@@ -72,9 +72,21 @@ export class XRRig {
       });
       c.addEventListener('selectstart', () => {
         if (this.endReady) {
+          // Prologue: continue into the story. Finale: leave VR back to the page.
+          if (this.endKind === 'prologue' && this.onPrologueContinue) {
+            const next = this.onPrologueContinue;
+            this.onPrologueContinue = null;
+            this.endMode = false;
+            this.endReady = false;
+            this.endKind = null;
+            this.endBoard.visible = false;
+            this.board.visible = true;
+            next();
+            return;
+          }
           this.exit();
           return;
-        } // the end card: the trigger takes the headset back to the page
+        }
         if (this.blurred) return;
         this.pressFrom = i;
         this.interactor.pressXR(c);
@@ -163,6 +175,9 @@ export class XRRig {
     player.dolly.add(this.endBoard);
     this.endMode = false;
     this.endReady = false;
+    this.endKind = null; // 'finale' | 'prologue'
+    this.endIds = null;
+    this.onPrologueContinue = null;
     this.endT = 0;
     this.endAlpha = {};
   }
@@ -216,6 +231,9 @@ export class XRRig {
     this.player.xrPending = null;
     this.endMode = false;
     this.endReady = false;
+    this.endKind = null;
+    this.endIds = null;
+    this.onPrologueContinue = null;
     this.endBoard.visible = false;
     this.fadeLin = 1;
     this.tunnel = 0; // open on black; the story fades in
@@ -256,6 +274,9 @@ export class XRRig {
       this.endBoard.visible = false;
       this.endMode = false;
       this.endReady = false;
+      this.endKind = null;
+      this.endIds = null;
+      this.onPrologueContinue = null;
       this.rays.forEach((r) => {
         r.visible = false;
       });
@@ -294,16 +315,8 @@ export class XRRig {
   recalibrate() {
     this.calib = 1;
   }
-  // the end card: read the page's end card line by line and show it in the dark
-  showEnd() {
-    if (!this.active) return;
-    this.endMode = true;
-    this.endReady = false;
-    this.endT = 0;
-    this.finT = 0;
-    this.endAlpha = {};
-    this._endKey = '';
-    // world-locked, at eye height about 1.7 m in front of where you are looking
+  /** Place the dark reading board ~1.7 m in front of the headset. */
+  _placeEndBoard() {
     const head = new THREE.Vector3(),
       fwd = new THREE.Vector3();
     this.camera.getWorldPosition(head);
@@ -316,9 +329,37 @@ export class XRRig {
     this.endBoard.position.copy(this.player.dolly.worldToLocal(p));
     const look = head.clone();
     look.y = p.y;
-    this.endBoard.lookAt(look); // a mesh's lookAt turns its front (+Z) toward the target (the play space's turn is accounted for)
+    this.endBoard.lookAt(look); // lookAt aims +Z at the target (play-space yaw already applied)
     this.endBoard.visible = true;
     this.board.visible = false;
+  }
+  // the end card: read the page's end card line by line and show it in the dark
+  showEnd() {
+    if (!this.active) return;
+    this.endMode = true;
+    this.endReady = false;
+    this.endKind = 'finale';
+    this.endIds = ['stat-0a', 'stat-0b', 'stat-1', 'stat-2', 'stat-3', 'stat-src', 'stat-fin'];
+    this.onPrologueContinue = null;
+    this.endT = 0;
+    this.finT = 0;
+    this.endAlpha = {};
+    this._endKey = '';
+    this._placeEndBoard();
+  }
+  // opening prologue: same board, story lines from #intro; trigger continues into play
+  showPrologue(onContinue) {
+    if (!this.active) return;
+    this.endMode = true;
+    this.endReady = false;
+    this.endKind = 'prologue';
+    this.endIds = ['pro-1', 'pro-2', 'pro-3', 'pro-4', 'pro-phones', 'pro-click'];
+    this.onPrologueContinue = onContinue || null;
+    this.endT = 0;
+    this.finT = 0;
+    this.endAlpha = {};
+    this._endKey = '';
+    this._placeEndBoard();
   }
   update(dt) {
     if (!this.active) return;
@@ -572,10 +613,18 @@ export class XRRig {
     }
     this.capTex.needsUpdate = true;
   }
-  // the end card: the same lines as the page (same type, the numbers in red), appearing one after another
+  // Finale or prologue: the same lines as the page, appearing one after another on the board
   _end(dt) {
     this.endT += dt;
-    const ids = ['stat-0a', 'stat-0b', 'stat-1', 'stat-2', 'stat-3', 'stat-src', 'stat-fin'];
+    const ids = this.endIds || [
+      'stat-0a',
+      'stat-0b',
+      'stat-1',
+      'stat-2',
+      'stat-3',
+      'stat-src',
+      'stat-fin',
+    ];
     const lines = [];
     let any = false,
       finOn = false;
@@ -595,7 +644,10 @@ export class XRRig {
           ps = el.querySelectorAll('p');
         if (h) lines.push({ a, kind: 'title', el: h });
         ps.forEach((p) => lines.push({ a, kind: 'small', el: p }));
-      } else lines.push({ a, kind: id === 'stat-src' ? 'small' : 'stat', el });
+      } else if (id === 'pro-click' || id === 'pro-phones' || id === 'stat-src') {
+        if (id === 'pro-click') finOn = on;
+        lines.push({ a, kind: 'small', el });
+      } else lines.push({ a, kind: 'stat', el });
     }
     if (finOn) {
       this.finT = (this.finT || 0) + dt;
@@ -699,7 +751,8 @@ export class XRRig {
       }
       y += l.st.gap;
     }
-    if (this.endReady) {
+    if (this.endReady && this.endKind !== 'prologue') {
+      // Prologue already shows its own "Pull the trigger…" line from #pro-click
       g.globalAlpha = 1;
       g.textAlign = 'center';
       g.font = '400 26px "Gowun Batang", Georgia, serif';

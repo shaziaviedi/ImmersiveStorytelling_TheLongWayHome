@@ -566,16 +566,22 @@ $('#hints').addEventListener('change', (e) => {
 
 async function begin() {
   if (mode !== 'title') return;
+  ui.clearPrologue();
   ui.show('title', false);
   ui.show('intro', true);
   setMode('intro');
-  const l1 = $('#intro-1'),
-    l2 = $('#intro-2');
-  l2.textContent = 'Preparing sound…';
-  setTimeout(() => l1.classList.add('on'), 300);
-  await audio.init();
-  l2.textContent = 'Click anywhere to sit down.';
-  l2.classList.add('on');
+  const clickEl = $('#pro-click');
+  clickEl.textContent = 'Preparing sound…';
+  // Story lines fade in like the end card while audio warms up
+  const cueAt = ui.prologue();
+  const sound = audio.init().catch(() => {
+    /* placeholders if decode fails */
+  });
+  await Promise.all([sound, new Promise((r) => setTimeout(r, cueAt))]);
+  if (mode !== 'intro') return;
+  clickEl.textContent = 'Click anywhere to sit down.';
+  clickEl.classList.add('on');
+  $('#intro').classList.add('ready');
   $('#intro').addEventListener('click', sitDown, { once: true });
 }
 let vrStarting = false;
@@ -589,7 +595,9 @@ async function enterVR() {
     await xrRig.enter(
       () => {
         player.xr = true;
+        ui.clearPrologue();
         ui.show('title', false);
+        ui.show('intro', true);
         ui.fade(true);
         setMode('intro');
         if (quality === 'high') {
@@ -602,13 +610,24 @@ async function enterVR() {
           })
           .then(() => {
             if (!xrRig.active || mode !== 'intro') return;
-            startJourney();
-            post.setCamera(camera);
-            jumpScene();
-            setMode('play');
-            playTime = 0;
-            autoChecked = true;
-            setTimeout(() => ui.fade(false), 600);
+            // Same prologue lines on the VR board; trigger continues into the seat
+            const cueAt = ui.prologue();
+            $('#pro-click').textContent = 'Pull the trigger to sit down.';
+            setTimeout(() => {
+              if (mode === 'intro') $('#pro-click').classList.add('on');
+            }, cueAt);
+            xrRig.showPrologue(() => {
+              if (!xrRig.active || mode !== 'intro') return;
+              ui.show('intro', false);
+              ui.clearPrologue();
+              startJourney();
+              post.setCamera(camera);
+              jumpScene();
+              setMode('play');
+              playTime = 0;
+              autoChecked = true;
+              setTimeout(() => ui.fade(false), 600);
+            });
           });
       },
       () => {
@@ -618,6 +637,8 @@ async function enterVR() {
         onResize();
         if (mode === 'end') return; // the end card stays on the page
         ui.fade(false);
+        ui.show('intro', false);
+        ui.clearPrologue();
         if (mode !== 'title') quit();
       },
     );
@@ -629,6 +650,7 @@ async function enterVR() {
 function sitDown() {
   ui.fade(true);
   ui.show('intro', false);
+  ui.clearPrologue();
   player.lock();
   startJourney();
   post.setCamera(camera);
@@ -636,8 +658,6 @@ function sitDown() {
   setMode('play');
   playTime = 0;
   setTimeout(() => ui.fade(false), 1500);
-  $('#intro-1').classList.remove('on');
-  $('#intro-2').classList.remove('on');
 }
 // ---------- scene select: start later in the story (Scene 2 the market · 3 the run · 4 the door) ----------
 let pendingScene = 0;
@@ -693,6 +713,8 @@ function restart() {
 function quit() {
   ui.show('pause', false);
   ui.show('endcard', false);
+  ui.show('intro', false);
+  ui.clearPrologue();
   if (exploring) setExplore(false);
   if (xrRig && xrRig.active) {
     const x = xrRig;

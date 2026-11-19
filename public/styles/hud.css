@@ -1,31 +1,11 @@
 /* In-game captions, interaction feedback, and SVG thread progress indicators.
    The caption stack reserves vertical space so thoughts, dialogue, and hints cannot collide. */
 
-.intro-line {
-  margin: 0;
-  opacity: 0;
-  transition: opacity 1.4s ease;
-}
-
-#intro-1 {
-  font-family: var(--serif);
-  font-size: clamp(32px, 4vw, 52px);
-}
-
-#intro-2 {
-  color: var(--paper-dim);
-}
-
-#intro .intro-line.on {
-  opacity: 1;
-}
-
 #intro {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
 }
 
 #hud {

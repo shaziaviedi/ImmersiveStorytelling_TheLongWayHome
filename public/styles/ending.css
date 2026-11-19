@@ -93,3 +93,33 @@
   font-size: clamp(16px, 1.3vw, 20px);
   line-height: 1.5;
 }
+
+/* Opening prologue — same serif fade-in language as the end card */
+#intro {
+  cursor: default;
+}
+
+#intro .intro-inner {
+  width: min(1180px, 100%);
+  max-width: 1180px;
+  max-height: 100dvh;
+  overflow-y: auto;
+  padding: clamp(20px, 4vw, 56px);
+  text-align: center;
+}
+
+#intro .end-stat {
+  font-size: clamp(27px, 3.2vw, 48px);
+  line-height: 1.35;
+  max-width: 1050px;
+  margin: 0 auto 22px;
+  text-wrap: balance;
+}
+
+#intro .end-src {
+  margin: 10px auto 0;
+}
+
+#intro.ready {
+  cursor: pointer;
+}

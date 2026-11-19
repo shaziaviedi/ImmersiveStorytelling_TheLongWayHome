@@ -143,6 +143,32 @@ export function createUI(settings, isXR) {
       ids.forEach((id) => $('#' + id).classList.remove('on'));
       ids.forEach((id, i) => setTimeout(() => $('#' + id).classList.add('on'), 900 + i * 2600));
     },
+    /** Opening world context — same fade language as the end card. Returns ms until the last story line appears. */
+    prologue() {
+      const story = ['pro-1', 'pro-2', 'pro-3', 'pro-4', 'pro-phones'];
+      const all = [...story, 'pro-click'];
+      all.forEach((id) => {
+        const el = $('#' + id);
+        if (el) el.classList.remove('on');
+      });
+      const start = 800;
+      const step = 2400;
+      story.forEach((id, i) =>
+        setTimeout(() => {
+          const el = $('#' + id);
+          if (el) el.classList.add('on');
+        }, start + i * step),
+      );
+      return start + story.length * step;
+    },
+    clearPrologue() {
+      ['pro-1', 'pro-2', 'pro-3', 'pro-4', 'pro-phones', 'pro-click'].forEach((id) => {
+        const el = $('#' + id);
+        if (el) el.classList.remove('on');
+      });
+      const intro = $('#intro');
+      if (intro) intro.classList.remove('ready');
+    },
     error(m) {
       $('#error').textContent = m;
     },
