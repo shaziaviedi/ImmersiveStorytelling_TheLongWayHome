@@ -113,6 +113,7 @@ export function createUI(settings, isXR) {
       ui.state.progress = k;
       const el = $('#ring');
       el.style.setProperty('--progress', k);
+      el.setAttribute('aria-valuenow', Math.round(k * 100));
       el.classList.toggle('on', k > 0.001 && k < 1);
     },
     label(t) {

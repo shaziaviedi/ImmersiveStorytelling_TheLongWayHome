@@ -147,11 +147,11 @@ export function buildHome(ctx) {
       const food=fitModel(await loadModel('models/home/thali.glb'),{span:0.42}); meal.clear();meal.add(food);
       const motherBox=box(mother);colliders.push({minX:motherBox.min.x,maxX:motherBox.max.x,minZ:motherBox.min.z,maxZ:motherBox.max.z,source:'mother'});
       ctx.homeDoorVisual=doorPivot;
-      assetStatus.loaded.push('unity-home.gltf','thali.glb');
+      assetStatus.loaded.push('unity-home.glb','thali.glb');
       gltfSource='reconstructed Unity/glTF hierarchy, uniform scale 1.4';
-      window.__homeGltf={url:'models/home/unity-home.gltf',source:gltfSource,mode:'unity-reference',corrections:referenceData.corrections,materials:referenceData.materialCompatibility};
+      window.__homeGltf={url:'models/home/unity-home.glb',source:gltfSource,mode:'unity-reference',corrections:referenceData.corrections,materials:referenceData.materialCompatibility};
       ctx.refreshColliders();
-    } catch(e) { assetStatus.failed.push('unity-home.gltf'); console.error('[home] reference failed',e); throw e; }
+    } catch(e) { assetStatus.failed.push('unity-home.glb'); console.error('[home] reference failed',e); throw e; }
   })();
   // ---------- interactions ----------
   // setPhase resets the phase-local clock; reset restores flags for a fresh playthrough.

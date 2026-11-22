@@ -226,6 +226,7 @@ export function makeMachine({
   at = null,
   threadColor = 0xb5442e,
   headX = 0,
+  separateFurniture = false,
 } = {}) {
   const g = new THREE.Group();
   const anim = new THREE.Group();
@@ -242,10 +243,11 @@ export function makeMachine({
     _headGeo.translate(0, 0, -0.05);
   }
   const parts = new Batcher();
+  const furniture = separateFurniture ? new Batcher() : parts;
   const hx = headX,
     hp = (geo, mat, x, ...r) => parts.add(geo, mat, x + hx, ...r);
   // table top
-  parts.add(slab(1.15, 0.68, 0.05, 0.03), wood, 0, -0.05, 0);
+  furniture.add(slab(1.15, 0.68, 0.05, 0.03), wood, 0, -0.05, 0);
   // machine bed
   hp(slab(0.66, 0.3, 0.05, 0.04, 0.01), ENAMEL(), -0.02, 0, 0);
   hp(G.box(0.12, 0.004, 0.09), STEEL(), -0.27, 0.051, 0.02); // needle plate
@@ -266,17 +268,17 @@ export function makeMachine({
   hp(G.box(0.03, 0.006, 0.05), STEEL(), -0.29, 0.058, 0.0);
   // treadle stand (two cast-iron side frames) under the table
   for (const sx of [-0.48, 0.48]) {
-    parts.add(G.box(0.05, 0.92, 0.05), IRON(), sx, -0.52, -0.22, 0, 0, 0);
-    parts.add(G.box(0.05, 0.92, 0.05), IRON(), sx, -0.52, 0.22, 0, 0, 0);
-    parts.add(G.box(0.05, 0.05, 0.55), IRON(), sx, -0.96, 0, 0, 0, 0);
-    parts.add(G.box(0.04, 0.04, 0.5), IRON(), sx, -0.2, 0, 0, 0, 0);
-    parts.add(G.box(0.04, 0.62, 0.04), IRON(), sx, -0.55, 0, 0.62, 0, 0);
-    parts.add(G.box(0.04, 0.62, 0.04), IRON(), sx, -0.55, 0, -0.62, 0, 0);
+    furniture.add(G.box(0.05, 0.92, 0.05), IRON(), sx, -0.52, -0.22, 0, 0, 0);
+    furniture.add(G.box(0.05, 0.92, 0.05), IRON(), sx, -0.52, 0.22, 0, 0, 0);
+    furniture.add(G.box(0.05, 0.05, 0.55), IRON(), sx, -0.96, 0, 0, 0, 0);
+    furniture.add(G.box(0.04, 0.04, 0.5), IRON(), sx, -0.2, 0, 0, 0, 0);
+    furniture.add(G.box(0.04, 0.62, 0.04), IRON(), sx, -0.55, 0, 0.62, 0, 0);
+    furniture.add(G.box(0.04, 0.62, 0.04), IRON(), sx, -0.55, 0, -0.62, 0, 0);
   }
-  parts.add(G.box(0.96, 0.035, 0.035), IRON(), 0, -0.86, 0.05);
+  furniture.add(G.box(0.96, 0.035, 0.035), IRON(), 0, -0.86, 0.05);
   // cloth drawer under the top
-  parts.add(G.box(0.3, 0.1, 0.4), wood, 0.25, -0.13, 0);
-  parts.add(G.cyl(0.01, 0.01, 0.02, 6), GOLD(), 0.25, -0.13, 0.205, Math.PI / 2);
+  furniture.add(G.box(0.3, 0.1, 0.4), wood, 0.25, -0.13, 0);
+  furniture.add(G.cyl(0.01, 0.01, 0.02, 6), GOLD(), 0.25, -0.13, 0.205, Math.PI / 2);
   hp(G.cyl(0.004, 0.004, 1.05, 4), M(0x3a2a1e), 0.36, -0.2, 0.0, 0, 0, 0.04); // belt
   if (batch && at) {
     for (const [mat, list] of parts.groups) {
@@ -288,6 +290,9 @@ export function makeMachine({
     }
     parts.groups.clear();
   } else parts.build(g);
+  if (separateFurniture) {
+    const stand = new THREE.Group(); stand.name = 'machine-furniture-placeholder'; g.add(stand); furniture.build(stand);
+  }
 
   // moving: hand wheel, needle bar, treadle wheel, pedal — each one merged mesh
   const one = (pieces, mat, cast = true) => {

@@ -41,13 +41,8 @@
 
     <section id="loading" class="screen show">
       <h1>The Long <em>Way Home</em></h1>
-      <svg
-        id="load-bar"
-        class="thread-progress load-track"
-        viewBox="0 0 1600 900"
-        preserveAspectRatio="none"
-        aria-hidden="true"
-      >
+      <svg id="load-bar" class="thread-progress load-track" viewBox="0 0 1600 900"
+        preserveAspectRatio="none" aria-hidden="true">
         <use class="thread-track" href="#thread-progress-curve" />
         <use class="thread-fill" href="#thread-progress-curve" />
       </svg>
@@ -246,15 +241,8 @@
 
     <div id="hud">
       <div id="crosshair"></div>
-      <svg
-        id="ring"
-        class="thread-progress interaction-thread"
-        viewBox="-28 400 1656 380"
-        aria-hidden="true"
-      >
-        <use class="thread-track" href="#thread-progress-curve" />
-        <use class="thread-fill" href="#thread-progress-curve" />
-      </svg>
+      <div id="ring" role="progressbar" aria-label="Sewing progress" aria-valuemin="0"
+        aria-valuemax="100" aria-valuenow="0"><span class="sew-fill"></span></div>
       <div id="label" class="mono"></div>
       <div id="caption-stack" aria-live="polite">
         <div id="thought"></div>
@@ -329,6 +317,6 @@
     <div id="eyelids" aria-hidden="true"><i class="lid-top"></i><i class="lid-bot"></i></div>
     <div id="fade"></div>
     <div id="error" class="mono"></div>
-    <script src="app.js?v=94e4015800afe078" defer></script>
+    <script src="app.js?v=07e55411f4ad9306" defer></script>
   </body>
 </html>

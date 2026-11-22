@@ -1,3 +1,22 @@
 .DS_Store
 node_modules/
 backups/
+_raw_assets/
+
+# Unity project source/cache folders inside public/models
+public/models/**/Library/
+public/models/**/Temp/
+public/models/**/Logs/
+public/models/**/Obj/
+public/models/**/Build/
+public/models/**/Builds/
+public/models/**/UserSettings/
+public/models/**/ProjectSettings/
+public/models/**/.plastic/
+public/models/**/.vscode/
+public/models/**/*.csproj
+public/models/**/*.slnx
+public/models/**/*.meta
+public/models/**/Assets/
+public/models/**/_Disabled_*/
+public/models/**/prepared-textures/

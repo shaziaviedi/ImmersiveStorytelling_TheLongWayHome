@@ -1,13 +1,22 @@
 // Shared GLTF/GLB helpers: cached load, safe clone, and size/ground fitting for props.
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
+import { MODEL_VERSIONS } from '../config/optimized-assets.js';
 import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js';
 
 const loader = new GLTFLoader();
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath('decoders/draco/');
+dracoLoader.setDecoderConfig({type:'wasm'});
+dracoLoader.setWorkerLimit(2);
+loader.setDRACOLoader(dracoLoader);
 const cache = new Map();
 
 /** Load a glTF once; later callers share the same promise. */
 export function loadGltf(url) {
+  const pathname=decodeURIComponent(url.split('?')[0]);
+  if(MODEL_VERSIONS[pathname])url=encodeURI(pathname)+'?v='+MODEL_VERSIONS[pathname];
   if (cache.has(url)) return cache.get(url);
   const p = new Promise((resolve, reject) => {
     loader.load(url, resolve, undefined, reject);

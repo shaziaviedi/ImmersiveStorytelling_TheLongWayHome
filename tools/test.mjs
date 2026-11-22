@@ -1,9 +1,11 @@
 import { spawn } from 'node:child_process';
 import { context } from 'esbuild';
 import { buildOptions } from './build-options.mjs';
+import { readCompleteFile } from './read-complete-file.mjs';
 
 const suites = {
   ui: [['dev/ui-test.mjs']],
+  factory: [['dev/factory-assets-test.mjs']],
   home: [['dev/home-assets-test.mjs']],
   street: [['dev/street-assets-test.mjs']],
   chase: [['dev/chase-assets-test.mjs']],
@@ -25,6 +27,7 @@ try {
   const env = { ...process.env, TLWH_TEST_URL: `http://127.0.0.1:${port}` };
   for (const suite of selected) {
     for (const args of suites[suite]) {
+      await readCompleteFile(new URL('../'+args[0],import.meta.url));
       const code = await new Promise((resolve, reject) => {
         const child = spawn(process.execPath, args, { env, stdio: 'inherit' });
         child.once('error', reject);

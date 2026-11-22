@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import * as THREE from 'three';
 import { HOME, HOME_SCALE, homePoint } from '../src/config/home-layout.js';
 import { launchTestBrowser, TEST_URL, ARTIFACT_DIR } from './helpers/browser.mjs';
-const source=JSON.parse(fs.readFileSync('public/models/home/home-space.gltf'));
+const source=JSON.parse(fs.readFileSync('dev/fixtures/home-layout.json'));
 const manifest=JSON.parse(fs.readFileSync('public/models/home/unity-home-manifest.json'));
 function bounds(id,parent=new THREE.Matrix4()) {
   const n=source.nodes[id], matrix=parent.clone().multiply(new THREE.Matrix4().compose(new THREE.Vector3(...n.translation||[0,0,0]),new THREE.Quaternion(...n.rotation||[0,0,0,1]),new THREE.Vector3(...n.scale||[1,1,1])));

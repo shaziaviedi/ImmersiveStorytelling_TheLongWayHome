@@ -1,0 +1,370 @@
+{
+  "models": [
+    "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Meshes/SM_Desk_Metal.fbx",
+    "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Meshes/SM_Chair_Metal.fbx",
+    "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Meshes/SM_Workbench.fbx",
+    "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Meshes/SM_Wall_Brick_1m.fbx",
+    "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Meshes/SM_Wall_Plaster_2m.fbx",
+    "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Meshes/SM_Floor_Wood_4m.fbx",
+    "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Meshes/SM_Floor_Concrete_Broken_4m.fbx",
+    "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Meshes/SM_Column_Concrete_5m.fbx",
+    "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Meshes/SM_Beam_IBeam_4m.fbx",
+    "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Meshes/SM_Pipe_Run_4m_Small.fbx",
+    "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Meshes/SM_Door_Metal_Single.fbx",
+    "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Meshes/SM_Window_Steel_C.fbx",
+    "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Meshes/SM_Clock_Wall.fbx",
+    "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Meshes/SM_Lamp_Fluorescent.fbx",
+    "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Meshes/SM_Fuse_Box.fbx",
+    "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Meshes/SM_Shelf_Rack_B.fbx",
+    "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Meshes/SM_Crate_Wood_Small.fbx",
+    "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Meshes/SM_Hand_Truck.fbx",
+    "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Meshes/SM_Bucket_Metal.fbx",
+    "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Meshes/SM_Duct_4m.fbx",
+    "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Folded_Cloth_Piles_Short_FBX.fbx",
+    "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Folded_Cloth_Piles_Tall_FBX.fbx"
+  ],
+  "textures": {
+    "hobo_Jerry_AlbedoTransparency.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Homeless_people/Jerry/Textures/hobo_Jerry_AlbedoTransparency.png",
+    "hobo_Jerry_AO.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Homeless_people/Jerry/Textures/hobo_Jerry_AO.png",
+    "Folded_Cloth_Piles_1_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/factory/prepared-textures/Folded_Cloth_Piles_1_Normal.png",
+    "Folded_Cloth_Piles_3_Height.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Folded_Cloth_Piles_Textures4K/Folded_Cloth_Piles_3_Texture4K/Folded_Cloth_Piles_3_Height.png",
+    "Folded_Cloth_Piles_3_Roughness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Folded_Cloth_Piles_Textures4K/Folded_Cloth_Piles_3_Texture4K/Folded_Cloth_Piles_3_Roughness.png",
+    "Folded_Cloth_Piles_4_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/factory/prepared-textures/Folded_Cloth_Piles_4_BaseColor.png",
+    "Folded_Cloth_Piles_2_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Folded_Cloth_Piles_Textures4K/Folded_Cloth_Piles_2_Texture4K/Folded_Cloth_Piles_2_Normal.png",
+    "Folded_Cloth_Piles_2_Roughness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Folded_Cloth_Piles_Textures4K/Folded_Cloth_Piles_2_Texture4K/Folded_Cloth_Piles_2_Roughness.png",
+    "T_Door_Metal_Single_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Door_Metal_Single_MetallicSmoothness.png",
+    "T_Sign_Warning_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Sign_Warning_MetallicSmoothness.png",
+    "T_Gas_Cylinder_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Gas_Cylinder_MetallicSmoothness.png",
+    "T_Desk_Metal_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Desk_Metal_Normal.png",
+    "T_Locker_Row_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Locker_Row_Normal.png",
+    "T_Control_Panel_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Control_Panel_Normal.png",
+    "T_Rust_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png",
+    "T_Fire_Extinguisher_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Fire_Extinguisher_BaseColor.png",
+    "T_Fan_Exhaust_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Fan_Exhaust_BaseColor.png",
+    "T_Workbench_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Workbench_BaseColor.png",
+    "T_Barrel_Oil_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Barrel_Oil_MetallicSmoothness.png",
+    "T_Barrel_Plastic_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Barrel_Plastic_Normal.png",
+    "T_Compressor_Air_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Compressor_Air_MetallicSmoothness.png",
+    "T_Debris_Bricks_A_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Debris_Bricks_A_Normal.png",
+    "T_Filing_Cabinet_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Filing_Cabinet_Occlusion.png",
+    "T_Brick_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Brick_BaseColor.png",
+    "T_Door_Wood_Office_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Door_Wood_Office_MetallicSmoothness.png",
+    "T_Shelf_Rack_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Shelf_Rack_Occlusion.png",
+    "T_Filing_Cabinet_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Filing_Cabinet_Normal.png",
+    "T_Debris_Bricks_A_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Debris_Bricks_A_Occlusion.png",
+    "T_Lamp_Work_Tripod_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Lamp_Work_Tripod_Occlusion.png",
+    "T_Lamp_Wall_Cage_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Lamp_Wall_Cage_BaseColor.png",
+    "T_Generator_Diesel_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Generator_Diesel_Normal.png",
+    "T_Shelf_Rack_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Shelf_Rack_BaseColor.png",
+    "T_Shelf_Rack_B_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Shelf_Rack_B_MetallicSmoothness.png",
+    "T_Stool_Workshop_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Stool_Workshop_MetallicSmoothness.png",
+    "T_First_Aid_Box_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_First_Aid_Box_Normal.png",
+    "T_Jerrycan_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Jerrycan_BaseColor.png",
+    "T_Chain_Hanging_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Chain_Hanging_Occlusion.png",
+    "T_First_Aid_Box_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_First_Aid_Box_MetallicSmoothness.png",
+    "T_Lathe_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Lathe_MetallicSmoothness.png",
+    "T_Debris_Pipes_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Debris_Pipes_Normal.png",
+    "T_Cabinet_Electric_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Cabinet_Electric_MetallicSmoothness.png",
+    "T_Barrels_On_Pallet_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Barrels_On_Pallet_Occlusion.png",
+    "T_Chain_Hanging_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Chain_Hanging_BaseColor.png",
+    "T_Control_Panel_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Control_Panel_BaseColor.png",
+    "T_Tool_Chest_Rolling_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Tool_Chest_Rolling_MetallicSmoothness.png",
+    "T_Shelf_Rack_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Shelf_Rack_Normal.png",
+    "T_Barrel_Oil_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Barrel_Oil_Normal.png",
+    "T_Lamp_Hanging_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Lamp_Hanging_BaseColor.png",
+    "T_Gas_Cylinder_Rack_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Gas_Cylinder_Rack_Occlusion.png",
+    "T_Cable_Spool_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Cable_Spool_BaseColor.png",
+    "T_Bucket_Metal_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Bucket_Metal_MetallicSmoothness.png",
+    "T_Alarm_Bell_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Alarm_Bell_Occlusion.png",
+    "T_Fuse_Box_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Fuse_Box_MetallicSmoothness.png",
+    "T_Tool_Chest_Rolling_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Tool_Chest_Rolling_Occlusion.png",
+    "T_Debris_Planks_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Debris_Planks_MetallicSmoothness.png",
+    "T_Alarm_Bell_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Alarm_Bell_BaseColor.png",
+    "T_Rust_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_Normal.png",
+    "T_Cable_Spool_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Cable_Spool_Occlusion.png",
+    "T_Gas_Cylinder_Rack_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Gas_Cylinder_Rack_BaseColor.png",
+    "T_Hoist_Chain_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Hoist_Chain_BaseColor.png",
+    "T_Control_Panel_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Control_Panel_Occlusion.png",
+    "T_Compressor_Air_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Compressor_Air_Occlusion.png",
+    "T_Window_Steel_A_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Window_Steel_A_Occlusion.png",
+    "T_Fan_Exhaust_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Fan_Exhaust_Normal.png",
+    "T_Gas_Cylinder_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Gas_Cylinder_Occlusion.png",
+    "T_Debris_Planks_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Debris_Planks_Normal.png",
+    "T_Chair_Metal_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Chair_Metal_Normal.png",
+    "T_Gas_Cylinder_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Gas_Cylinder_BaseColor.png",
+    "T_Sign_Warning_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Sign_Warning_Normal.png",
+    "T_Sign_Exit_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Sign_Exit_MetallicSmoothness.png",
+    "T_Hazard_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Hazard_BaseColor.png",
+    "T_Stool_Workshop_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Stool_Workshop_BaseColor.png",
+    "T_Sign_Exit_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Sign_Exit_Normal.png",
+    "T_Valve_Gate_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Valve_Gate_Normal.png",
+    "T_Debris_Concrete_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Debris_Concrete_Occlusion.png",
+    "T_Barrel_Plastic_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Barrel_Plastic_Occlusion.png",
+    "T_Crate_Wood_Small_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Crate_Wood_Small_Occlusion.png",
+    "T_Lamp_Fluorescent_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Lamp_Fluorescent_BaseColor.png",
+    "T_Locker_Row_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Locker_Row_MetallicSmoothness.png",
+    "T_Barrel_Oil_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Barrel_Oil_Occlusion.png",
+    "T_Paint_Cans_Group_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Paint_Cans_Group_Occlusion.png",
+    "T_Cable_Spool_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Cable_Spool_MetallicSmoothness.png",
+    "T_Door_Wood_Office_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Door_Wood_Office_BaseColor.png",
+    "T_Lamp_Wall_Cage_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Lamp_Wall_Cage_MetallicSmoothness.png",
+    "T_PaintedMetal_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_PaintedMetal_Normal.png",
+    "T_Debris_Glass_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Debris_Glass_Normal.png",
+    "T_Window_Steel_B_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Window_Steel_B_Occlusion.png",
+    "T_Paint_Cans_Group_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Paint_Cans_Group_BaseColor.png",
+    "T_Crate_Wood_Small_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Crate_Wood_Small_BaseColor.png",
+    "T_Debris_Pipes_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Debris_Pipes_MetallicSmoothness.png",
+    "T_Barrel_Oil_Rusted_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Barrel_Oil_Rusted_Normal.png",
+    "T_First_Aid_Box_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_First_Aid_Box_BaseColor.png",
+    "T_Sign_Exit_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Sign_Exit_Occlusion.png",
+    "T_Fire_Extinguisher_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Fire_Extinguisher_Normal.png",
+    "T_Workbench_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Workbench_MetallicSmoothness.png",
+    "T_Crate_Wood_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Crate_Wood_MetallicSmoothness.png",
+    "T_Chair_Metal_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Chair_Metal_BaseColor.png",
+    "T_Fire_Extinguisher_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Fire_Extinguisher_MetallicSmoothness.png",
+    "T_WoodGrain_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_WoodGrain_BaseColor.png",
+    "T_Grinder_Pedestal_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Grinder_Pedestal_Occlusion.png",
+    "T_Brick_OcclusionRoughnessMetallic.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Brick_OcclusionRoughnessMetallic.png",
+    "T_Hand_Truck_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Hand_Truck_BaseColor.png",
+    "T_Debris_Concrete_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Debris_Concrete_MetallicSmoothness.png",
+    "T_Fuse_Box_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Fuse_Box_BaseColor.png",
+    "T_Clock_Wall_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Clock_Wall_Occlusion.png",
+    "T_Fuse_Box_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Fuse_Box_Occlusion.png",
+    "T_Radiator_Cast_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Radiator_Cast_MetallicSmoothness.png",
+    "T_Clock_Wall_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Clock_Wall_BaseColor.png",
+    "T_Grinder_Pedestal_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Grinder_Pedestal_BaseColor.png",
+    "T_Shelf_Rack_B_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Shelf_Rack_B_Normal.png",
+    "T_Radiator_Cast_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Radiator_Cast_Normal.png",
+    "T_Concrete_OcclusionRoughnessMetallic.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Concrete_OcclusionRoughnessMetallic.png",
+    "T_Debris_Glass_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Debris_Glass_BaseColor.png",
+    "T_Debris_Glass_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Debris_Glass_MetallicSmoothness.png",
+    "T_Hoist_Chain_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Hoist_Chain_Normal.png",
+    "T_Hazard_OcclusionRoughnessMetallic.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Hazard_OcclusionRoughnessMetallic.png",
+    "T_First_Aid_Box_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_First_Aid_Box_Occlusion.png",
+    "T_Grinder_Pedestal_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Grinder_Pedestal_MetallicSmoothness.png",
+    "T_Sign_Exit_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Sign_Exit_BaseColor.png",
+    "T_Door_Metal_Single_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Door_Metal_Single_BaseColor.png",
+    "T_Desk_Metal_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Desk_Metal_Occlusion.png",
+    "T_Drill_Press_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Drill_Press_Normal.png",
+    "T_Barrel_Oil_Rusted_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Barrel_Oil_Rusted_MetallicSmoothness.png",
+    "T_Hoist_Chain_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Hoist_Chain_MetallicSmoothness.png",
+    "T_Bucket_Metal_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Bucket_Metal_Normal.png",
+    "T_Sign_Warning_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Sign_Warning_BaseColor.png",
+    "T_Valve_Gate_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Valve_Gate_Occlusion.png",
+    "T_Drill_Press_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Drill_Press_BaseColor.png",
+    "T_Barrel_Plastic_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Barrel_Plastic_MetallicSmoothness.png",
+    "T_Tire_Stack_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Tire_Stack_Normal.png",
+    "T_Crate_Wood_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Crate_Wood_Occlusion.png",
+    "T_Locker_Row_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Locker_Row_BaseColor.png",
+    "T_Crate_Wood_BaseColor.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Crate_Wood_BaseColor.png",
+    "T_Window_Steel_B_MetallicSmoothness.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Window_Steel_B_MetallicSmoothness.png",
+    "T_Trolley_Platform_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Trolley_Platform_Occlusion.png",
+    "T_Drill_Press_Occlusion.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Drill_Press_Occlusion.png",
+    "T_WoodGrain_Normal.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_WoodGrain_Normal.png",
+    "Lightmap-0_comp_dir.png": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Scenes/Workshop/Lightmap-0_comp_dir.png"
+  },
+  "materials": {
+    "M_Paint_Grey": {
+      "_ChipBaseMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png",
+      "_NormalMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_PaintedMetal_Normal.png"
+    },
+    "M_Debris_Bricks_B": {},
+    "M_Barrel_Oil": {
+      "_BumpMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Barrel_Oil_Normal.png",
+      "_MetallicGlossMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Barrel_Oil_MetallicSmoothness.png"
+    },
+    "M_Compressor_Air": {},
+    "M_Debris_Bricks_A": {
+      "_OcclusionMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Debris_Bricks_A_Occlusion.png"
+    },
+    "M_Sign_Exit": {
+      "_BumpMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Sign_Exit_Normal.png",
+      "_MetallicGlossMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Sign_Exit_MetallicSmoothness.png",
+      "_OcclusionMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Sign_Exit_Occlusion.png"
+    },
+    "M_Clock_Wall": {},
+    "M_Lamp_Hanging": {
+      "_BaseMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Lamp_Hanging_BaseColor.png",
+      "_MainTex": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Lamp_Hanging_BaseColor.png"
+    },
+    "M_Debris_Glass": {
+      "_BaseMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Debris_Glass_BaseColor.png",
+      "_MainTex": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Debris_Glass_BaseColor.png"
+    },
+    "M_Tire_Stack": {
+      "_BumpMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Tire_Stack_Normal.png"
+    },
+    "M_BrickLoose": {
+      "_ChipBaseMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png",
+      "_ORMMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Concrete_OcclusionRoughnessMetallic.png"
+    },
+    "M_Barrel_Plastic": {
+      "_BumpMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Barrel_Plastic_Normal.png",
+      "_MetallicGlossMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Barrel_Plastic_MetallicSmoothness.png"
+    },
+    "M_Grinder_Pedestal": {
+      "_OcclusionMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Grinder_Pedestal_Occlusion.png"
+    },
+    "M_Alarm_Bell": {
+      "_BaseMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Alarm_Bell_BaseColor.png",
+      "_MainTex": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Alarm_Bell_BaseColor.png",
+      "_OcclusionMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Alarm_Bell_Occlusion.png"
+    },
+    "M_Door_Metal_Single": {
+      "_MetallicGlossMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Door_Metal_Single_MetallicSmoothness.png"
+    },
+    "M_Valve_Gate": {
+      "_BumpMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Valve_Gate_Normal.png",
+      "_OcclusionMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Valve_Gate_Occlusion.png"
+    },
+    "M_Chain_Hanging": {
+      "_OcclusionMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Chain_Hanging_Occlusion.png"
+    },
+    "M_Debris_Planks": {},
+    "M_Sign_Green": {},
+    "M_Debris_Pipes": {
+      "_BumpMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Debris_Pipes_Normal.png",
+      "_MetallicGlossMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Debris_Pipes_MetallicSmoothness.png"
+    },
+    "M_Shelf_Rack": {
+      "_BumpMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Shelf_Rack_Normal.png"
+    },
+    "M_Galvanized": {
+      "_ChipBaseMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png",
+      "_NormalMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_PaintedMetal_Normal.png"
+    },
+    "M_Wood": {
+      "_BaseMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_WoodGrain_BaseColor.png",
+      "_ChipBaseMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png",
+      "_NormalMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_WoodGrain_Normal.png"
+    },
+    "M_Rubber": {
+      "_ChipBaseMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png",
+      "_NormalMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_PaintedMetal_Normal.png"
+    },
+    "M_Door_Wood_Office": {
+      "_MetallicGlossMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Door_Wood_Office_MetallicSmoothness.png"
+    },
+    "M_Barrels_On_Pallet": {
+      "_OcclusionMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Barrels_On_Pallet_Occlusion.png"
+    },
+    "M_Rust": {
+      "_BaseMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png",
+      "_ChipBaseMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png"
+    },
+    "M_Debris_Concrete": {
+      "_MetallicGlossMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Debris_Concrete_MetallicSmoothness.png"
+    },
+    "M_Paint_Teal": {
+      "_ChipBaseMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png",
+      "_NormalMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_PaintedMetal_Normal.png"
+    },
+    "M_Locker_Row": {
+      "_BaseMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Locker_Row_BaseColor.png",
+      "_BumpMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Locker_Row_Normal.png",
+      "_MainTex": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Locker_Row_BaseColor.png"
+    },
+    "M_Concrete": {
+      "_ChipBaseMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png",
+      "_ORMMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Concrete_OcclusionRoughnessMetallic.png"
+    },
+    "M_Cable_Spool": {
+      "_BaseMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Cable_Spool_BaseColor.png",
+      "_MainTex": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Cable_Spool_BaseColor.png",
+      "_MetallicGlossMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Cable_Spool_MetallicSmoothness.png",
+      "_OcclusionMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Cable_Spool_Occlusion.png"
+    },
+    "M_Steel_Dark": {
+      "_ChipBaseMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png",
+      "_NormalMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_PaintedMetal_Normal.png"
+    },
+    "M_Paint_Yellow": {
+      "_ChipBaseMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png",
+      "_NormalMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_PaintedMetal_Normal.png"
+    },
+    "M_Crate_Wood": {
+      "_MetallicGlossMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Crate_Wood_MetallicSmoothness.png",
+      "_OcclusionMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Crate_Wood_Occlusion.png"
+    },
+    "M_Control_Panel": {
+      "_BumpMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Control_Panel_Normal.png",
+      "_OcclusionMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Control_Panel_Occlusion.png"
+    },
+    "M_Radiator_Cast": {
+      "_BumpMap": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Radiator_Cast_Normal.png"
+    },
+    "M_Crate_Wood_Small": {},
+    "M_Lamp_Work_Tripod": {},
+    "M_Sign_White": {}
+  },
+  "output": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/factory",
+  "prepared": "/Users/shazia/Documents/programs/ImmersiveStorytelling_TheLongWayHome/public/models/factory/prepared-textures",
+  "missingSceneReferences": [
+    {
+      "guid": "10fc4df2da32a41aaa32d77bc913491c",
+      "path": null
+    },
+    {
+      "guid": "172515602e62fb746b5d573b38a5fe58",
+      "path": null
+    },
+    {
+      "guid": "2e07a8ac8c96043edb8ea802322d0e19",
+      "path": "public/models/scene1/Assets/28.fbx"
+    },
+    {
+      "guid": "3102e1f78eb74487aa645d973cbd4bfe",
+      "path": "public/models/scene1/Assets/Folded_Cloth_Piles_Textures4K/Folded_Cloth_Piles_1_Texture4K/cloth.mat"
+    },
+    {
+      "guid": "474bcb49853aa07438625e644c072ee6",
+      "path": null
+    },
+    {
+      "guid": "57288625494a1484caca0d1162c49b0f",
+      "path": null
+    },
+    {
+      "guid": "6f15d215b71a74c08857276abcaab42d",
+      "path": null
+    },
+    {
+      "guid": "78fc041d38233400893a3e6318886ec7",
+      "path": "public/models/scene1/Assets/chair_02_SM.FBX"
+    },
+    {
+      "guid": "9d387918c9be4488da747cef27cf37b2",
+      "path": "public/models/scene1/Assets/table_01_SM.FBX"
+    },
+    {
+      "guid": "a79441f348de89743a2939f4d699eac1",
+      "path": null
+    },
+    {
+      "guid": "be454f59a3b023d4b81685ddf8236593",
+      "path": null
+    },
+    {
+      "guid": "ec4fdcf46c2164bef965688624f9e5c0",
+      "path": null
+    }
+  ],
+  "sourceVersion": "b455bd279f4215e7",
+  "textureResizes": [
+    {
+      "name": "Folded_Cloth_Piles_4_BaseColor.png",
+      "size": [
+        2048,
+        2048
+      ]
+    },
+    {
+      "name": "Folded_Cloth_Piles_1_Normal.png",
+      "size": [
+        2048,
+        2048
+      ]
+    }
+  ],
+  "sourceFingerprint": "70a26ef4659353c8"
+}

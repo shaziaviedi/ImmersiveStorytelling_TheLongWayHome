@@ -1,6 +1,7 @@
 // Factory scene: sewing, daydreams, wages, and collecting the bag before the shift ends.
 import * as THREE from 'three';
 import * as TX from '../world/textures.js';
+import { loadFactoryReference } from '../world/factory-reference.js';
 import { GRIP } from '../characters/first-person.js';
 import {
   lerp,
@@ -79,6 +80,8 @@ export function buildSweatshop(ctx) {
   const ironM = M(0x1d1b19, { roughness: 0.5, metalness: 0.6 });
   const STEELM = () => M(0xb8b8b4, { metalness: 0.9, roughness: 0.25 });
   const B = new Batcher(); // static set dressing, merged per material
+  const structureB = new Batcher(), seatsB = new Batcher(), deskB = new Batcher(), cuttingB = new Batcher(), clothB = new Batcher(), storageB = new Batcher(), doorFrameB = new Batcher();
+  const shellPanels = [], seatSlots = [];
 
   // ---------- shell ----------
   const W = ROOM.maxX - ROOM.minX,
@@ -108,6 +111,7 @@ export function buildSweatshop(ctx) {
     const p = mesh(new THREE.PlaneGeometry(len + ext * 2, yt - yb), m, cx, (yb + yt) / 2, cz, root);
     p.rotation.y = ry;
     p.castShadow = false;
+    shellPanels.push(p);
     return p;
   }
   wallPiece(W, 0, H, 0, 0, ROOM.minZ, 0); // front (z-)
@@ -193,11 +197,11 @@ export function buildSweatshop(ctx) {
     [3.1, 0.12],
     [5.6, -2.9],
   ];
-  piers.forEach(([x, z]) => B.add(G.box(0.5, H, 0.5), pierM, x, H / 2, z));
+  piers.forEach(([x, z]) => structureB.add(G.box(0.5, H, 0.5), pierM, x, H / 2, z));
   // ceiling beams, conduit, pipes
   const beamM = M(0x3a332a, { roughness: 0.9 });
-  for (let x = -6; x <= 6; x += 3) B.add(G.box(0.28, 0.32, D), beamM, x, H - 0.16, 0);
-  B.add(
+  for (let x = -6; x <= 6; x += 3) structureB.add(G.box(0.28, 0.32, D), beamM, x, H - 0.16, 0);
+  structureB.add(
     G.cyl(0.07, 0.07, W, 10),
     M(0x4a3a2c, { metalness: 0.5, roughness: 0.55 }),
     0,
@@ -207,7 +211,7 @@ export function buildSweatshop(ctx) {
     0,
     Math.PI / 2,
   );
-  B.add(
+  structureB.add(
     G.cyl(0.045, 0.045, D, 8),
     M(0x3a3026, { metalness: 0.4, roughness: 0.6 }),
     -7.75,
@@ -217,7 +221,7 @@ export function buildSweatshop(ctx) {
     0,
     0,
   );
-  B.add(G.cyl(0.03, 0.03, H, 6), M(0x2a2420), 7.8, H / 2, -5.6);
+  structureB.add(G.cyl(0.03, 0.03, H, 6), M(0x2a2420), 7.8, H / 2, -5.6);
   const wireM = M(0x0c0c0c, { roughness: 0.6 });
   const rr = (() => {
     let s = 7;
@@ -229,7 +233,7 @@ export function buildSweatshop(ctx) {
   for (let k = 0; k < 16; k++) {
     const x = -7.5 + rr() * 15,
       z = -5.5 + rr() * 11;
-    B.add(
+    structureB.add(
       wireGeo(
         new THREE.Vector3(x, 3.82, z),
         new THREE.Vector3(x + (rr() - 0.5) * 6, 3.82, z + (rr() - 0.5) * 5),
@@ -725,6 +729,7 @@ export function buildSweatshop(ctx) {
       );
       const m = makeMachine({
         wood: woodM,
+        separateFurniture: true,
         threadColor: [0xb5442e, 0x1f3a68, 0xd9a22a, 0xe9e1cf][(c + r) % 4],
         batch: isPlayer ? null : B,
         at: isPlayer ? null : at,
@@ -746,7 +751,7 @@ export function buildSweatshop(ctx) {
       const done = 1 + ((wi * 3) % 5),
         todo = 3 + (wi % 3);
       for (let k = 0; k < done; k++)
-        B.add(
+        clothB.add(
           G.box(0.32, 0.024, 0.2),
           fabM[(wi + k) % fabM.length],
           x + 0.4 + (rr() - 0.5) * 0.02,
@@ -768,7 +773,7 @@ export function buildSweatshop(ctx) {
         B.add(G.box(0.035, 0.6, 0.035), woodDarkM, lx + a * 0.14, 0.3, lz + b * 0.14),
       );
       for (let k = 0; k < todo; k++)
-        B.add(
+        clothB.add(
           G.box(0.34, 0.024, 0.26),
           fabM[(wi * 2 + k) % fabM.length],
           lx + (rr() - 0.5) * 0.02,
@@ -779,17 +784,18 @@ export function buildSweatshop(ctx) {
           0,
         );
       addCol(lx - 0.16, lx + 0.16, lz - 0.16, lz + 0.16); // small, so the aisles stay walkable
+      seatSlots.push({x, z:z+.85, seat:.56, w:.38, d:.38});
       // stool
       const sx = x,
         sz = z + 0.85;
-      B.add(slab(0.38, 0.38, 0.05, 0.03), woodDarkM, sx, 0.56, sz);
+      seatsB.add(slab(0.38, 0.38, 0.05, 0.03), woodDarkM, sx, 0.56, sz);
       [
         [-1, -1],
         [1, -1],
         [-1, 1],
         [1, 1],
       ].forEach(([a, b]) =>
-        B.add(
+        seatsB.add(
           G.box(0.04, 0.56, 0.04),
           woodDarkM,
           sx + a * 0.15,
@@ -835,15 +841,16 @@ export function buildSweatshop(ctx) {
     }),
   );
 
+  seatSlots.push({x:SEAT.x,z:SEAT.z,seat:.5,w:.36,d:.34});
   // the player's own stool (low, so a child's feet reach the treadle)
-  B.add(slab(0.36, 0.34, 0.05, 0.03), woodDarkM, SEAT.x, 0.5, SEAT.z);
+  seatsB.add(slab(0.36, 0.34, 0.05, 0.03), woodDarkM, SEAT.x, 0.5, SEAT.z);
   [
     [-1, -1],
     [1, -1],
     [-1, 1],
     [1, 1],
   ].forEach(([a, b]) =>
-    B.add(
+    seatsB.add(
       G.box(0.04, 0.5, 0.04),
       woodDarkM,
       SEAT.x + a * 0.14,
@@ -854,8 +861,8 @@ export function buildSweatshop(ctx) {
       -a * 0.06,
     ),
   );
-  B.add(G.box(0.3, 0.025, 0.025), woodDarkM, SEAT.x, 0.16, SEAT.z + 0.13);
-  B.add(G.box(0.3, 0.025, 0.025), woodDarkM, SEAT.x, 0.16, SEAT.z - 0.13);
+  seatsB.add(G.box(0.3, 0.025, 0.025), woodDarkM, SEAT.x, 0.16, SEAT.z + 0.13);
+  seatsB.add(G.box(0.3, 0.025, 0.025), woodDarkM, SEAT.x, 0.16, SEAT.z - 0.13);
   addCol(SEAT.x - 0.2, SEAT.x + 0.2, SEAT.z - 0.19, SEAT.z + 0.19);
   // the player's own table: fabric on a stool to the left, finished pieces on the right
   const sideStool = new THREE.Group();
@@ -910,8 +917,8 @@ export function buildSweatshop(ctx) {
   // a long plywood counter parallel to the back wall; he stands behind it, facing the workshop
   const DESK = { x: 5.15, z: 4.5, w: 1.9, d: 0.85, h: 0.84 }; // a desk he sits at (a standing-height counter hid him when seated)   // off the back wall, so he has room to sit behind it
   const plyM = new THREE.MeshStandardMaterial({ ...TX.wood([0.5, 0.38, 0.26], 93), roughness: 1 });
-  B.add(slab(DESK.w + 0.08, DESK.d + 0.06, 0.05, 0.02), woodDarkM, DESK.x, DESK.h - 0.05, DESK.z); // top
-  B.add(
+  deskB.add(slab(DESK.w + 0.08, DESK.d + 0.06, 0.05, 0.02), woodDarkM, DESK.x, DESK.h - 0.05, DESK.z); // top
+  deskB.add(
     G.box(DESK.w, DESK.h - 0.05, 0.03),
     plyM,
     DESK.x,
@@ -919,7 +926,7 @@ export function buildSweatshop(ctx) {
     DESK.z - DESK.d / 2 + 0.015,
   ); // front panel (faces the room)
   [-1, 1].forEach((e) =>
-    B.add(
+    deskB.add(
       G.box(0.03, DESK.h - 0.05, DESK.d - 0.04),
       plyM,
       DESK.x + e * (DESK.w / 2 - 0.015),
@@ -927,17 +934,17 @@ export function buildSweatshop(ctx) {
       DESK.z,
     ),
   );
-  B.add(G.box(DESK.w - 0.06, 0.03, DESK.d - 0.06), plyM, DESK.x, 0.12, DESK.z); // bottom shelf
-  B.add(G.box(DESK.w + 0.02, 0.06, 0.02), M(0x2a2018), DESK.x, 0.03, DESK.z - DESK.d / 2 + 0.01); // kick strip
+  deskB.add(G.box(DESK.w - 0.06, 0.03, DESK.d - 0.06), plyM, DESK.x, 0.12, DESK.z); // bottom shelf
+  deskB.add(G.box(DESK.w + 0.02, 0.06, 0.02), M(0x2a2018), DESK.x, 0.03, DESK.z - DESK.d / 2 + 0.01); // kick strip
   // plywood patches and a painted number on the front
-  B.add(
+  deskB.add(
     G.box(0.5, 0.4, 0.006),
     M(0x6a5a44, { roughness: 1 }),
     DESK.x - 0.5,
     0.55,
     DESK.z - DESK.d / 2 - 0.003,
   );
-  B.add(
+  deskB.add(
     G.box(0.36, 0.3, 0.006),
     M(0x5a4a38, { roughness: 1 }),
     DESK.x + 0.55,
@@ -946,8 +953,8 @@ export function buildSweatshop(ctx) {
   );
   // drawers on his side
   [-0.55, 0.55].forEach((dx) => {
-    B.add(G.box(0.5, 0.1, 0.02), woodDarkM, DESK.x + dx, DESK.h - 0.12, DESK.z + DESK.d / 2 - 0.01);
-    B.add(
+    deskB.add(G.box(0.5, 0.1, 0.02), woodDarkM, DESK.x + dx, DESK.h - 0.12, DESK.z + DESK.d / 2 - 0.01);
+    deskB.add(
       G.box(0.08, 0.02, 0.025),
       M(0x8a7a5a, { metalness: 0.6, roughness: 0.4 }),
       DESK.x + dx,
@@ -1083,12 +1090,12 @@ export function buildSweatshop(ctx) {
   const CH = { x: DESK.x + 0.15, z: 5.38, seat: 0.48 };
   {
     const cw = woodDarkM;
-    B.add(slab(0.46, 0.44, 0.045, 0.02), cw, CH.x, CH.seat - 0.02, CH.z);
+    seatsB.add(slab(0.46, 0.44, 0.045, 0.02), cw, CH.x, CH.seat - 0.02, CH.z);
     [
       [-1, -1],
       [1, -1],
     ].forEach(([a, b]) =>
-      B.add(
+      seatsB.add(
         G.box(0.045, CH.seat - 0.04, 0.045),
         cw,
         CH.x + a * 0.19,
@@ -1097,10 +1104,10 @@ export function buildSweatshop(ctx) {
       ),
     );
     [-1, 1].forEach((a) =>
-      B.add(G.box(0.05, 1.02, 0.05), cw, CH.x + a * 0.19, 0.51, CH.z + 0.2, -0.06, 0, 0),
+      seatsB.add(G.box(0.05, 1.02, 0.05), cw, CH.x + a * 0.19, 0.51, CH.z + 0.2, -0.06, 0, 0),
     ); // back legs run up into the back
     [0.72, 0.86, 0.98].forEach((y) =>
-      B.add(
+      seatsB.add(
         G.box(0.4, y > 0.95 ? 0.08 : 0.04, 0.025),
         cw,
         CH.x,
@@ -1111,11 +1118,12 @@ export function buildSweatshop(ctx) {
         0,
       ),
     );
-    B.add(G.box(0.38, 0.03, 0.03), cw, CH.x, 0.18, CH.z - 0.18);
-    B.add(G.box(0.03, 0.03, 0.36), cw, CH.x - 0.19, 0.16, CH.z);
-    B.add(G.box(0.03, 0.03, 0.36), cw, CH.x + 0.19, 0.16, CH.z);
+    seatsB.add(G.box(0.38, 0.03, 0.03), cw, CH.x, 0.18, CH.z - 0.18);
+    seatsB.add(G.box(0.03, 0.03, 0.36), cw, CH.x - 0.19, 0.16, CH.z);
+    seatsB.add(G.box(0.03, 0.03, 0.36), cw, CH.x + 0.19, 0.16, CH.z);
     addCol(CH.x - 0.26, CH.x + 0.26, CH.z - 0.24, CH.z + 0.28);
   }
+  seatSlots.push({x:CH.x,z:CH.z,seat:CH.seat,w:.46,d:.44});
   foreman.position.set(CH.x, 0, CH.z);
   foreman.rotation.y = Math.PI;
   root.add(foreman);
@@ -1214,9 +1222,9 @@ export function buildSweatshop(ctx) {
   );
   // frame: jambs and a threshold, so no light or sky shows through cracks round the door
   [DOOR.z0 - 0.05, DOOR.z1 + 0.05].forEach((z) =>
-    B.add(G.box(0.16, DOOR.h + 0.1, 0.1), woodDarkM, ROOM.maxX, (DOOR.h + 0.1) / 2, z),
+    doorFrameB.add(G.box(0.16, DOOR.h + 0.1, 0.1), woodDarkM, ROOM.maxX, (DOOR.h + 0.1) / 2, z),
   );
-  B.add(
+  doorFrameB.add(
     G.box(0.2, 0.03, dw + 0.2),
     M(0x3a3026, { roughness: 0.9 }),
     ROOM.maxX + 0.02,
@@ -1319,17 +1327,17 @@ export function buildSweatshop(ctx) {
   }); // a girl folding the finished pieces
   folder.position.set(4.6, 0, -5.25);
   root.add(folder);
-  B.add(slab(2.4, 0.9, 0.06, 0.03), woodM, 4.6, 1.02, -4.6);
+  cuttingB.add(slab(2.4, 0.9, 0.06, 0.03), woodM, 4.6, 1.02, -4.6);
   [
     [-1, -1],
     [1, -1],
     [-1, 1],
     [1, 1],
   ].forEach(([a, b]) =>
-    B.add(G.box(0.06, 1.0, 0.06), woodDarkM, 4.6 + a * 1.1, 0.5, -4.6 + b * 0.38),
+    cuttingB.add(G.box(0.06, 1.0, 0.06), woodDarkM, 4.6 + a * 1.1, 0.5, -4.6 + b * 0.38),
   );
   for (let k = 0; k < 9; k++)
-    B.add(
+    clothB.add(
       G.box(0.4, 0.03, 0.3),
       fabM[k % fabM.length],
       3.8 + (k % 3) * 0.5,
@@ -1426,7 +1434,7 @@ export function buildSweatshop(ctx) {
     [7.4, 0.2],
     [6.9, -4.9],
   ].forEach(([x, z], i) => {
-    B.add(
+    storageB.add(
       sackGeo,
       jute,
       x,
@@ -1444,7 +1452,7 @@ export function buildSweatshop(ctx) {
   addCol(7.0, 7.9, -0.2, 0.6);
   // fabric bolts leaning on the front wall
   for (let i = 0; i < 6; i++)
-    B.add(
+    storageB.add(
       G.cyl(0.11, 0.11, 2.2, 10),
       fabM[i],
       -5.6 + i * 0.3,
@@ -1598,7 +1606,11 @@ export function buildSweatshop(ctx) {
         ROOM.minZ + 0.16,
       );
 
+  const placeholders = {structure:structureB.build(root),seats:seatsB.build(root),desk:deskB.build(root),cutting:cuttingB.build(root),cloth:clothB.build(root),storage:storageB.build(root),doorFrame:doorFrameB.build(root)};
   B.build(root);
+  let referenceData = null;
+  const ready = loadFactoryReference({root,ROOM,WIN,DOOR,shellPanels,floor,ceil,machines,workers,seatSlots,placeholders,pileLayers,rightPile,piece,DESK,doorPivot,leaf,clock,hHand,mHand,piers,tableHeight:TABLE_H})
+    .then(data=>{referenceData=data;colliders.push(...data.colliders);ctx.refreshColliders();return data;});
   root.traverse((o) => {
     if (o.isMesh && !o.material.colorWrite === false) o.receiveShadow = true;
   });
@@ -1779,6 +1791,8 @@ export function buildSweatshop(ctx) {
     if (top) top.visible = false;
     piece.material.map = top ? top.material.map : T.fab[0];
     piece.material.needsUpdate = true;
+    const pickedCloth=top?.children.find(o=>o.userData.sourceCloth),movingCloth=piece.children.find(o=>o.userData.sourceCloth);
+    if(pickedCloth&&movingCloth)movingCloth.material=pickedCloth.material;
     piece.visible = true;
     piece.scale.set(1, 1, 1);
     piece.position.copy(leftPile.localToWorld(new THREE.Vector3(0, 0.2, 0)));
@@ -2199,6 +2213,7 @@ export function buildSweatshop(ctx) {
             0,
             rightPile,
           );
+          referenceData?.skinFolded(folded,piece);
           folded.rotation.y = (Math.random() - 0.5) * 0.2;
           S.pieces++;
           if (S.pieces === 2) {
@@ -2476,6 +2491,9 @@ export function buildSweatshop(ctx) {
   const doorCollider = { minX: ROOM.maxX - 0.4, maxX: ROOM.maxX + 1, minZ: DOOR.z0, maxZ: DOOR.z1 };
   return {
     root,
+    ready,
+    get referenceData() { return referenceData; },
+    anchors:{playerMachine,leftPile,rightPile,piece,doorPivot,foreman,seat:SEAT,needle:NEEDLE,foldCloth},
     update,
     start,
     stop,

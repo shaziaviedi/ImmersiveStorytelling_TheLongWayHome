@@ -1,0 +1,70 @@
+{
+  "runtimeEntryPoints": [
+    "public/models/factory/factory.glb",
+    "public/models/market/market.glb",
+    "public/models/scene3/Scene 3.glb",
+    "public/models/home/unity-home.glb",
+    "public/models/home/front_doors_pack.glb",
+    "public/models/home/thali.glb"
+  ],
+  "references": {
+    "public/models/factory/factory.glb": [
+      "src/config/optimized-assets.js",
+      "src/world/factory-reference.js",
+      "public/app.js",
+      "public/app.js"
+    ],
+    "public/models/market/market.glb": [
+      "src/config/optimized-assets.js",
+      "src/world/street-reference.js",
+      "public/app.js",
+      "public/app.js"
+    ],
+    "public/models/scene3/Scene 3.glb": [
+      "src/config/optimized-assets.js",
+      "src/world/chase-reference.js",
+      "public/app.js",
+      "public/app.js"
+    ],
+    "public/models/home/unity-home.glb": [
+      "src/config/optimized-assets.js",
+      "src/scenes/home.js",
+      "src/world/home-reference.js",
+      "public/app.js",
+      "public/app.js",
+      "public/app.js"
+    ],
+    "public/models/home/front_doors_pack.glb": [
+      "src/config/optimized-assets.js",
+      "src/world/home-reference.js",
+      "public/app.js",
+      "public/app.js"
+    ],
+    "public/models/home/thali.glb": [
+      "src/config/optimized-assets.js",
+      "src/scenes/home.js",
+      "public/app.js",
+      "public/app.js"
+    ]
+  },
+  "totalBytes": 61211702,
+  "totalFiles": 14,
+  "filesOver5MiB": [
+    {
+      "file": "public/models/market/market.glb",
+      "bytes": 40107576
+    },
+    {
+      "file": "public/models/scene3/Scene 3.glb",
+      "bytes": 9339528
+    },
+    {
+      "file": "public/models/home/unity-home.glb",
+      "bytes": 8004500
+    }
+  ],
+  "unusedModelAndTextureFiles": [],
+  "unusedFiles": 0,
+  "unusedBytes": 0,
+  "note": "Unused means not required at runtime. Unity sources, regeneration inputs, test references and caches are preserved in the ignored archive, not discarded."
+}

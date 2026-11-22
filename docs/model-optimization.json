@@ -1,0 +1,142 @@
+{
+  "settings": {
+    "maxTextureSize": 1024,
+    "smallPropAndDataTextureSize": 512,
+    "colorFormat": "WebP quality 90",
+    "dataFormat": "JPEG quality 95, full chroma resolution; alpha-bearing maps retained",
+    "geometry": "Draco 16-bit positions/UVs, 12-bit normals; no simplification",
+    "preserve": "named nodes, extras, hierarchy, animation, texture alpha"
+  },
+  "models": [
+    {
+      "input": "public/models/factory/factory.glb",
+      "output": "public/models/factory/factory.glb",
+      "before": 52242672,
+      "after": 2827636,
+      "version": "91cdd136bca4d1e4",
+      "verification": {
+        "nodes": 44,
+        "maxLocalPositionError": 0.0003528594970703125,
+        "transformsPreserved": true,
+        "triangleCountsPreserved": true
+      },
+      "textureBudgets": {
+        "512": 27,
+        "1024": 5
+      },
+      "nodes": 44,
+      "meshes": 22,
+      "triangles": 37798,
+      "textures": 32,
+      "textureMiBWithMipmaps": 63
+    },
+    {
+      "input": "public/models/market/market.gltf",
+      "output": "public/models/market/market.glb",
+      "before": 179010949,
+      "after": 40107576,
+      "version": "db6693a37e897ca4",
+      "verification": {
+        "nodes": 339,
+        "maxLocalPositionError": 0.0063934326171875,
+        "transformsPreserved": true,
+        "triangleCountsPreserved": true
+      },
+      "textureBudgets": {
+        "512": 222,
+        "1024": 55
+      },
+      "nodes": 339,
+      "meshes": 140,
+      "triangles": 514350,
+      "textures": 277,
+      "textureMiBWithMipmaps": 513
+    },
+    {
+      "input": "public/models/scene3/Scene 3.glb",
+      "output": "public/models/scene3/Scene 3.glb",
+      "before": 83113828,
+      "after": 9339528,
+      "version": "60faf534cdc4edac",
+      "verification": {
+        "nodes": 1104,
+        "maxLocalPositionError": 0.0063934326171875,
+        "transformsPreserved": true,
+        "triangleCountsPreserved": true
+      },
+      "textureBudgets": {
+        "512": 30,
+        "1024": 55
+      },
+      "nodes": 1104,
+      "meshes": 81,
+      "triangles": 73788,
+      "textures": 85,
+      "textureMiBWithMipmaps": 181
+    },
+    {
+      "input": "public/models/home/unity-home.gltf",
+      "output": "public/models/home/unity-home.glb",
+      "before": 125007623,
+      "after": 8004500,
+      "version": "7cc0627f18b25442",
+      "verification": {
+        "nodes": 402,
+        "maxLocalPositionError": 0.00180816650390625,
+        "transformsPreserved": true,
+        "triangleCountsPreserved": true
+      },
+      "textureBudgets": {
+        "512": 72,
+        "1024": 2
+      },
+      "nodes": 402,
+      "meshes": 53,
+      "triangles": 127677,
+      "textures": 74,
+      "textureMiBWithMipmaps": 103
+    },
+    {
+      "input": "public/models/home/front_doors_pack.glb",
+      "output": "public/models/home/front_doors_pack.glb",
+      "before": 829432,
+      "after": 184084,
+      "version": "da0ca22fe8a27f0a",
+      "verification": {
+        "nodes": 55,
+        "maxLocalPositionError": 0.000013589859008789062,
+        "transformsPreserved": true,
+        "triangleCountsPreserved": true
+      },
+      "textureBudgets": {
+        "1024": 1
+      },
+      "nodes": 55,
+      "meshes": 31,
+      "triangles": 7802,
+      "textures": 1,
+      "textureMiBWithMipmaps": 1
+    },
+    {
+      "input": "public/models/home/thali.glb",
+      "output": "public/models/home/thali.glb",
+      "before": 9514988,
+      "after": 647748,
+      "version": "7c459fd1cb096063",
+      "verification": {
+        "nodes": 31,
+        "maxLocalPositionError": 0.00013756752014160156,
+        "transformsPreserved": true,
+        "triangleCountsPreserved": true
+      },
+      "textureBudgets": {
+        "512": 6
+      },
+      "nodes": 31,
+      "meshes": 14,
+      "triangles": 28960,
+      "textures": 6,
+      "textureMiBWithMipmaps": 8
+    }
+  ]
+}

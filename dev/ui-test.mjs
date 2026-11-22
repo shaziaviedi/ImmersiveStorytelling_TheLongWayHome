@@ -1,4 +1,4 @@
-// Caption layout, thread progress, mat alignment, ending wrapping, and chase light checks.
+// Caption layout, loading bar/thread progress, mat alignment, ending and chase lights.
 // npm run test:ui supplies the server; screenshots use the shared temporary artifact directory.
 import { launchTestBrowser, TEST_URL, ARTIFACT_DIR } from './helpers/browser.mjs';
 const browser = await launchTestBrowser({
@@ -41,12 +41,14 @@ try {
     w.ui.progress(0.5);
     w.ui.stamina(0.4);
     const load = document.querySelector('#load-bar');
-    load.querySelector('.thread-fill').style.transition = 'none';
+    const sewing=document.querySelector('#ring');
+    sewing.querySelector('.sew-fill').style.transition = 'none';
     load.style.setProperty('--progress', '.5');
     document.querySelector('#loading').classList.add('show');
     document.querySelector('#load-msg').textContent = 'Loading…';
     await new Promise((r) => setTimeout(r, 500));
-    return ['load-bar', 'ring', 'stamina'].map((id) => {
+    const fraction=sewing.querySelector('.sew-fill').getBoundingClientRect().width/sewing.getBoundingClientRect().width;
+    const threads=['load-bar', 'stamina'].map((id) => {
       const el = document.getElementById(id);
       return {
         svg: el.tagName.toLowerCase() === 'svg',
@@ -58,13 +60,13 @@ try {
         ),
       };
     });
+    return {fraction,bar:sewing.getAttribute('role')==='progressbar',threads};
   });
   assert(
-    progress.every((p) => p.svg) &&
-      Math.abs(progress[0].offset - 0.5) < 0.01 &&
-      Math.abs(progress[1].offset - 0.5) < 0.01 &&
-      Math.abs(progress[2].offset - 0.6) < 0.01,
-    'red thread indicators reflect loading, interaction, and stamina progress: ' +
+    progress.bar && Math.abs(progress.fraction-.5)<.01 && progress.threads.every(p=>p.svg) &&
+      Math.abs(progress.threads[0].offset - 0.5) < 0.01 &&
+      Math.abs(progress.threads[1].offset - 0.6) < 0.01,
+    'sewing uses a standard bar; loading and stamina retain red threads: ' +
       JSON.stringify(progress),
   );
   await page.screenshot({ path: `${ARTIFACT_DIR}/tlwh-thread-loading.png`, timeout: 120000 });

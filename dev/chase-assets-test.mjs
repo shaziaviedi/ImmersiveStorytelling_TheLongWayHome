@@ -1,4 +1,6 @@
 import { launchTestBrowser, TEST_URL, ARTIFACT_DIR } from './helpers/browser.mjs';
+import fs from 'node:fs';
+const optimized=JSON.parse(fs.readFileSync('docs/model-optimization.json','utf8')).models.find(m=>m.output==='public/models/scene3/Scene 3.glb');
 const browser=await launchTestBrowser({args:['--autoplay-policy=no-user-gesture-required']});
 const page=await browser.newPage({viewport:{width:1280,height:800}}),errors=[];
 page.on('pageerror',e=>errors.push(e.message));
@@ -9,12 +11,12 @@ try {
   await page.waitForFunction(()=>window.__tlwh?.built===5,null,{timeout:240000});
   await page.evaluate(async()=>{for(const s of window.__tlwh.spaces)if(s?.ready)await s.ready;await window.__tlwh.audio.init();await window.__tlwh.audio.rest;});
   for(const edition of ['normal','extra']) {
-    const result=await page.evaluate(async edition=>{
+    const result=await page.evaluate(async ({edition,optimized})=>{
       const w=window.__tlwh;w.ctx.edition=edition;document.querySelector('#title').style.display='none';w.setMode('play');await w.goTo('nightmare');
       const s=w.world,d=s.referenceData,fail=[];const check=(ok,m)=>{if(!ok)fail.push(m);};
       s.reset();const V=w.camera.position.constructor,Box=d.instances[0].owner.geometry.boundingBox.constructor;
       const bounds=o=>{o.updateWorldMatrix(true,true);return new Box().setFromObject(o);};
-      check(d.sourceMeshes===87&&d.sourceImages===86,'complete source catalog/embedded images');
+      check(d.sourceMeshes===optimized.meshes&&d.sourceImages===optimized.textures,'complete optimized catalog/embedded images');
       check(d.missingPrefabs.length===17,'missing source ground prefabs documented');
       const houses=d.instances.filter(i=>i.type==='building');
       check(houses.length>40,'native source architecture replaces chase blocks');
@@ -52,7 +54,7 @@ try {
       await w.renderer.compileAsync(w.scene,w.camera);
       check(!w.renderer.info.programs.some(p=>p.diagnostics&&!p.diagnostics.runnable),'source shaders compile');
       return {fail,maps,buildings:houses.length,props:d.instances.length-houses.length};
-    },edition);
+    },{edition,optimized});
     if(result.fail.length)throw Error(`${edition}: ${result.fail.join('; ')}`);
     console.log(`PASS ${edition}: ${result.buildings} native buildings, ${result.props} props, ${result.maps} texture bindings, route, knock/collapse/reset, audio and shaders`);
     for(const[name,x,z,yaw,pitch]of[['entry',47,8.3,-Math.PI/2,.05],['hands',52.7,2.8,0,.05],['turn',58,-4.7,-Math.PI/2,.05],['loop',66.7,2,Math.PI,.1],['home-lane',75,12.7,-Math.PI/2,.08]]){

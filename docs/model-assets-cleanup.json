@@ -1,0 +1,12 @@
+{
+  "before": {
+    "files": 23905,
+    "bytes": 3852160218
+  },
+  "after": {
+    "files": 14,
+    "bytes": 61211702
+  },
+  "archive": "_raw_assets/public/models",
+  "preservedOriginals": true
+}

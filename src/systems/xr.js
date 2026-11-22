@@ -561,7 +561,7 @@ export class XRRig {
       scale *= 0.85;
     }
     const bars = [];
-    if (prog > 0) bars.push({ v: prog, c: '#d23a2c' });
+    if (prog > 0) bars.push({ v: prog, c: '#e6decc', sewing: true });
     if (stam >= 0) bars.push({ v: stam, c: '#d23a2c' });
     if (!blocks.length && !bars.length) {
       this.capTex.needsUpdate = true;
@@ -594,6 +594,12 @@ export class XRRig {
     for (const bar of bars) {
       const bw = 360,
         bx = (W - bw) / 2;
+      if (bar.sewing) {
+        g.fillStyle = '#302b27';g.fillRect(bx,y+24,bw,12);
+        g.fillStyle = bar.c;g.fillRect(bx,y+24,bw*Math.max(0,Math.min(1,bar.v)),12);
+        y += 92;
+        continue;
+      }
       g.save();
       g.translate(bx, y);
       g.scale(bw / 1656, bw / 1656);

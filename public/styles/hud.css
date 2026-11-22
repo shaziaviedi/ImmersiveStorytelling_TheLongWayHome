@@ -548,17 +548,26 @@ body.exploring #explore {
 }
 
 #ring {
+  --progress: 0;
   left: 50%;
   top: calc(50% + 44px);
   width: 160px;
-  height: auto;
-  aspect-ratio: 1656/380;
+  height: 8px;
   margin: 0;
   transform: translateX(-50%);
-  border-radius: 0;
-  background: none;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #302b27;
   mask: none;
   -webkit-mask: none;
+}
+
+#ring .sew-fill {
+  display: block;
+  height: 100%;
+  width: calc(var(--progress) * 100%);
+  background: var(--paper);
+  transition: width 0.16s linear;
 }
 
 #stamina {

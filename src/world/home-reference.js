@@ -3,7 +3,7 @@ import { loadGltf, loadModel, prepareShadows } from './gltf-assets.js';
 import { HOME, HOME_SCALE, homePoint } from '../config/home-layout.js';
 
 export async function loadHomeReference(parent) {
-  const gltf = await loadGltf('models/home/unity-home.gltf');
+  const gltf = await loadGltf('models/home/unity-home.glb');
   const reference = gltf.scene;
   reference.name = 'unity-home-reference';
   reference.position.set(...homePoint(0, 0, 0));

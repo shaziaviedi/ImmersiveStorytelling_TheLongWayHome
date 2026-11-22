@@ -221,6 +221,10 @@ async function build() {
   await step(0.3, 'Building the workshop…');
   spaces[0] = buildSweatshop(ctx);
   built = 1;
+  if (spaces[0].ready) {
+    await step(0.55, 'Preparing the workshop…');
+    await spaces[0].ready;
+  }
   atmosphere.install(scene);
   ctx.refreshColliders();
   xrRig = new XRRig({ renderer, camera, player, interactor, hands, bagCtl, ui });

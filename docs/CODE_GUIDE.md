@@ -78,6 +78,10 @@ when formatting source files.
 Install the test browser once with `npx playwright install chromium`, then run:
 
 - `npm test`: caption layout, progress, imported Home/market/chase bounds and route clearance, chase lights, and both-edition scene rendering.
+- `npm run test:factory`: source furniture/contact, full pick/sew/fold cycle, bag/wages/exit and routes.
+- `npm run test:models`: Draco decode, embedded texture limits, and source hierarchy/transform/topology comparisons for all runtime GLBs.
+- `npm run optimize:models`: regenerate compact runtime GLBs from ignored original backups; see [asset workflow](MODEL_ASSETS.md).
+- `npm run audit:models`: scan code references and report runtime files, oversized assets and unused candidates.
 - `npm run test:home`: imported Home alignment, door state, navigation clearance and story interactions.
 - `npm run test:street`: supplied market models/materials, five interaction callbacks, theft/reset and route clearance.
 - `npm run test:chase`: imported chase architecture, routes, source textures, knock/collapse/reset and audio.

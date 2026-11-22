@@ -1,11 +1,7 @@
 // Check leaving VR mid-story, entering again, and continuing on desktop.
 import { launchTestBrowser, TEST_URL } from './helpers/browser.mjs';
-import fs from 'fs';
-import { continueVRPrologue } from './helpers/vr.mjs';
-const IWER = fs.readFileSync(
-  new URL('../node_modules/iwer/build/iwer.min.js', import.meta.url),
-  'utf8',
-);
+import { continueVRPrologue, readXRRuntime } from './helpers/vr.mjs';
+const IWER = await readXRRuntime();
 const b = await launchTestBrowser({
   args: ['--autoplay-policy=no-user-gesture-required'],
 });

@@ -69,6 +69,12 @@ The title menu's **Scenes** starts later in the story: 2 The Market · 3 The Run
 
 ## Scene assets
 
+The active models are six optimized Draco GLBs (about 58 MB total). Raw Unity
+projects and redundant exports are preserved locally in gitignored `_raw_assets/`.
+Use `npm run optimize:models`, `npm run audit:models` and `npm run test:models`;
+see [model asset workflow](docs/MODEL_ASSETS.md) for reports, texture budgets and
+source restoration before running the older conversion tools below.
+
 Drop source asset folders into `public/models/scene1/` through `public/models/scene4/`
 (factory, market, chase, home). Keep original Unity `.meta` files and texture folders together.
 Dropping a source folder does not automatically place objects in the game.
@@ -80,6 +86,11 @@ See [asset integration notes](docs/ASSET_INTEGRATION.md) for mappings and remain
 The Scene 2 runtime is in `public/models/market/`; regenerate its repaired PBR bindings with
 `node tools/prepare-scene2.mjs`. Use `npm run test:home` or `npm run test:street` for
 source alignment, collision clearance, material and interaction checks.
+Scene 1 uses `public/models/factory/factory.glb`, converted from the available
+Unity FBXs with `python3 tools/prepare-scene1.py` (requires Blender and Pillow).
+Run `npm run test:factory` for furniture contact, sewing, wages, door and route checks.
+The original sewing/table/chair models are missing from the supplied project;
+see the integration report for the available replacements and preserved systems.
 Scene 3 loads the self-contained `public/models/scene3/Scene 3.glb` through
 `src/world/chase-reference.js`; regenerate its source version/report with
 `node tools/prepare-scene3.mjs` and run `npm run test:chase` after alignment changes.

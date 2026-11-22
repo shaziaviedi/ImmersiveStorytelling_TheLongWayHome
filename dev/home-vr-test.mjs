@@ -1,7 +1,6 @@
 // Focused XR initialization/Home render check, including warnings and source-door transition.
-import fs from 'node:fs';
 import { launchTestBrowser, TEST_URL, ARTIFACT_DIR } from './helpers/browser.mjs';
-import { continueVRPrologue } from './helpers/vr.mjs';
+import { continueVRPrologue, readXRRuntime } from './helpers/vr.mjs';
 const browser=await launchTestBrowser({args:['--autoplay-policy=no-user-gesture-required']});
 const page=await browser.newPage({viewport:{width:800,height:450}});
 const errors=[];let warned=false;
@@ -14,7 +13,7 @@ page.on('console',async m=>{
   console.log('FIRST XR WARNING:',m.text(),JSON.stringify(state));
 });
 try{
-  await page.addInitScript({content:fs.readFileSync(new URL('../node_modules/iwer/build/iwer.min.js',import.meta.url),'utf8')+`;const device=new IWER.XRDevice(IWER.metaQuest3);device.installRuntime({forceInstall:true});device.controlMode='programmatic';device.position.set(0.6,1.62,0.3);window.__xrdev=device;`});
+  await page.addInitScript({content:await readXRRuntime()+`;const device=new IWER.XRDevice(IWER.metaQuest3);device.installRuntime({forceInstall:true});device.controlMode='programmatic';device.position.set(0.6,1.62,0.3);window.__xrdev=device;`});
   await page.goto(`${TEST_URL}/?debug&q=low&dtmax=0.25`);
   await page.waitForFunction(()=>document.querySelector('#title.show'),null,{timeout:180000});
   await page.locator('#vr-btn').click();

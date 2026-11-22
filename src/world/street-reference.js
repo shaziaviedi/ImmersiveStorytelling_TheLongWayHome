@@ -27,7 +27,7 @@ function splitRegion(mesh, region) {
   });
 }
 export async function loadStreetReference(root, {food,tailor,parcel,heap,carton,laneLots,laneHangings}) {
-  const gltf=await loadGltf(`models/market/market.gltf?v=${MARKET_ASSET_VERSION}`);
+  const gltf=await loadGltf(`models/market/market.glb?v=${MARKET_ASSET_VERSION}`);
   const reference=gltf.scene;reference.name='scene2-unity-reference';
   reference.position.set(31,0,3.8);reference.rotation.y=Math.PI;root.add(reference);
   const authoredNames=new Set(gltf.parser.json.nodes.map(n=>n.name));

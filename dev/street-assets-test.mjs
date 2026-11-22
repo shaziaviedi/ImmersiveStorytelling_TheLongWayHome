@@ -1,23 +1,6 @@
 import { launchTestBrowser, TEST_URL, ARTIFACT_DIR } from './helpers/browser.mjs';
 import fs from 'node:fs';
-import assert from 'node:assert/strict';
-const sourceBytes=fs.readFileSync('public/models/scene2/Scene2_Plaza.glb');
-const jsonLength=sourceBytes.readUInt32LE(12),source=JSON.parse(sourceBytes.subarray(20,20+jsonLength));
-const runtime=JSON.parse(fs.readFileSync('public/models/market/market.gltf','utf8'));
-const runtimeBytes=fs.readFileSync('public/models/market/market.bin');
-assert.deepEqual(runtime.nodes,source.nodes,'runtime hierarchy/placements must come from the actual supplied scene');
-assert.deepEqual(runtime.meshes,source.meshes,'runtime mesh primitives must match the supplied scene');
-for(let i=0;i<source.accessors.length;i++){
- const a=source.accessors[i],b=runtime.accessors[i];
- assert.deepEqual({...b,bufferView:a.bufferView},a,`source accessor ${i}`);
- if(a.bufferView===undefined)continue;
- const v=source.bufferViews[a.bufferView],w=runtime.bufferViews[b.bufferView];
- assert.ok(sourceBytes.subarray(jsonLength+28+(v.byteOffset||0),jsonLength+28+(v.byteOffset||0)+v.byteLength)
-  .equals(runtimeBytes.subarray(w.byteOffset||0,(w.byteOffset||0)+w.byteLength)),`unchanged supplied geometry view ${a.bufferView}`);
-}
-for(const i of runtime.images)assert.ok(fs.existsSync(`public/models/market/${i.uri}`),`texture dependency ${i.uri}`);
-assert.ok(runtime.buffers[0].uri.includes(runtime.extras.sourceVersion),'geometry request version follows the uploaded assets');
-console.log('PASS actual supplied Scene 2 hierarchy, model geometry and all runtime texture dependencies');
+const optimized=JSON.parse(fs.readFileSync('docs/model-optimization.json','utf8')).models.find(m=>m.output==='public/models/market/market.glb');
 const browser=await launchTestBrowser({args:['--autoplay-policy=no-user-gesture-required']});
 const page=await browser.newPage({viewport:{width:1280,height:800}}),errors=[];
 page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
@@ -27,7 +10,7 @@ try{
  await page.waitForFunction(()=>window.__tlwh?.built===5,null,{timeout:180000});
  await page.evaluate(async()=>{for(const s of window.__tlwh.spaces)if(s?.ready)await s.ready;await window.__tlwh.audio.init();await window.__tlwh.audio.rest;});
  for(const edition of ['normal','extra']){
-  const result=await page.evaluate(async edition=>{
+  const result=await page.evaluate(async ({edition,optimizedMeshes})=>{
    const w=window.__tlwh;w.ctx.edition=edition;document.querySelector('#title').style.display='none';w.setMode('play');await w.goTo('street');
    const s=w.world,d=s.referenceData,fail=[];const check=(ok,m)=>{if(!ok)fail.push(m);};
    check(!!d,'source plaza loaded');check(s.marketPlaceholders.visible===false,'old market visuals hidden');
@@ -61,7 +44,7 @@ try{
     for(let i=0;i<a.count;i++){const v=new V().fromBufferAttribute(a,i).applyMatrix4(o.matrixWorld);if(v.y>broom.max.y-.08)top.expandByPoint(v);if(v.y<broom.min.y+.08)foot.expandByPoint(v);}
    });
    check(foot.getCenter(new V()).x>top.getCenter(new V()).x+.1,'broom leans toward supporting wall');
-   check(d.sourceMeshCount===145,'complete supplied mesh library');check(d.lane.children.length>2,'lane houses replaced with source architecture');
+   check(d.sourceMeshCount===optimizedMeshes,'complete supplied mesh library');check(d.lane.children.length>2,'lane houses replaced with source architecture');
    const targets=w.interactor.targets.filter(t=>t.space==='street');check(targets.length===5,'all five original market interactions retained');
    const phases=['toStall','toScraps','toTailor','toBeg','toSteal'],expected=['counting','scrapping','refused','sitting','stealing'];
    for(let i=0;i<phases.length;i++){s.S.phase=phases[i];const target=targets.find(t=>t.enabled());check(!!target,`target for ${phases[i]}`);target?.onPress();check(s.phase===expected[i],`callback ${phases[i]}`);}
@@ -81,7 +64,7 @@ try{
    check(maps>100,'supplied PBR material maps present');check(w.audio.buffers.market?.duration>0,'market ambience still decoded');
    w.setExplore(true);w.post.setCamera(w.camera);w.spaces.forEach(p=>p.root.visible=p.name==='street');w.player.canMove=false;await w.renderer.compileAsync(w.scene,w.camera);
    check(!w.renderer.info.programs.some(p=>p.diagnostics&&!p.diagnostics.runnable),'all shaders compile');return{fail,maps,lane:d.lane.children.length};
-  },edition);
+  },{edition,optimizedMeshes:optimized.meshes});
   if(result.fail.length)throw Error(`${edition}: ${result.fail.join('; ')}`);console.log(`PASS ${edition}: source market, ${result.maps} texture bindings, ${result.lane} native lane houses, five interactions, routes and shader checks`);
   for(const[name,pos,yaw,pitch]of[['entry',[21.5,3.9],-Math.PI/2,0],['food',[31,1],0,-.12],['tailor',[28,7.5],Math.PI,0],['overview',[34,4],-2.2,.1],['lane',[10.5,3.9],-Math.PI/2,0],['produce',[29,3.4],Math.PI,-.65],['fixtures',[24,1.4],Math.PI/2,-.05],['broom',[24,6.65],Math.PI/2,-.25],['hangings',[31,4],0,.8]]){
    await page.evaluate(({pos,yaw,pitch})=>{const w=window.__tlwh;w.player.place(...pos,yaw,1.52);w.player.pitch=pitch;w.player.apply(0);},{pos,yaw,pitch});await page.waitForTimeout(1200);await page.screenshot({path:`${ARTIFACT_DIR}/tlwh-street-source-${edition}-${name}.png`,timeout:120000});

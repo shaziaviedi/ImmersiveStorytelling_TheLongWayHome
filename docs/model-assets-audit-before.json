@@ -1,0 +1,354 @@
+{
+  "directories": {
+    "home": [
+      167729647,
+      32
+    ],
+    "scene1": [
+      2124609378,
+      21616
+    ],
+    "chase": [
+      1730,
+      1
+    ],
+    "scene3": [
+      166230273,
+      90
+    ],
+    "scene4": [
+      643944452,
+      857
+    ],
+    "scene2": [
+      565720736,
+      983
+    ],
+    "market": [
+      179026351,
+      288
+    ],
+    "factory": [
+      89487499,
+      36
+    ]
+  },
+  "filesOver5MiB": [
+    {
+      "path": "public/models/scene1/Library/DataStore/UDSData_3.bin",
+      "bytes": 807850820
+    },
+    {
+      "path": "public/models/scene1/Library/Search/98957a664bd18c47a3e41b2a0189ef53.SearchIndexArtifactImporter.262146.b.index",
+      "bytes": 117358592
+    },
+    {
+      "path": "public/models/scene1/Library/PackageCache/com.unity.ai.assistant@890548b66362/RelayApp~/relay_win.exe",
+      "bytes": 117089200
+    },
+    {
+      "path": "public/models/scene1/Library/DataStore/UDSData_0.bin",
+      "bytes": 90934964
+    },
+    {
+      "path": "public/models/scene3/Scene 3.glb",
+      "bytes": 83113828
+    },
+    {
+      "path": "public/models/scene2/Scene2_Plaza.glb",
+      "bytes": 67082504
+    },
+    {
+      "path": "public/models/factory/factory.glb",
+      "bytes": 52242672
+    },
+    {
+      "path": "public/models/home/old_decorative_wooden_round_table.glb",
+      "bytes": 51526852
+    },
+    {
+      "path": "public/models/scene4/Home Space w 3 folders/Assets/old_decorative_wooden_round_table.glb",
+      "bytes": 51526852
+    },
+    {
+      "path": "public/models/scene4/Assets/Building and props/old_decorative_wooden_round_table.glb",
+      "bytes": 51526852
+    },
+    {
+      "path": "public/models/scene1/Library/Bee/200b0aE.dag.json",
+      "bytes": 46383071
+    },
+    {
+      "path": "public/models/scene1/Library/DataStore/UDSData_4.bin",
+      "bytes": 42207464
+    },
+    {
+      "path": "public/models/scene1/Assets/Folded_Cloth_Piles_Textures4K/Folded_Cloth_Piles_1_Texture4K/Folded_Cloth_Piles_1_Normal.png",
+      "bytes": 39735501
+    },
+    {
+      "path": "public/models/scene1/Assets/Folded_Cloth_Piles_Textures4K/Folded_Cloth_Piles_2_Texture4K/Folded_Cloth_Piles_2_Normal.png",
+      "bytes": 39735501
+    },
+    {
+      "path": "public/models/scene1/Library/DataStore/uds.db",
+      "bytes": 33554432
+    },
+    {
+      "path": "public/models/scene1/Assets/Folded_Cloth_Piles_Textures4K/Folded_Cloth_Piles_4_Texture4K/Folded_Cloth_Piles_4_BaseColor.png",
+      "bytes": 31537595
+    },
+    {
+      "path": "public/models/scene4/Home Space w 3 folders/Assets/Settings/Audio/Misc/713522__vital_sounds__fireplace-fire.wav",
+      "bytes": 26845952
+    },
+    {
+      "path": "public/models/scene4/Assets/Sounds/713522__vital_sounds__fireplace-fire.wav",
+      "bytes": 26845952
+    },
+    {
+      "path": "public/models/scene1/Assets/580455__szegvari__factory-atmo.wav",
+      "bytes": 23040044
+    },
+    {
+      "path": "public/models/market/market.bin",
+      "bytes": 22746344
+    },
+    {
+      "path": "public/models/scene1/Assets/Homeless_people/Jerry/Textures/hobo_Jerry_AlbedoTransparency.png",
+      "bytes": 21499260
+    },
+    {
+      "path": "public/models/home/floor_material.glb",
+      "bytes": 20426916
+    },
+    {
+      "path": "public/models/scene4/Home Space w 3 folders/Home Space w 3 folders/Assets/floor_material.glb",
+      "bytes": 20426916
+    },
+    {
+      "path": "public/models/scene4/Home Space w 3 folders/Assets/floor_material.glb",
+      "bytes": 20426916
+    },
+    {
+      "path": "public/models/scene4/Home Space/Assets/floor_material.glb",
+      "bytes": 20426916
+    },
+    {
+      "path": "public/models/scene4/Assets/Building and props/floor_material.glb",
+      "bytes": 20426916
+    },
+    {
+      "path": "public/models/scene4/Home Space w 3 folders/Assets/Starter Assets/Runtime/ThirdPersonController/Character/Textures/Armature_Arms_Normal.tif",
+      "bytes": 19552838
+    },
+    {
+      "path": "public/models/scene1/Library/Bee/200b0aE.dag.payloads",
+      "bytes": 18980114
+    },
+    {
+      "path": "public/models/home/mother.glb",
+      "bytes": 18478396
+    },
+    {
+      "path": "public/models/scene4/Assets/People/south_indian_women.glb",
+      "bytes": 18478396
+    },
+    {
+      "path": "public/models/scene4/Home Space w 3 folders/Assets/Starter Assets/Runtime/ThirdPersonController/Character/Textures/Armature_Body_Normal.tif",
+      "bytes": 18432742
+    },
+    {
+      "path": "public/models/scene4/Home Space w 3 folders/Assets/Starter Assets/Runtime/ThirdPersonController/Character/Textures/Armature_Legs_Normal.tif",
+      "bytes": 17252902
+    },
+    {
+      "path": "public/models/scene1/Assets/Homeless_people/Jerry/FBX/Hobo_Jerry.fbx",
+      "bytes": 16301689
+    },
+    {
+      "path": "public/models/home/steel_cooking_pots.glb",
+      "bytes": 15371712
+    },
+    {
+      "path": "public/models/scene4/Home Space w 3 folders/Home Space w 3 folders/Assets/steel_cooking_pots.glb",
+      "bytes": 15371712
+    },
+    {
+      "path": "public/models/scene4/Home Space w 3 folders/Assets/steel_cooking_pots.glb",
+      "bytes": 15371712
+    },
+    {
+      "path": "public/models/scene4/Home Space/Assets/steel_cooking_pots.glb",
+      "bytes": 15371712
+    },
+    {
+      "path": "public/models/scene4/Assets/Building and props/steel_cooking_pots.glb",
+      "bytes": 15371712
+    },
+    {
+      "path": "public/models/scene2/Scene 2/Assets/Scene2/Models/steel_cooking_pots.glb",
+      "bytes": 15371712
+    },
+    {
+      "path": "public/models/scene1/Assets/T_TableChair_01_N.tga",
+      "bytes": 12582930
+    },
+    {
+      "path": "public/models/scene1/Library/PackageCache/com.unity.render-pipelines.core@13460d8ea9e5/Samples~/RendererShaderUserValue_Common/Textures/VertexAnimationTextureArray.asset",
+      "bytes": 11952870
+    },
+    {
+      "path": "public/models/scene3/Assets/floor_material.png",
+      "bytes": 11517928
+    },
+    {
+      "path": "public/models/scene1/Logs/Editor.log",
+      "bytes": 11455809
+    },
+    {
+      "path": "public/models/scene1/Library/PackageCache/com.unity.shadergraph@8b7e693cdbfe/Samples~/Common/Textures/MipChecker.dds",
+      "bytes": 11184952
+    },
+    {
+      "path": "public/models/scene1/Library/PackageCache/com.unity.shadergraph@8b7e693cdbfe/Samples~/Common/Textures/cobblestones_n.png",
+      "bytes": 10870719
+    },
+    {
+      "path": "public/models/factory/prepared-textures/Folded_Cloth_Piles_1_Normal.png",
+      "bytes": 10673183
+    },
+    {
+      "path": "public/models/scene1/Library/PackageCache/com.unity.shadergraph@8b7e693cdbfe/Samples~/Terrain/Textures/ground_rockgrass_fellsdirty/ground_rockgrass_fellsdirty_NOH.png",
+      "bytes": 10443570
+    },
+    {
+      "path": "public/models/scene1/Library/PackageCache/com.unity.shadergraph@8b7e693cdbfe/Samples~/Common/Textures/terrain/dry_soil/dry_soil_n.png",
+      "bytes": 10391658
+    },
+    {
+      "path": "public/models/home/brother.glb",
+      "bytes": 10090484
+    },
+    {
+      "path": "public/models/scene4/Assets/People/indian_man_in_kurta.glb",
+      "bytes": 10090484
+    },
+    {
+      "path": "public/models/scene1/Library/PackageCache/com.unity.shadergraph@8b7e693cdbfe/Samples~/Common/Textures/cobblestones_d.png",
+      "bytes": 9518995
+    },
+    {
+      "path": "public/models/home/thali.glb",
+      "bytes": 9514988
+    },
+    {
+      "path": "public/models/scene4/Assets/Interactables/indian_thali__free.glb",
+      "bytes": 9514988
+    },
+    {
+      "path": "public/models/scene1/Library/PackageCache/com.unity.shadergraph@8b7e693cdbfe/Samples~/Common/Textures/terrain/ground_rockgrass_fellsdirty/ground_rockgrass_fellsdirty_n.png",
+      "bytes": 9271783
+    },
+    {
+      "path": "public/models/scene2/Scene 2/Assets/Scene2/Models/wooden_hand_cart.glb",
+      "bytes": 9098408
+    },
+    {
+      "path": "public/models/scene1/Library/PackageCache/com.unity.shadergraph@8b7e693cdbfe/Samples~/Common/Textures/Rock_Macro_NOS.png",
+      "bytes": 8044263
+    },
+    {
+      "path": "public/models/scene2/Scene 2/Assets/Scene2/Models/exterior_aircon_unit.glb",
+      "bytes": 7665680
+    },
+    {
+      "path": "public/models/scene2/Realistic Assets/Models/exterior_aircon_unit.glb",
+      "bytes": 7665680
+    },
+    {
+      "path": "public/models/factory/prepared-textures/Folded_Cloth_Piles_4_BaseColor.png",
+      "bytes": 7330097
+    },
+    {
+      "path": "public/models/scene1/Assets/Homeless_people/Jerry/Textures/hobo_Jerry_AO.png",
+      "bytes": 7044868
+    },
+    {
+      "path": "public/models/scene1/Library/BurstCache/JIT/Hashes/75745a22b2b24b4888098c63010cba71.bhc",
+      "bytes": 7012304
+    },
+    {
+      "path": "public/models/scene3/Assets/floor_material_0.png",
+      "bytes": 6868872
+    },
+    {
+      "path": "public/models/scene1/Library/Bee/200b0aE-inputdata.json",
+      "bytes": 6805840
+    },
+    {
+      "path": "public/models/scene1/Library/PackageCache/com.unity.collab-proxy@4628d2ba6ea4/Lib/Editor/TextMateSharp/TextMateSharpPlastic.Grammars.dll",
+      "bytes": 6735360
+    },
+    {
+      "path": "public/models/scene1/Library/PackageCache/com.unity.render-pipelines.core@13460d8ea9e5/Samples~/RendererShaderUserValue_Common/Animation/HumanoidIdle.anim",
+      "bytes": 6722128
+    },
+    {
+      "path": "public/models/scene1/Library/BurstCache/JIT/Hashes/d8fc82fca3a6110c441fab4a9660f32f.bhc",
+      "bytes": 6054903
+    },
+    {
+      "path": "public/models/scene1/Library/PackageCache/com.unity.ai.assistant@890548b66362/Plugins/CodeAnalysis/6_5/Microsoft.CodeAnalysis.CSharp_AIA.dll",
+      "bytes": 6039552
+    },
+    {
+      "path": "public/models/scene1/Library/PackageCache/com.unity.ai.assistant@890548b66362/Plugins/CodeAnalysis/6_4/Microsoft.CodeAnalysis.CSharp_AIA.dll",
+      "bytes": 6039552
+    },
+    {
+      "path": "public/models/scene3/Assets/floor_material_1.png",
+      "bytes": 5958192
+    },
+    {
+      "path": "public/models/scene1/Assets/Folded_Cloth_Piles_Textures4K/Folded_Cloth_Piles_3_Texture4K/Folded_Cloth_Piles_3_Roughness.png",
+      "bytes": 5848282
+    },
+    {
+      "path": "public/models/scene1/Assets/Folded_Cloth_Piles_Textures4K/Folded_Cloth_Piles_2_Texture4K/Folded_Cloth_Piles_2_Roughness.png",
+      "bytes": 5848282
+    },
+    {
+      "path": "public/models/scene1/Library/PackageCache/com.unity.shadergraph@8b7e693cdbfe/Samples~/Common/Textures/terrain/stone_ground/stone_ground_n.png",
+      "bytes": 5845991
+    },
+    {
+      "path": "public/models/home/oil_lamp_small.glb",
+      "bytes": 5436572
+    },
+    {
+      "path": "public/models/scene4/Home Space w 3 folders/Home Space w 3 folders/Assets/oil_lamp_small.glb",
+      "bytes": 5436572
+    },
+    {
+      "path": "public/models/scene4/Home Space w 3 folders/Assets/oil_lamp_small.glb",
+      "bytes": 5436572
+    },
+    {
+      "path": "public/models/scene4/Home Space/Assets/oil_lamp_small.glb",
+      "bytes": 5436572
+    },
+    {
+      "path": "public/models/scene4/Assets/Building and props/oil_lamp_small.glb",
+      "bytes": 5436572
+    },
+    {
+      "path": "public/models/scene4/Home Space w 3 folders/Assets/Starter Assets/Runtime/ThirdPersonController/Character/Textures/Armature_Body_AlbedoTransparency.tif",
+      "bytes": 5334786
+    },
+    {
+      "path": "public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Debris_Bricks_A_Normal.png",
+      "bytes": 5302896
+    }
+  ]
+}

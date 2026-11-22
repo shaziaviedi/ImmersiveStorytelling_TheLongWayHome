@@ -1,5 +1,11 @@
 # Scene asset integration
 
+Current runtime packaging: Home and market load optimized self-contained `.glb`
+files. The original source paths described below have moved, unchanged, under
+`_raw_assets/`. See [model optimization and archival](MODEL_ASSETS.md) for current
+paths, texture budgets, reports and source restoration. Earlier sections record
+the source integration steps before runtime packaging.
+
 ## Current implementation
 
 The playable game is Three.js/WebXR. The supplied Unity-exported
@@ -127,8 +133,7 @@ caches while retaining an archival copy. This work was not deployed.
 
 ## Remaining environments
 
-Scenes 2 and 3 are now integrated as described below. Replacement assets for
-Scene 1 are not yet supplied. Drop each source project into `public/models/scene1/`, `scene2/` or `scene3/`, keeping `.meta` files,
+Scenes 1, 2 and 3 are adapted below; Scene 4 is described above. Drop each source project into `public/models/scene1/`, `scene2/` or `scene3/`, keeping `.meta` files,
 materials and textures together. Include the intended Unity scene plus either a
 self-contained GLB or a complete glTF/binary/texture export.
 
@@ -147,8 +152,8 @@ For each environment, follow the same sequence:
    views, test routes/trigger reachability, then run the existing story/WebXR tests
    before starting the next environment.
 
-The factory needs sewing-machine/workstation/exit mappings before replacing its
-environment. Market and chase adapters are implemented below.
+Factory, market and chase adapters are implemented below. Scene 1 still needs
+its missing original workstation FBXs/materials for an exact reconstruction.
 
 ## Verified results
 
@@ -425,3 +430,104 @@ headset memory/frame-rate review remains a device task. The original missing
 prefab and empty barrel geometry cannot be restored from this export; the supplied
 floor maps and available tank geometry provide the documented runtime substitutes.
 No original source assets were modified and no deployment was performed.
+
+
+## Scene 1: available factory assets and protected sewing gameplay
+
+The supplied Unity project is `public/models/scene1`, with the editable reference
+`Assets/Scenes/SampleScene.unity`. Its workstation arrangement contains eight
+sewing-machine/table/chair instances and eleven cloth-pile instances. The current
+WebXR factory's twelve workstations, room footprint, window, exit, walking aisles,
+sewing/hand animation and story coordinates are retained. Available source furniture
+and factory kit geometry are adapted to that working layout rather than replacing
+its systems with an incomplete Unity project.
+
+Important source dependencies are absent: `Assets/28.fbx` (the referenced sewing
+model), `table_01_SM.FBX`, `chair_02_SM.FBX`, their associated materials, and
+`T_TableChair_01_BC.tga`. Their metadata files exist without the corresponding files.
+The cloth models reference a fabric-1 color map that is also absent. The source
+project also lacks numerous factory-pack meshes/materials/textures named by its
+metadata and contains unresolved scene GUIDs. The generated import report records
+those unresolved references and every material's actual available texture bindings.
+Some GUIDs belong to Unity package scripts rather than browser-importable assets;
+the browser does not execute those Unity components. Original sources were not edited.
+
+`python3 tools/prepare-scene1.py` audits source references and converts 22 selected
+available FBX prototypes with installed Blender via `tools/export-factory.py`.
+It creates a separate self-contained `public/models/factory/factory.glb`, conversion
+manifest/import report and `src/config/factory-assets.js`. Python needs Pillow;
+`BLENDER_BIN` can specify the Blender executable. `--reuse-audit` is for conversion
+iterations when the audited source files have not changed. Unity metallic/smoothness
+R/alpha channels are converted to glTF metallic/roughness B/G; supplied base color,
+normal and occlusion maps are retained where available. Missing maps use the FBX's
+source base color and scalar PBR settings, not a normal/packed image as albedo.
+The supplied cloth-4 color variant substitutes for the unavailable cloth-1 color map;
+the supplied cloth-1 normal map is retained. Those two 4K cloth maps are reduced to
+2K in the runtime copy, reducing the catalog from approximately 101 MiB to 50 MiB.
+The original maps are unchanged.
+
+The source's custom-shader RGB vertex channels produced green floors and purple
+columns when interpreted as ordinary glTF surface colors. The runtime adapter
+excludes those channels from base-color multiplication and uses the supplied maps
+and material colors. Unity Shader Graph/HLSL wear logic is not executed in Three.js.
+This is a PBR adaptation, not a port of every Unity shader feature.
+
+`src/world/factory-reference.js` replaces the visible room panels with actual source
+brick-wall sections, preserving all window/exit openings and the existing invisible
+sunlight-blocking shell. Wall-map repetition follows physical panel dimensions.
+Level surfaces from the native floor mesh tile the original 16 × 12 m floor at y=0;
+a continuous backing fills seams below it. Source columns, I-beams and pipe runs
+replace the former merged structure. New ceiling cables connect to the beams.
+The existing continuous ceiling backing uses a native plaster material.
+
+Twelve supplied open workbenches replace the original machine table/stand visuals.
+Their actual desktop support plane (native 0.90 m) is fitted to the existing 1.0 m
+sewing-bed height. Source tools above the bench surface are omitted to keep the
+animated sewing mechanism clear. The open legs leave the treadle wheel and belt
+visible. The cutting table uses the same bench; the supervisor's supplied metal
+desk is fitted by its native 0.76 m desktop plane, excluding its integral lamp.
+Thirteen native chairs match the existing seat planes (0.50 m player, 0.56 m workers,
+0.48 m supervisor), measured from the actual mesh surfaces. The new geometry fits
+the existing workstation footprints. The original animated sewing heads, needles,
+hand wheels, treadles and children remain because no usable replacement sewing
+model/compatible child sewing animation was supplied. `makeMachine` has an optional
+separate furniture group, enabled only for the factory; its default behavior elsewhere
+is unchanged. That fallback furniture is hidden once native assets load.
+
+A connected source folded-cloth piece skins the original interactive pile-layer
+owners. Picking hides the actual cloth with its owner; player and worker moving
+pieces and completed pieces receive the same supplied geometry and material.
+Reset restores the source pile and clears finished pieces. Noninteractive stock is
+instanced to reduce draw calls. The original static cloth-box batch is hidden.
+Native racks, crates and cloth piles replace storage placeholders; shelf stock rests
+on ray-tested rack surfaces. A source fuse box is mounted flush to the wall and a
+source fluorescent fixture follows the existing light location. New solid edge-prop
+bounds join the existing collision map.
+
+The source metal exit assembly is split into connected components: the stationary
+frame remains attached to the room, while the leaf, panel inserts/louvers and hardware
+follow the original game hinge. Its open authored pose is straightened and scaled
+using the main leaf bounds rather than handle extents. The old frame/leaf visuals
+are hidden. Existing open-door lighting, sound, interaction, collision release and
+market transition remain. The optical window/bar/sunbeam system, live clock hands,
+bag, wages/ledger, characters, dreams and moving gameplay props are preserved.
+The factory waits for its assets before showing the title; subsequent scene loading
+uses the existing background builder.
+
+Validation: `npm run build`, syntax/whitespace checks, `npm run test:factory`,
+the UI suite and the all-scene atmosphere suite passed. The focused factory test
+covers both editions, decoded PBR maps and shader compilation, all 12 desktop and
+13 seat support planes, native moving/finished cloth, pick/sew/fold/reset,
+bag/wages/door callbacks, complete closed-door surfaces and the fixed frame during
+opening, standing height, audio buffers and collision-clear routes to story targets.
+Seated, aisle, supervisor, storage and door screenshots were inspected.
+The full emulated WebXR story passed in Normal and Extra, including controller
+fabric/sewing input, locomotion/collision, height reset, bag grip, system-menu
+resume, every scene transition and the ending. Repeated mid-story VR exit/re-entry
+and desktop play afterward also passed, with no console errors or warnings.
+Physical-headset performance remains to be checked; these are browser/emulator
+checks rather than on-device measurements.
+
+The pre-integration checkpoint is `backups/before-scene1/`. Source folders and Unity
+cache directories are not deployment assets; package only the runtime catalog and
+existing game resources. No Unity Editor validation or deployment was performed.

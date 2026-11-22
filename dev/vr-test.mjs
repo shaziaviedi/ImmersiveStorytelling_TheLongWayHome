@@ -1,12 +1,8 @@
 // Emulated Quest walkthrough. Run both editions with npm run test:vr.
 import { launchTestBrowser, TEST_URL, ARTIFACT_DIR } from './helpers/browser.mjs';
-import fs from 'fs';
-import { continueVRPrologue } from './helpers/vr.mjs';
+import { continueVRPrologue, readXRRuntime } from './helpers/vr.mjs';
 const [ED = 'normal', OUT = `${ARTIFACT_DIR}/vr-${ED}`] = process.argv.slice(2);
-const IWER = fs.readFileSync(
-  new URL('../node_modules/iwer/build/iwer.min.js', import.meta.url),
-  'utf8',
-);
+const IWER = await readXRRuntime();
 const b = await launchTestBrowser({
   args: ['--autoplay-policy=no-user-gesture-required'],
 });
