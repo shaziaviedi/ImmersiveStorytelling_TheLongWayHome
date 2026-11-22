@@ -1,3 +1,4 @@
+import { HOME } from '../config/home-layout.js';
 // SPACE 3 · NORMAL EDITION — five lanes, five refusals (docs/nightmare-design.md, v2.4).
 // References: Little Nightmares (threats shown before they act; a catch is survivable),
 // P.T. (one familiar space that keeps changing), VR-horror studies (dread through meaningful
@@ -396,10 +397,11 @@ export function buildLanes(ctx, root, say, onOpened) {
   });
   // your own door: plywood, shut, with light round its edges
   const doorPivot = new THREE.Group();
-  doorPivot.position.set(81.9, 0, 12.0);
+  doorPivot.position.set(HOME.x0, 0, HOME.door.z0);
   g.add(doorPivot);
-  const leaf = new THREE.Mesh(G.box(0.045, 2.0, 1.4), texMat(T.plywood(), { color: 0x9a8a78 }));
-  leaf.position.set(0, 1.0, 0.7);
+  const leaf = new THREE.Mesh(G.box(0.05, HOME.door.h, HOME.door.z1-HOME.door.z0), new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false,colorWrite:false}));
+  leaf.name='home-knock-proxy'; leaf.userData.interactionProxy=true;
+  leaf.position.set(0, HOME.door.h/2, (HOME.door.z1-HOME.door.z0)/2);
   leaf.castShadow = true;
   doorPivot.add(leaf);
   const leakM = new THREE.MeshBasicMaterial({
@@ -409,16 +411,16 @@ export function buildLanes(ctx, root, say, onOpened) {
     depthWrite: false,
   });
   [
-    [81.93, 1.0, 13.41, 0.02, 2.0],
-    [81.93, 2.01, 12.7, 1.4, 0.02],
-    [81.93, 0.005, 12.7, 1.4, 0.012],
+    [HOME.x0-0.03, HOME.door.h/2, HOME.door.z1, 0.02, HOME.door.h],
+    [HOME.x0-0.03, HOME.door.h, 12.7, HOME.door.z1-HOME.door.z0, 0.02],
+    [HOME.x0-0.03, 0.005, 12.7, HOME.door.z1-HOME.door.z0, 0.012],
   ].forEach(([x, y, z, w, h]) => {
     const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), leakM);
     m.position.set(x - 0.03, y, z);
     m.rotation.y = -Math.PI / 2;
     g.add(m);
   });
-  const doorCol = { minX: 81.55, maxX: 82.25, minZ: 11.9, maxZ: 13.5 };
+  const doorCol = { minX: HOME.x0-0.17, maxX: HOME.x0+0.17, minZ: HOME.door.z0, maxZ: HOME.door.z1 };
   interactor.add({
     object: leaf,
     label: 'Knock',
@@ -506,6 +508,7 @@ export function buildLanes(ctx, root, say, onOpened) {
       b.s.material.opacity = 0.55;
     });
     doorPivot.rotation.y = 0;
+    ctx.homeDoorAngle = 0;
     leakM.opacity = 0.9;
     stopSounds();
     g.visible = false;
@@ -705,6 +708,7 @@ export function buildLanes(ctx, root, say, onOpened) {
     if (S.doorOpen) {
       S.openT += dt;
       doorPivot.rotation.y = -1.45 * ease(Math.min(1, S.openT / 0.9));
+      ctx.homeDoorAngle = doorPivot.rotation.y;
       leakM.opacity = Math.max(0, 0.9 - S.openT * 2);
     }
     // police slow down at the door so knocking is tense, not unfair

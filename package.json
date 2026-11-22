@@ -10,7 +10,10 @@
     "test:vr": "node tools/test.mjs vr",
     "test:ui": "node tools/test.mjs ui",
     "test:atmosphere": "node tools/test.mjs atmosphere",
-    "test": "node tools/test.mjs ui atmosphere"
+    "test": "node tools/test.mjs ui home street chase atmosphere",
+    "test:home": "node tools/test.mjs home",
+    "test:street": "node tools/test.mjs street",
+    "test:chase": "node tools/test.mjs chase"
   },
   "dependencies": {
     "three": "0.169.0"

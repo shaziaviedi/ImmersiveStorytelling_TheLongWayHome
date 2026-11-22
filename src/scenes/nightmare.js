@@ -1,3 +1,4 @@
+import { HOME } from '../config/home-layout.js';
 // Chase scene: route checkpoints and pursuit, plus the edition-specific nightmare beats.
 // Normal uses the scripted lanes; Extra adds looping, hiding, and the transition into the void.
 import * as THREE from 'three';
@@ -14,6 +15,7 @@ import {
 import { T, texMat, cityBlock, wires, clothLine, rand } from '../world/city.js';
 import { MARKET } from './street.js';
 import { buildLanes } from './lanes.js';
+import { loadChaseReference } from '../world/chase-reference.js';
 
 export const ROUTE = [
   { x0: 40, x1: 54, z0: 7, z1: 9.6 },
@@ -87,15 +89,15 @@ export function buildNightmare(ctx) {
         ...o,
       }),
     );
-  blk(40, 54, 9.6, 20);
-  blk(40, 51.4, -12, 7);
+  blk(46.7, 54, 9.6, 20);
+  blk(46.7, 51.4, -12, 7);
   blk(51.4, 82, -12, -6);
-  blk(65.4, 82, 14, 20);
+  blk(65.4, 81.4, 14, 20);
   blk(54, 65.4, -3.4, 20, { period: LOOP.period });
-  blk(68, 82, -6, 11.4, { period: LOOP.period }); // the loop lane repeats every 8 m
-  blk(82, 92, -12, 9.7);
-  blk(82, 92, 15.7, 22);
-  blk(88.3, 92, 9.7, 15.7); // clear of the home's walls
+  blk(68, 81.4, -6, 11.4, { period: LOOP.period }); // the loop lane repeats every 8 m
+  blk(82, 96, -12, HOME.z0-1.4);
+  blk(82, 96, HOME.z1+1.2, 24);
+  blk(HOME.x1+2.2, 96, HOME.z0-1.4, HOME.z1+1.2); // clear of the source house and roof overhang
   buildings.forEach((m, i) => {
     m.userData.ph = i * 1.7;
     m.userData.spin = (rand() - 0.5) * 2;
@@ -164,12 +166,13 @@ export function buildNightmare(ctx) {
     emissive: 0x1a1410,
     flatShading: true,
   });
-  for (let x = 69; x < 81.5; x += 1.6 + rand() * 0.8) {
+  const shackEnd = HOME.x0 - 0.5;
+  for (let x = 69; x < shackEnd - 0.4; x += 1.6 + rand() * 0.8) {
     [
       [11.4, 1],
       [14, -1],
     ].forEach(([zf, out]) => {
-      const w = 1.5 + rand() * 0.6,
+      const w = Math.min(1.5 + rand() * 0.6, shackEnd - x),
         h = 2.1 + rand() * 0.5;
       B.add(
         G.box(w, h, 0.03),
@@ -240,7 +243,7 @@ export function buildNightmare(ctx) {
   });
   for (let z = LOOP.z0 + 1; z < 11; z += LOOP.period)
     wl.push([new THREE.Vector3(65.4, 5.2, z), new THREE.Vector3(68, 5.0, z + 1.5), 0.5, 0.012]); // loop lane: periodic too
-  wires(root, wl);
+  const placeholderWires = wires(root, wl);
   const statics = B.build(root, { cast: true, receive: true });
 
   // eyes in the windows
@@ -664,6 +667,9 @@ export function buildNightmare(ctx) {
       m.userData.calm = anchors.some((a) => bb.containsPoint(a));
     });
   }
+  let referenceData = null;
+  const ready = loadChaseReference({root,buildings,statics,grounds,obstacles,route:ROUTE,laundry,lanes,placeholderWires})
+    .then(data => { referenceData=data; ctx.refreshColliders(); return data; });
   function setPhase(p) {
     S.phase = p;
     S.t = 0;
@@ -718,7 +724,7 @@ export function buildNightmare(ctx) {
       m.scale.set(1, 1, 1);
     });
     grounds.forEach((g, i) => {
-      g.position.y = 0.001 * i;
+      g.position.y = g.userData.baseY ?? 0.001 * i;
     });
     statics.forEach((s) => {
       s.position.set(0, 0, 0);
@@ -1330,6 +1336,8 @@ export function buildNightmare(ctx) {
   let onEndFn = null;
   return {
     root,
+    ready,
+    get referenceData() { return referenceData; },
     update,
     start,
     stop,

@@ -316,6 +316,7 @@ async function goTo(name) {
   if (!spaces[i]) {
     await allBuilt;
   }
+  if (spaces[i].ready) await spaces[i].ready;
   // stop what is behind you; the street keeps the factory and the nightmare keeps the street for one
   // more space (their sounds fade out behind you). The light and the home leave everything behind.
   const keepPrev = name === 'street' || name === 'nightmare';

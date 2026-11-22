@@ -4,12 +4,18 @@ import { buildOptions } from './build-options.mjs';
 
 const suites = {
   ui: [['dev/ui-test.mjs']],
+  home: [['dev/home-assets-test.mjs']],
+  street: [['dev/street-assets-test.mjs']],
+  chase: [['dev/chase-assets-test.mjs']],
+  'home-vr': [['dev/home-vr-test.mjs']],
   atmosphere: [['dev/atmosphere-test.mjs']],
+  'vr-extra': [['dev/vr-test.mjs', 'extra']],
+  'vr-quit': [['dev/vr-quit-test.mjs']],
   vr: [['dev/vr-test.mjs', 'normal'], ['dev/vr-test.mjs', 'extra'], ['dev/vr-quit-test.mjs']],
 };
 const selected = process.argv.slice(2);
 if (!selected.length || selected.some((name) => !suites[name])) {
-  throw new Error('Choose a test suite: ui, atmosphere, or vr.');
+  throw new Error('Choose a test suite: ' + Object.keys(suites).join(', ') + '.');
 }
 
 // Tests share a freshly built site on an isolated local port; no manually started server is needed.

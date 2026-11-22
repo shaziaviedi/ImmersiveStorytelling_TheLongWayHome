@@ -1,6 +1,7 @@
 // Check leaving VR mid-story, entering again, and continuing on desktop.
 import { launchTestBrowser, TEST_URL } from './helpers/browser.mjs';
 import fs from 'fs';
+import { continueVRPrologue } from './helpers/vr.mjs';
 const IWER = fs.readFileSync(
   new URL('../node_modules/iwer/build/iwer.min.js', import.meta.url),
   'utf8',
@@ -61,6 +62,7 @@ const st = () =>
   });
 for (let round = 1; round <= 2; round++) {
   await clickVR();
+  await continueVRPrologue(p);
   await p.waitForFunction(
     () => window.__tlwh.mode === 'play' && window.__tlwh.renderer.xr.isPresenting,
     null,
@@ -86,7 +88,7 @@ for (let round = 1; round <= 2; round++) {
 // now play on desktop: the view and the walking direction must agree
 await p.evaluate(() => document.querySelector('[data-action="begin"]').click());
 await p.waitForFunction(
-  () => document.querySelector('#intro-2').textContent.includes('Click'),
+  () => document.querySelector('#intro.ready'),
   null,
   { timeout: 60000 },
 );

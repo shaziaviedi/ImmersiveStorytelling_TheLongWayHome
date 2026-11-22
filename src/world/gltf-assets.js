@@ -70,6 +70,37 @@ export function groundModel(root) {
   return root;
 }
 
+/** Fit in a detached parent so imported pivots/transforms never move the gameplay anchor.
+ * `size` fits explicit axes; `span` or `height` preserves the model's proportions.
+ * Rotation is applied before measuring. The result is centered in X/Z, grounded in Y.
+ */
+export function fitModel(model, { size, span, height, rotation = [0, 0, 0] } = {}) {
+  const pivot = new THREE.Group();
+  const oriented = new THREE.Group();
+  oriented.add(model);
+  oriented.rotation.set(...rotation);
+  pivot.add(oriented);
+  pivot.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(pivot);
+  const native = box.getSize(new THREE.Vector3());
+  if (box.isEmpty() || ![native.x, native.y, native.z].every(Number.isFinite))
+    throw new Error('Cannot fit an empty or invalid model');
+  const uniform = height ? height / Math.max(native.y, 1e-6)
+    : span ? span / Math.max(native.x, native.z, 1e-6) : 1;
+  pivot.scale.set(...['x', 'y', 'z'].map((axis) =>
+    size?.[axis] !== undefined ? size[axis] / Math.max(native[axis], 1e-6) : uniform,
+  ));
+  pivot.updateMatrixWorld(true);
+  box.setFromObject(pivot);
+  const center = box.getCenter(new THREE.Vector3());
+  // Translate the child in the unscaled parent's coordinates; leave the anchor at (0,0,0).
+  oriented.position.x -= center.x / pivot.scale.x;
+  oriented.position.y -= box.min.y / pivot.scale.y;
+  oriented.position.z -= center.z / pivot.scale.z;
+  pivot.updateMatrixWorld(true);
+  return pivot;
+}
+
 /** Enable shadows and fix colour spaces on embedded maps. */
 export function prepareShadows(root, { cast = true, receive = true } = {}) {
   root.traverse((o) => {

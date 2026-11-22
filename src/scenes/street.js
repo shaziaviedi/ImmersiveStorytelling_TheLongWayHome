@@ -1,6 +1,7 @@
 // Market scene: failed attempts to afford food lead into stealing and the pursuit.
 import * as THREE from 'three';
 import * as TX from '../world/textures.js';
+import { loadStreetReference } from '../world/street-reference.js';
 import { M, G, Batcher, slab, ease, lerp, damp, clamp } from '../world/builders.js';
 import {
   makePerson,
@@ -13,7 +14,7 @@ import { GRIP } from '../characters/first-person.js';
 import { T, texMat, cityBlock, stall, wires, clothLine, rand } from '../world/city.js';
 
 const CROWD_STEPS = 0; // passers-by footstep volume: 0 = silent
-export const ALLEY = { x0: 8, x1: 22, z0: 2.4, z1: 5.4, bx1: 19.3 };
+export const ALLEY = { x0: 8, x1: 22, z0: 2.4, z1: 5.4, bx1: 16.9 };
 export const MARKET = { x0: 22, x1: 40, z0: -4, z1: 12, exitZ0: 7, exitZ1: 9.6 };
 const BEG = { x: 36.6, z: 11.2 };
 
@@ -54,7 +55,7 @@ export function buildStreet(ctx) {
   root.name = 'street';
   scene.add(root);
   const colliders = [];
-  const B = new Batcher(); // everything static, merged
+  let B = new Batcher(); // lane and market batches are separated for visual replacement
   const fabM = [0, 1, 2, 3, 4, 5].map(
     (i) =>
       new THREE.MeshStandardMaterial({
@@ -121,7 +122,7 @@ export function buildStreet(ctx) {
       hMin: 6,
       hMax: 10,
       face: '+z',
-      batch: B,
+      batch: null,
       cloths,
     }),
   );
@@ -131,7 +132,7 @@ export function buildStreet(ctx) {
       hMin: 6,
       hMax: 10,
       face: '-z',
-      batch: B,
+      batch: null,
       cloths,
     }),
   );
@@ -157,7 +158,8 @@ export function buildStreet(ctx) {
       0.01,
     ]);
   }
-  wires(root, wl);
+  const laneHangings = new THREE.Group(); laneHangings.name = 'lane-original-hangings'; root.add(laneHangings);
+  wires(laneHangings, wl);
   // laundry across the lane
   const lines = [
     [10.2, 3.3],
@@ -165,7 +167,7 @@ export function buildStreet(ctx) {
     [17.8, 3.2],
   ].flatMap(([lx, y]) =>
     clothLine(
-      root,
+      laneHangings,
       new THREE.Vector3(lx, y, A.z0 + 0.1),
       new THREE.Vector3(lx + 0.5, y, A.z1 - 0.1),
       fabM,
@@ -267,6 +269,13 @@ export function buildStreet(ctx) {
     space: 'street',
   });
 
+  B.build(root, { cast: true, receive: true });
+  const laneChildren = new Set(root.children), laneColliderCount = colliders.length;
+  const laneLots = root.children.filter(o=>o.isMesh&&o.geometry.type==='BoxGeometry'&&Array.isArray(o.material)).map(o=>{
+    o.updateWorldMatrix(true,true);o.geometry.computeBoundingBox();const box=o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld);
+    return { object:o,box,south:box.max.z<=A.z0+0.05 };
+  });
+  B = new Batcher();
   // ============ THE MARKET SQUARE ============
   const { x0, x1, z0, z1 } = MARKET,
     mx = (x0 + x1) / 2,
@@ -411,7 +420,7 @@ export function buildStreet(ctx) {
   const parcel = new THREE.Group();
   parcel.position.set(0.05, 0.94, 0.35);
   food.add(parcel);
-  const parcelMat = new THREE.MeshStandardMaterial({
+  let parcelMat = new THREE.MeshStandardMaterial({
     color: 0xd8b070,
     roughness: 0.8,
     emissive: 0xff9a30,
@@ -681,6 +690,23 @@ export function buildStreet(ctx) {
   const swing = [...lines, ...cloths.map((c) => c.piv).filter(Boolean)];
 
   B.build(root, { cast: true, receive: true });
+
+  const marketPlaceholders = new THREE.Group();marketPlaceholders.name='market-placeholder-visuals';root.add(marketPlaceholders);
+  const preserved = new Set([food,tailor,heap,carton,vendor,tailorMan,chaiMan,seller,dust,...kids,...counted]);
+  for(const o of [...root.children])if(!laneChildren.has(o)&&o!==marketPlaceholders&&!preserved.has(o))marketPlaceholders.attach(o);
+  let referenceData = null;
+  const ready = (async()=>{
+    referenceData=await loadStreetReference(root,{food,tailor,parcel,heap,carton,laneLots,laneHangings});
+    marketPlaceholders.visible=false;
+    // Hide only the original visual children; keep the existing target owners and story state.
+    food.children.filter(o=>o!==parcel&&!referenceData.sourceFood.includes(o)).forEach(o=>{o.visible=false;});
+    // Source instances have sourceName metadata; old tailor/heap visuals do not.
+    for(const owner of [tailor,heap])owner.children.filter(o=>!o.userData.sourceName&&!o.userData.sourceScraps).forEach(o=>{o.visible=false;});
+    parcelMat=referenceData.parcelMaterial;
+    colliders.splice(laneColliderCount);
+    colliders.push(...referenceData.colliders,{minX:22.4,maxX:24,maxZ:-2.8,minZ:-3.9,source:'cloth scraps'});
+    ctx.refreshColliders();
+  })();
 
   // ---------- the crowd ----------
   const loops = [
@@ -1301,6 +1327,10 @@ export function buildStreet(ctx) {
   let onEndFn = null;
   return {
     root,
+    ready,
+    get referenceData() { return referenceData; },
+    anchors: { food, tailor, parcel, heap, carton, vendor, tailorMan, seller },
+    marketPlaceholders,
     update,
     start,
     stop,
@@ -1318,6 +1348,7 @@ export function buildStreet(ctx) {
       dust.visible = true;
       dg.setDrawRange(0, q === 'low' ? Math.floor(DUST * 0.4) : DUST);
     },
+    get S() { return S; },
     get phase() {
       return S.phase;
     },

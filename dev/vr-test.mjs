@@ -1,6 +1,7 @@
 // Emulated Quest walkthrough. Run both editions with npm run test:vr.
 import { launchTestBrowser, TEST_URL, ARTIFACT_DIR } from './helpers/browser.mjs';
 import fs from 'fs';
+import { continueVRPrologue } from './helpers/vr.mjs';
 const [ED = 'normal', OUT = `${ARTIFACT_DIR}/vr-${ED}`] = process.argv.slice(2);
 const IWER = fs.readFileSync(
   new URL('../node_modules/iwer/build/iwer.min.js', import.meta.url),
@@ -112,6 +113,7 @@ await p.evaluate(() => {
 } // a real click (the headset needs a user gesture)
 await p.waitForFunction(() => window.__tlwh.renderer.xr.isPresenting, null, { timeout: 60000 });
 ok(true, 'immersive-vr session started from the title click');
+await continueVRPrologue(p);
 await p.waitForFunction(() => window.__tlwh.mode === 'play', null, { timeout: 120000 });
 const S = () => p.evaluate(() => window.__st());
 let s = await S();

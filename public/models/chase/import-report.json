@@ -1,0 +1,28 @@
+{
+  "source": "../scene3/Scene 3.glb",
+  "version": "15bb7c911deab6d1",
+  "nodes": 1104,
+  "meshes": 87,
+  "materials": 60,
+  "images": 86,
+  "missingPrefabs": [
+    "dirt_ground (3) (Missing Prefab with guid: 8bf31b7205ff840ac8b005c229876d27)",
+    "dirt_ground (4) (Missing Prefab with guid: 8bf31b7205ff840ac8b005c229876d27)",
+    "dirt_ground (6) (Missing Prefab with guid: 8bf31b7205ff840ac8b005c229876d27)",
+    "dirt_ground (2) (Missing Prefab with guid: 8bf31b7205ff840ac8b005c229876d27)",
+    "dirt_ground (1) (Missing Prefab with guid: 8bf31b7205ff840ac8b005c229876d27)",
+    "dirt_ground (7) (Missing Prefab with guid: 8bf31b7205ff840ac8b005c229876d27)",
+    "dirt_ground (5) (Missing Prefab with guid: 8bf31b7205ff840ac8b005c229876d27)",
+    "dirt_ground (Missing Prefab with guid: 8bf31b7205ff840ac8b005c229876d27)",
+    "dirt_ground (8) (Missing Prefab with guid: 8bf31b7205ff840ac8b005c229876d27)",
+    "dirt_ground (9) (Missing Prefab with guid: 8bf31b7205ff840ac8b005c229876d27)",
+    "dirt_ground (10) (Missing Prefab with guid: 8bf31b7205ff840ac8b005c229876d27)",
+    "dirt_ground (11) (Missing Prefab with guid: 8bf31b7205ff840ac8b005c229876d27)",
+    "dirt_ground (15) (Missing Prefab with guid: 8bf31b7205ff840ac8b005c229876d27)",
+    "dirt_ground (16) (Missing Prefab with guid: 8bf31b7205ff840ac8b005c229876d27)",
+    "dirt_ground (17) (Missing Prefab with guid: 8bf31b7205ff840ac8b005c229876d27)",
+    "dirt_ground (19) (Missing Prefab with guid: 8bf31b7205ff840ac8b005c229876d27)",
+    "brick_wall_section (Missing Prefab with guid: 61b3897dcd8534eb7a2aac9868786bc9)"
+  ],
+  "adaptation": "Source buildings and props fitted to existing chase lots and obstacle bounds; route and story systems retained"
+}

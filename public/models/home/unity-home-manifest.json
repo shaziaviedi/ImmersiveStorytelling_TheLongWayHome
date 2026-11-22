@@ -1,0 +1,343 @@
+{
+  "source": "home-space.gltf",
+  "roots": [
+    {
+      "name": "brick_wall_section",
+      "node": 0,
+      "file": "brick_wall_section.glb",
+      "referenceNode": 7
+    },
+    {
+      "name": "brick_wall_section (3)",
+      "node": 8,
+      "file": "brick_wall_section.glb",
+      "referenceNode": 15
+    },
+    {
+      "name": "brick_wall_section (1)",
+      "node": 16,
+      "file": "brick_wall_section.glb",
+      "referenceNode": 23
+    },
+    {
+      "name": "front_doors_pack",
+      "node": 24,
+      "file": "front_doors_pack.glb",
+      "referenceNode": 78
+    },
+    {
+      "name": "old_window",
+      "node": 32,
+      "file": "old_window.glb",
+      "referenceNode": 87
+    },
+    {
+      "name": "old_wooden_chair",
+      "node": 41,
+      "file": "old_wooden_chair.glb",
+      "referenceNode": 95
+    },
+    {
+      "name": "old_wooden_stool",
+      "node": 49,
+      "file": "old_wooden_stool.glb",
+      "referenceNode": 99
+    },
+    {
+      "name": "cardboard_boxes_set",
+      "node": 53,
+      "file": "cardboard_boxes_set.glb",
+      "referenceNode": 124
+    },
+    {
+      "name": "clay_water_pot_matka",
+      "node": 78,
+      "file": "clay_water_pot_matka.glb",
+      "referenceNode": 129
+    },
+    {
+      "name": "clay_water_pot_matka (1)",
+      "node": 83,
+      "file": "clay_water_pot_matka.glb",
+      "referenceNode": 134
+    },
+    {
+      "name": "plastic_chair_and_bin",
+      "node": 88,
+      "file": "plastic_chair_and_bin.glb",
+      "referenceNode": 155
+    },
+    {
+      "name": "steel_cooking_pots",
+      "node": 109,
+      "file": "steel_cooking_pots.glb",
+      "referenceNode": 173
+    },
+    {
+      "name": "blanket_and_pillows",
+      "node": 126,
+      "file": "blanket_and_pillows.glb",
+      "referenceNode": 182
+    },
+    {
+      "name": "blanket_and_pillows (1)",
+      "node": 134,
+      "file": "blanket_and_pillows.glb",
+      "referenceNode": 190
+    },
+    {
+      "name": "steel_cup",
+      "node": 142,
+      "file": "steel_cup.glb",
+      "referenceNode": 196
+    },
+    {
+      "name": "broom",
+      "node": 148,
+      "file": "broom.glb",
+      "referenceNode": 202
+    },
+    {
+      "name": "cardboard_boxes_set (1)",
+      "node": 154,
+      "file": "cardboard_boxes_set.glb",
+      "referenceNode": 227
+    },
+    {
+      "name": "brick_wall_section (4)",
+      "node": 179,
+      "file": "brick_wall_section.glb",
+      "referenceNode": 235
+    },
+    {
+      "name": "brick_wall_section (5)",
+      "node": 187,
+      "file": "brick_wall_section.glb",
+      "referenceNode": 243
+    },
+    {
+      "name": "brick_wall_section (6)",
+      "node": 195,
+      "file": "brick_wall_section.glb",
+      "referenceNode": 251
+    },
+    {
+      "name": "brick_wall_section (7)",
+      "node": 203,
+      "file": "brick_wall_section.glb",
+      "referenceNode": 259
+    },
+    {
+      "name": "brick_wall_section (8)",
+      "node": 211,
+      "file": "brick_wall_section.glb",
+      "referenceNode": 267
+    },
+    {
+      "name": "brick_wall_section (9)",
+      "node": 219,
+      "file": "brick_wall_section.glb",
+      "referenceNode": 275
+    },
+    {
+      "name": "brick_wall_section (10)",
+      "node": 227,
+      "file": "brick_wall_section.glb",
+      "referenceNode": 283
+    },
+    {
+      "name": "brick_wall_section (11)",
+      "node": 235,
+      "file": "brick_wall_section.glb",
+      "referenceNode": 291
+    },
+    {
+      "name": "ceiling_fan",
+      "node": 243,
+      "file": "ceiling_fan.glb",
+      "referenceNode": 302
+    },
+    {
+      "name": "ceiling_fan (1)",
+      "node": 254,
+      "file": "ceiling_fan.glb",
+      "referenceNode": 313
+    },
+    {
+      "name": "kerosene_lantern",
+      "node": 265,
+      "file": "kerosene_lantern.glb",
+      "referenceNode": 328
+    },
+    {
+      "name": "oil_lamp_small",
+      "node": 280,
+      "file": "oil_lamp_small.glb",
+      "referenceNode": 337
+    },
+    {
+      "name": "clay_cooking_stove",
+      "node": 289,
+      "file": "clay_cooking_stove.glb",
+      "referenceNode": 342
+    },
+    {
+      "name": "floor_material",
+      "node": 294,
+      "file": "floor_material.glb",
+      "referenceNode": 347
+    },
+    {
+      "name": "floor_material (4)",
+      "node": 299,
+      "file": "floor_material.glb",
+      "referenceNode": 352
+    },
+    {
+      "name": "floor_material (5)",
+      "node": 304,
+      "file": "floor_material.glb",
+      "referenceNode": 357
+    },
+    {
+      "name": "floor_material (6)",
+      "node": 309,
+      "file": "floor_material.glb",
+      "referenceNode": 362
+    },
+    {
+      "name": "floor_material (8)",
+      "node": 314,
+      "file": "floor_material.glb",
+      "referenceNode": 367
+    },
+    {
+      "name": "floor_material (9)",
+      "node": 319,
+      "file": "floor_material.glb",
+      "referenceNode": 372
+    },
+    {
+      "name": "floor_material (10)",
+      "node": 324,
+      "file": "floor_material.glb",
+      "referenceNode": 377
+    },
+    {
+      "name": "floor_material (11)",
+      "node": 329,
+      "file": "floor_material.glb",
+      "referenceNode": 382
+    },
+    {
+      "name": "floor_material (12)",
+      "node": 334,
+      "file": "floor_material.glb",
+      "referenceNode": 387
+    },
+    {
+      "name": "floor_material (13)",
+      "node": 339,
+      "file": "floor_material.glb",
+      "referenceNode": 392
+    },
+    {
+      "name": "floor_material (14)",
+      "node": 344,
+      "file": "floor_material.glb",
+      "referenceNode": 397
+    },
+    {
+      "name": "floor_material (16)",
+      "node": 349,
+      "file": "floor_material.glb",
+      "referenceNode": 402
+    },
+    {
+      "name": "floor_material (17)",
+      "node": 354,
+      "file": "floor_material.glb",
+      "referenceNode": 407
+    },
+    {
+      "name": "floor_material (18)",
+      "node": 359,
+      "file": "floor_material.glb",
+      "referenceNode": 412
+    },
+    {
+      "name": "floor_material (19)",
+      "node": 364,
+      "file": "floor_material.glb",
+      "referenceNode": 417
+    },
+    {
+      "name": "floor_material (15)",
+      "node": 369,
+      "file": "floor_material.glb",
+      "referenceNode": 422
+    },
+    {
+      "name": "floor_material (7)",
+      "node": 374,
+      "file": "floor_material.glb",
+      "referenceNode": 427
+    },
+    {
+      "name": "floor_material (1)",
+      "node": 379,
+      "file": "floor_material.glb",
+      "referenceNode": 432
+    },
+    {
+      "name": "floor_material (2)",
+      "node": 384,
+      "file": "floor_material.glb",
+      "referenceNode": 437
+    },
+    {
+      "name": "floor_material (3)",
+      "node": 389,
+      "file": "floor_material.glb",
+      "referenceNode": 442
+    },
+    {
+      "name": "Brick Wall STL",
+      "node": 394,
+      "file": "recovered/brick-wall.glb",
+      "referenceNode": 444
+    },
+    {
+      "name": "old_decorative_wooden_round_table",
+      "node": 396,
+      "file": "old_decorative_wooden_round_table.glb",
+      "referenceNode": 453
+    },
+    {
+      "name": "wall_clock_round (1)",
+      "node": 399,
+      "file": "wall_clock_round_1.glb",
+      "referenceNode": 456
+    }
+  ],
+  "openings": [
+    {
+      "y0": -0.01,
+      "y1": 1.582,
+      "z0": -5.058,
+      "z1": -4.013
+    },
+    {
+      "y0": 0.38,
+      "y1": 1.54,
+      "z0": -7.24,
+      "z1": -6.04
+    }
+  ],
+  "recoveredMaterialNames": [
+    "M_Bricks_Var_3",
+    "M_Bricks_Var_2",
+    "M_Bricks_Var_1",
+    "M_Bricks_Var_4"
+  ]
+}

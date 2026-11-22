@@ -1,0 +1,26 @@
+{
+  "source": "../scene4/Home Space w 3 folders/Assets/dirt_ground.glb",
+  "runtime": "dirt_ground.glb",
+  "sha256": "f8977906c4225ababb266199875cb3c885e6bc9abd8f070d4f1ab2aa7c4fc9df",
+  "note": "Unmodified runtime copy; source Unity project and .meta files preserved.",
+  "verified_runtime_assets": [
+    {
+      "runtime": "broom.glb",
+      "source": "../scene4/Assets/Building and props/broom.glb",
+      "sha256": "e85785270d4e076ada1e16977a4e19083a2c722935df2778d14a87f38edfae29",
+      "note": "Existing runtime file is byte-identical to newly supplied loose asset."
+    },
+    {
+      "runtime": "old_window.glb",
+      "source": "../scene4/Assets/Building and props/old_window.glb",
+      "sha256": "9bbdccc7e16d99b58c73659e41155383088bcb1355e059a56164610124837215",
+      "note": "Existing runtime file is byte-identical to newly supplied loose asset."
+    },
+    {
+      "runtime": "steel_cooking_pots.glb",
+      "source": "../scene4/Assets/Building and props/steel_cooking_pots.glb",
+      "sha256": "cbf9f4fe3fb1db9fd79de5e73ca6e2d749be1d3441fed241514569bbb22fe411",
+      "note": "Existing runtime file is byte-identical to newly supplied loose asset."
+    }
+  ]
+}

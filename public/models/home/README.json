@@ -1,8 +1,17 @@
 {
-  "purpose": "Scene 4 (home) props and brick walls from the Unity/Sketchfab export",
-  "gltf": "home-space.gltf",
-  "status": "incomplete_export",
-  "missing": ["home space.bin", "78 external png textures"],
-  "how_used": "home.js places individual GLBs at the original procedural anchors (table, stove, lamp, blanket, brick wall slots). Mother/brother Mixamo GLBs are present but unused (T-pose). Do not load the full Unity scene graph — its X rotations lay walls flat.",
-  "layout_json": "Node transforms from home-space.gltf for reference only; live placement is in src/scenes/home.js"
+  "purpose": "Source-faithful reconstructed Unity/glTF Home for WebXR",
+  "gltf": "unity-home.gltf",
+  "status": "reconstructed_runtime",
+  "original_export": "home-space.gltf",
+  "original_missing": [
+    "home space.bin",
+    "78 external PNG textures"
+  ],
+  "how_used": "Original node hierarchy and geometry are recovered from embedded GLB assets. One uniform 1.4 scale and 180-degree Y rotation place the source entrance at the chase lane. Grounding/boundary corrections are reported in window.__homeGltf. Runtime uses native textured assets and recovered four-color brick materials, with a single shared door. Procedural family animation and notebook remain.",
+  "regenerate": "node tools/recover-home.mjs",
+  "recovered_materials": "recovered/Brick Wall.mtl",
+  "manifest": "unity-home-manifest.json",
+  "integration_notes": "../../../docs/ASSET_INTEGRATION.md",
+  "source_project": "../scene4/Home Space/",
+  "additional_source": "../scene4/Assets/"
 }

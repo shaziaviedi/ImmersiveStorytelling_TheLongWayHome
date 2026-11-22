@@ -77,7 +77,10 @@ when formatting source files.
 
 Install the test browser once with `npx playwright install chromium`, then run:
 
-- `npm test`: caption layout, progress, home alignment, chase lights, and both-edition scene rendering.
+- `npm test`: caption layout, progress, imported Home/market/chase bounds and route clearance, chase lights, and both-edition scene rendering.
+- `npm run test:home`: imported Home alignment, door state, navigation clearance and story interactions.
+- `npm run test:street`: supplied market models/materials, five interaction callbacks, theft/reset and route clearance.
+- `npm run test:chase`: imported chase architecture, routes, source textures, knock/collapse/reset and audio.
 - `npm run test:ui`: only the UI and targeted scene checks.
 - `npm run test:atmosphere`: only scene rendering and font checks.
 - `npm run test:vr`: both editions in an emulated Quest, followed by entering and leaving VR.

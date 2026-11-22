@@ -1,0 +1,375 @@
+{
+  "source": "../scene2/Scene2_Plaza.glb",
+  "sourceVersion": "7428c243c6fe699d",
+  "meshes": 145,
+  "images": 306,
+  "uniqueImages": 285,
+  "geometryBytes": 22746344,
+  "materialRepairs": [
+    {
+      "material": "exterior_aircon_unit_01",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/exterior_aircon_unit.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "exterior_aircon_unit_02",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/exterior_aircon_unit.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "exterior_aircon_unit_rusted_01",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/exterior_aircon_unit.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "exterior_aircon_unit_rusted_02",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/exterior_aircon_unit.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "painted_wooden_table",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/painted_wooden_table.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "barrel_stove",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/barrel_stove.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "brass_pan_01",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/brass_pan_01.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "ceramic_pot",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/ceramic_pot.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "wooden_bowl_01",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/wooden_bowl_01.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "carved_wooden_plate",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/carved_wooden_plate.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "M_Dull_camping_kettle_1",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/steel_cooking_pots.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "M_Dull_camping_pan_1",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/steel_cooking_pots.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "M_Dull_camping_boiler_1",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/steel_cooking_pots.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "M_Dull_camping_pot_1",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/steel_cooking_pots.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "wooden_table_02",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/wooden_table_02.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "vintage_wooden_drawer_01",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/vintage_wooden_drawer_01.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "DefaultMaterial",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/clay_water_pot_matka.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "M_Dull_Material_25",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/steel_cup.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "Fire_lamp_2_0",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/wooden_hand_cart.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "Glass_lamp_2_0",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/wooden_hand_cart.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "Metal_lamp_2_0",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/wooden_hand_cart.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "Metal_wheel_2_0",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/wooden_hand_cart.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "Rope_2_0",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/wooden_hand_cart.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "Wood_cart_2_0",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/wooden_hand_cart.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "wood",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/wooden_crate_simple.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "screw",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/wooden_crate_simple.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "Material.001",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/wicker_basket.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "electricpole",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/electric_pole.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "Material__25",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/trash_pile.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "Cardboard_Box_Mat",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/cardboard_boxes_set.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "Juta_Bag_1",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/burlap_sacks.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "Material.001",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/old_wooden_stool.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "M_Dull_Scene_-_Root",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/metal_bucket.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "metal_jug",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/metal_jug.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "pot_enamel_01",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/pot_enamel_01.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "plastic_crate_02",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/plastic_crate_02.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "wooden_bucket_01",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/wooden_bucket_01.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "brass_pot_02",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/brass_pot_02.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "cement_bag",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/cement_bag.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "plastic_crate_01",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/plastic_crate_01.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "cardboard_box_01",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/cardboard_box_01.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "wicker_basket_01",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/wicker_basket_01.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "hand_truck",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/hand_truck.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "wooden_ladder",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/wooden_ladder.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "plastic_jerrycan",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/plastic_jerrycan.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "metal_jerrycan",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/metal_jerrycan.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "metal_jerrycan_green",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/metal_jerrycan_green.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "plastic_bottle_gallon",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/plastic_bottle_gallon.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "small_lpg_tank",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/small_lpg_tank.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "wooden_stool_01",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/wooden_stool_01.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "brass_pot_01",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/brass_pot_01.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "barrel_03",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/barrel_03.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "old_tyre",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/old_tyre.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "utility_box_02",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/utility_box_02.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "metal_trash_can",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/metal_trash_can.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "metal_trash_can_rust",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/metal_trash_can.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "metal_trash_can_rust",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/metal_trash_can.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "plastic_broom",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/plastic_broom.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "plastic_broom_bristles",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/plastic_broom.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "trashbag",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/trashbag.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "can_rusted",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/can_rusted.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "industrial_storage_cart",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/industrial_storage_cart.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "metal_stool_01",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/metal_stool_01.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "measuring_tape_01",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/measuring_tape_01.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "plastic_monobloc_chair_01",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/plastic_monobloc_chair_01.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "Material_25",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/steel_cup.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "worn_metal_rack",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/worn_metal_rack.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "Material.008",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/bananas.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "food_pomegranate_01",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/food_pomegranate_01.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "sweet_potato",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/sweet_potato.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "yellow_onion",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/yellow_onion.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "utility_box_01",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/utility_box_01.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    },
+    {
+      "material": "power_box_01",
+      "source": "models/scene2/Scene 2/Assets/Scene2/Models/power_box_01.glb",
+      "method": "original GLB PBR texture bindings; Unity factors retained"
+    }
+  ]
+}

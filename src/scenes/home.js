@@ -1,205 +1,33 @@
-// Home scene (Space 4): arrival, sharing food, sleep — both editions share this ending.
-//
-// Layout strategy:
-//   • Procedural room shell (floor, roof, door, lights, story beats) keeps the original
-//     HOME footprint and interaction anchors.
-//   • Unity/Sketchfab GLBs from models/home/ replace key props and brick walls, each
-//     placed at those anchors — not the full Unity scene graph (its X rotations laid
-//     walls flat on the floor/ceiling).
-//   • Mother and brother stay procedural (Mixamo GLBs are T-pose; posing was unreliable).
+// Home: the supplied Unity/glTF hierarchy at one uniform WebXR scale.
+// Story systems remain here; source geometry, materials and placement come from the reference.
 import * as THREE from 'three';
-import * as TX from '../world/textures.js';
-import { M, G, Batcher, slab, lerp, ease, damp, clamp } from '../world/builders.js';
+import { slab, lerp, ease, damp, clamp } from '../world/builders.js';
 import { makePerson, poseFloor, poseLie, poseStand, animateIdle } from '../characters/people.js';
+import * as TX from '../world/textures.js';
 import { GRIP } from '../characters/first-person.js';
-import { T, texMat } from '../world/city.js';
-import {
-  loadModel,
-  normalizeHeight,
-  normalizeXZ,
-  prepareShadows,
-  groundModel,
-} from '../world/gltf-assets.js';
-
-/** World AABB of the home room (x along the lane, z depth into the house). */
-export const HOME = { x0: 82, x1: 88, z0: 10, z1: 15.4, h: 2.8, door: { z0: 12, z1: 13.4 } };
-const MODEL_BASE = 'models/home/';
+import { loadModel, fitModel } from '../world/gltf-assets.js';
+import { loadHomeReference } from '../world/home-reference.js';
+import { HOME, HOME_SCALE, homePoint } from '../config/home-layout.js';
+export { HOME } from '../config/home-layout.js';
 
 export function buildHome(ctx) {
   const { scene, audio, interactor, player, ui, thread, hands, bagCtl, lights } = ctx;
-  const extra = () => ctx.edition === 'extra'; // Extra: you wake up here at night, eat, lie down, and the day repeats
-  const root = new THREE.Group();
-  root.name = 'home';
-  scene.add(root);
-  const { x0, x1, z0, z1, h } = HOME,
-    cx = (x0 + x1) / 2,
-    cz = (z0 + z1) / 2,
-    W = x1 - x0,
-    D = z1 - z0;
-  const dz0 = HOME.door.z0,
-    dz1 = HOME.door.z1,
-    dh = 2.0;
-  const B = new Batcher();
-
-  // ---------- shell: mud plaster over brick, an earth floor, a tin roof ----------
-  const mud = (() => {
-    const c = T.facade('#9a7a5a');
-    const g = c.getContext('2d');
-    g.fillStyle = 'rgba(70,50,30,.25)';
-    g.fillRect(0, 0, 512, 512);
-    const t = new THREE.CanvasTexture(c);
-    t.colorSpace = THREE.SRGBColorSpace;
-    t.wrapS = t.wrapT = THREE.RepeatWrapping;
-    return t;
-  })();
-  // (use a plain mud plaster, not the street facade with windows: paint over the window pattern)
-  {
-    const g = mud.image.getContext('2d');
-    g.fillStyle = '#8a6c4e';
-    g.fillRect(0, 0, 512, 512);
-    for (let i = 0; i < 40; i++) {
-      g.fillStyle = `rgba(${40 + Math.random() * 40},${30 + Math.random() * 20},20,${0.08 + Math.random() * 0.12})`;
-      g.beginPath();
-      g.arc(Math.random() * 512, Math.random() * 512, 20 + Math.random() * 80, 0, 7);
-      g.fill();
-    }
-    g.fillStyle = 'rgba(30,20,12,.35)';
-    g.fillRect(0, 430, 512, 82);
-    mud.needsUpdate = true;
+  const extra = () => ctx.edition === 'extra';
+  const root = new THREE.Group(); root.name = 'home'; scene.add(root);
+  const { x0, x1, z0, z1, h } = HOME;
+  const dz0 = HOME.door.z0, dz1 = HOME.door.z1;
+  const proxyMaterial = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false });
+  function proxy(name, width, depth, point) {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(width, depth), proxyMaterial);
+    m.name = name; m.userData.interactionProxy = true; m.rotation.x = -Math.PI / 2;
+    m.position.set(...point); root.add(m); return m;
   }
-  // Wall planes stay as solid backing; brick_wall_section GLBs overlay them at these slots.
-  const shellWalls = [];
-  const wallSlots = []; // { x, y, z, ry, w, hh }
-  const wallM = (w, hh) => {
-    const t = mud.clone();
-    t.needsUpdate = true;
-    t.repeat.set(w / 3, hh / 3);
-    return new THREE.MeshStandardMaterial({ map: t, roughness: 1 });
-  };
-  const wp = (w, hh, x, y, z, ry) => {
-    wallSlots.push({ w, hh, x, y, z, ry });
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(w + 0.08, hh + 0.04), wallM(w, hh));
-    m.position.set(x, y, z);
-    m.rotation.y = ry;
-    m.receiveShadow = true;
-    root.add(m);
-    shellWalls.push(m);
-  };
-  wp(W, h, cx, h / 2, z0, 0);
-  wp(W, h, cx, h / 2, z1, Math.PI);
-  wp(D, h, x1, h / 2, cz, -Math.PI / 2);
-  wp(dz0 - z0, h, x0, h / 2, (z0 + dz0) / 2, Math.PI / 2);
-  wp(z1 - dz1, h, x0, h / 2, (dz1 + z1) / 2, Math.PI / 2);
-  wp(dz1 - dz0, h - dh, x0, (h + dh) / 2, (dz0 + dz1) / 2, Math.PI / 2);
-  const floorT = T.dirt().clone();
-  floorT.needsUpdate = true;
-  floorT.repeat.set(2, 2);
-  const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(W, D),
-    new THREE.MeshStandardMaterial({ map: floorT, color: 0xa08060, roughness: 1 }),
-  );
-  floor.rotation.x = -Math.PI / 2;
-  floor.position.set(cx, 0.004, cz);
-  floor.receiveShadow = true;
-  root.add(floor);
-  const roofT = T.tin().clone();
-  roofT.needsUpdate = true;
-  roofT.repeat.set(3, 2);
-  const roof = new THREE.Mesh(
-    new THREE.PlaneGeometry(W, D),
-    new THREE.MeshStandardMaterial({
-      map: roofT,
-      side: THREE.DoubleSide,
-      metalness: 0.3,
-      roughness: 0.7,
-    }),
-  );
-  roof.rotation.x = Math.PI / 2;
-  roof.position.set(cx, h, cz);
-  root.add(roof);
-  for (let x = x0 + 0.8; x < x1; x += 1.6)
-    B.add(G.box(0.08, 0.1, D), M(0x3a2a1c, { roughness: 1 }), x, h - 0.06, cz); // bamboo rafters
-  // outside of the front wall, with the glowing doorway seen from the lane
-  const extM = new THREE.MeshStandardMaterial({
-    map: (() => {
-      const t = new THREE.CanvasTexture(T.facade('#8a7a64', true));
-      t.colorSpace = THREE.SRGBColorSpace;
-      t.wrapS = t.wrapT = THREE.RepeatWrapping;
-      return t;
-    })(),
-    roughness: 0.95,
-    emissive: 0x1a1210,
-  });
-  const ext = (w, hh, x, y, z) => {
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, hh), extM);
-    m.position.set(x, y, z);
-    m.rotation.y = -Math.PI / 2;
-    root.add(m);
-  };
-  ext(dz0 - z0 + 1.4, 4, x0 - 0.03, 2, (z0 - 1.4 + dz0) / 2);
-  ext(z1 - dz1 + 1, 4, x0 - 0.03, 2, (dz1 + z1 + 1) / 2);
-  ext(dz1 - dz0, 4 - dh, x0 - 0.03, (4 + dh) / 2, (dz0 + dz1) / 2);
-  const glowMat = new THREE.MeshBasicMaterial({
-    color: new THREE.Color(1, 0.88, 0.62).multiplyScalar(2.2),
-    transparent: true,
-    opacity: 0.9,
-    side: THREE.DoubleSide,
-    fog: false,
-  });
-  const glowDoor = new THREE.Mesh(new THREE.PlaneGeometry(dz1 - dz0, dh), glowMat);
-  glowDoor.position.set(x0 - 0.04, dh / 2, (dz0 + dz1) / 2);
-  glowDoor.rotation.y = -Math.PI / 2;
-  root.add(glowDoor);
-  const doorGlow = lights.add({
-    pos: new THREE.Vector3(x0 - 1.0, 1.4, (dz0 + dz1) / 2),
-    color: 0xffd090,
-    intensity: 0,
-    distance: 7,
-    space: 'home',
-    priority: 2,
-  });
-  const doorPivot = new THREE.Group();
-  doorPivot.position.set(x0 + 0.03, 0, dz0);
-  root.add(doorPivot);
-  const door = new THREE.Mesh(new THREE.BoxGeometry(0.04, dh, dz1 - dz0), texMat(T.plywood()));
-  door.position.set(0, dh / 2, (dz1 - dz0) / 2);
-  doorPivot.add(door);
-
-  // ---------- inside: what little there is ----------
-  const ply = texMat(T.plywood()),
-    steel = M(0xb8b8b4, { metalness: 0.85, roughness: 0.25 });
-  // low table (chowki) with two empty steel plates and a cup
-  const table = new THREE.Group();
-  table.position.set(85, 0, 12.7);
-  root.add(table);
-  {
-    const tb = new Batcher();
-    tb.add(slab(0.9, 0.6, 0.05, 0.02), ply, 0, 0.3, 0);
-    [
-      [-0.4, -0.25],
-      [0.4, -0.25],
-      [-0.4, 0.25],
-      [0.4, 0.25],
-    ].forEach(([a, b]) => tb.add(G.box(0.05, 0.3, 0.05), ply, a, 0.15, b));
-    [-0.2, 0.2].forEach((px) => tb.add(G.cyl(0.13, 0.11, 0.015, 18), steel, px, 0.36, 0));
-    tb.add(G.cyl(0.035, 0.03, 0.09, 10), steel, 0.35, 0.395, 0.18);
-    tb.build(table);
-  }
-  const meal = new THREE.Group();
-  meal.visible = false;
-  meal.position.set(0, 0.37, 0);
-  table.add(meal);
-  const mealM = new THREE.MeshStandardMaterial({ color: 0xd8b070, roughness: 0.8 });
-  meal.add(new THREE.Mesh(slab(0.24, 0.18, 0.1, 0.03, 0.01), mealM));
-  // sleeping mat with the little brother under a blanket
-  const mat = new THREE.Mesh(
-    new THREE.PlaneGeometry(1.6, 0.9),
-    new THREE.MeshStandardMaterial({ map: TX.fabric('check', 1, 128), roughness: 1 }),
-  );
-  mat.rotation.x = -Math.PI / 2;
-  mat.position.set(86.6, 0.01, 10.9);
-  mat.receiveShadow = true;
-  root.add(mat);
+  const table = new THREE.Group(); table.name = 'home-table-anchor';
+  table.position.set(...homePoint(1.8433, 0, -6.042)); root.add(table);
+  const meal = new THREE.Group(); meal.visible = false; table.add(meal);
+  meal.add(new THREE.Mesh(slab(0.24, 0.18, 0.1, 0.03, 0.01), new THREE.MeshStandardMaterial({ color: 0xd8b070, roughness: 0.8 })));
+  const mat = proxy('brother-mat', 1.6, 0.9, homePoint(-0.227, 0.02, -6.166));
+  const myMat = proxy('player-mat', 1.6, 0.9, homePoint(0.5875, 0.02, -5.589));
   const sib = makePerson({
     child: true,
     top: 0x6a6a7a,
@@ -248,7 +76,7 @@ export function buildHome(ctx) {
   function sibSit() {
     if (sib.userData.gltf) {
       sib.rotation.set(0, -2.2, 0);
-      sib.position.set(86.5, 0, 11.05);
+      sib.position.set(mat.position.x, 0, mat.position.z);
       sib.userData.lying = false;
       return;
     }
@@ -256,356 +84,75 @@ export function buildHome(ctx) {
     resetArms();
     poseFloor(sib, { hug: true });
     sib.rotation.set(0, -2.2, 0);
-    sib.position.set(86.5, 0, 11.05);
+    sib.position.set(mat.position.x, 0, mat.position.z);
     sib.userData.lying = false;
   }
   sibLie();
-  // a mat of your own beside his
-  const myMat = new THREE.Mesh(
-    new THREE.PlaneGeometry(1.3, 0.8),
-    new THREE.MeshStandardMaterial({ map: TX.fabric('stripe', 3, 128), roughness: 1 }),
-  );
-  myMat.rotation.x = -Math.PI / 2;
-  myMat.position.set(84.55, 0.011, 10.95);
-  myMat.receiveShadow = true;
-  root.add(myMat);
-  B.add(
-    slab(0.95, 0.62, 0.12, 0.05),
-    new THREE.MeshStandardMaterial({
-      map: TX.fabric('paisley', 4, 128),
-      roughness: 1,
-      flatShading: true,
-    }),
-    86.75,
-    0.04,
-    10.9,
-  ); // blanket
-  B.add(slab(0.32, 0.42, 0.08, 0.04), M(0xd8d0c0, { roughness: 1 }), 85.85, 0.02, 10.9);
-  // the mother by the clay stove
-  const chulha = new THREE.Group();
-  chulha.position.set(87.3, 0, 14.7);
-  root.add(chulha);
-  {
-    const cb = new Batcher(),
-      clay = M(0x8a5a3a, { roughness: 1, flatShading: true });
-    cb.add(G.box(0.5, 0.3, 0.12), clay, 0, 0.15, -0.2);
-    cb.add(G.box(0.12, 0.3, 0.5), clay, -0.2, 0.15, 0);
-    cb.add(G.box(0.12, 0.3, 0.5), clay, 0.2, 0.15, 0);
-    cb.add(G.cyl(0.17, 0.13, 0.18, 12), M(0x3a3a38, { metalness: 0.5, roughness: 0.5 }), 0, 0.4, 0);
-    for (let k = 0; k < 5; k++)
-      cb.add(
-        G.cyl(0.02, 0.02, 0.5, 5),
-        M(0x4a3020),
-        0.3 + k * 0.03,
-        0.03,
-        0.3 - k * 0.06,
-        0,
-        k,
-        Math.PI / 2,
-      ); // firewood
-    cb.build(chulha);
-  }
-  const ember = new THREE.Mesh(
-    new THREE.SphereGeometry(0.1, 8, 6),
-    new THREE.MeshBasicMaterial({ color: new THREE.Color(1, 0.4, 0.1).multiplyScalar(2) }),
-  );
-  ember.scale.y = 0.4;
-  ember.position.set(0, 0.06, 0);
-  chulha.add(ember);
-  const mother = makePerson({
-    female: true,
-    top: 0x7a3a4a,
-    bottom: 0x9a5a3a,
-    scarf: 0xb5442e,
-    skin: 0x6b4630,
-    seed: 302,
-    scale: 1.3,
-  });
-  poseFloor(mother);
-  mother.position.set(86.55, 0, 14.15);
-  mother.rotation.y = Math.PI / 2 + 0.5;
-  root.add(mother);
-  // Seat flush to floor after poseFloor (skinned bounds can leave a small float)
-  {
-    mother.updateMatrixWorld(true);
-    const mb = new THREE.Box3().setFromObject(mother);
-    if (Number.isFinite(mb.min.y)) mother.position.y -= mb.min.y;
-  }
-  {
-    const J = mother.userData.J;
-    J.shL.rotation.set(-0.9, 0, 0.2);
-    J.shR.rotation.set(-1.0, 0, -0.2);
-    J.elL.rotation.x = -0.9;
-    J.elR.rotation.x = -0.7;
-  }
-  // shelf with utensils, tin trunk, clothes on a rope, a small picture, the oil lamp
-  B.add(G.box(0.25, 0.03, 0.9), ply, 87.85, 1.4, 12.5);
-  for (let k = 0; k < 4; k++)
-    B.add(G.cyl(0.06, 0.05, 0.1, 10), steel, 87.85, 1.47, 12.15 + k * 0.22);
-  B.add(G.box(0.8, 0.45, 0.5), M(0x4a5a6a, { metalness: 0.4, roughness: 0.5 }), 82.7, 0.23, 14.9);
-  B.add(G.box(0.82, 0.04, 0.52), M(0x3a4a5a, { metalness: 0.4 }), 82.7, 0.47, 14.9);
-  B.add(G.cyl(0.005, 0.005, 3, 4), M(0x3a2a1a), 84.6, 2.25, 10.35, 0, 0, Math.PI / 2);
+
+  const chulha = new THREE.Group(); chulha.name = 'home-stove-anchor';
+  chulha.position.set(...homePoint(2.418, 0, -8.034)); root.add(chulha);
+  const mother = makePerson({ female: true, top: 0x7a3a4a, bottom: 0x9a5a3a, scarf: 0xb5442e, skin: 0x6b4630, seed: 302, scale: 1.3 });
+  mother.name = 'mother'; poseFloor(mother); mother.position.set(...homePoint(1.95, 0, -7.35));
+  const motherYaw = Math.atan2(chulha.position.x - mother.position.x, chulha.position.z - mother.position.z);
+  mother.rotation.y = motherYaw; root.add(mother);
+  mother.updateMatrixWorld(true);
+  mother.position.y -= new THREE.Box3().setFromObject(mother).min.y;
+  { const J = mother.userData.J; J.shL.rotation.set(-0.9,0,0.2); J.shR.rotation.set(-1,0,-0.2); J.elL.rotation.x=-0.9; J.elR.rotation.x=-0.7; }
+  const page = new THREE.Mesh(new THREE.PlaneGeometry(0.3,0.21), new THREE.MeshStandardMaterial({ map: TX.notebookPage(), color: 0xf2ead8, roughness: 0.9 }));
+  page.position.set(x0+0.19,1.45,dz0-0.4); page.rotation.y=Math.PI/2; root.add(page);
+  // The notebook is a narrative prop retained from the playable game.
   const hang = [];
-  for (let k = 0; k < 4; k++) {
-    const c = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.4, 0.55),
-      new THREE.MeshStandardMaterial({
-        map: TX.fabric(['buti', 'stripe', 'check', 'border'][k], k + 2, 128),
-        side: THREE.DoubleSide,
-        color: 0xb0a090,
-      }),
-    );
-    c.geometry.translate(0, -0.27, 0);
-    c.position.set(83.5 + k * 0.7, 2.24, 10.35);
-    root.add(c);
-    hang.push(c);
-  }
-  B.add(G.box(0.3, 0.38, 0.02), M(0xc0902a), 85.5, 1.8, z1 - 0.02);
-  // the torn notebook page from the bag, pinned by the door: "When I grow up I will be a teacher."
-  const page = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.3, 0.21),
-    new THREE.MeshStandardMaterial({
-      map: TX.notebookPage ? TX.notebookPage() : null,
-      roughness: 0.9,
-      color: 0xf2ead8,
-    }),
-  );
-  page.position.set(x0 + 0.02, 1.45, 11.3);
-  page.rotation.y = Math.PI / 2;
-  page.rotation.z = 0.04;
-  root.add(page);
-  const lamp = new THREE.Group();
-  lamp.position.set(87.85, 1.43, 13.3);
-  root.add(lamp);
-  {
-    const lb = new Batcher();
-    lb.add(G.cyl(0.05, 0.06, 0.06, 10), M(0x8a6a2a, { metalness: 0.6 }), 0, 0.03, 0);
-    lb.build(lamp);
-  }
-  const flame = new THREE.Mesh(
-    new THREE.SphereGeometry(0.025, 6, 5),
-    new THREE.MeshBasicMaterial({ color: new THREE.Color(1, 0.75, 0.35).multiplyScalar(3) }),
-  );
-  flame.scale.y = 1.8;
-  flame.position.y = 0.1;
-  lamp.add(flame);
-  const halo = new THREE.Sprite(
-    new THREE.SpriteMaterial({
-      map: T.dot(),
-      color: new THREE.Color(1, 0.6, 0.25).multiplyScalar(0.7),
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-      transparent: true,
-      fog: false,
-    }),
-  );
-  halo.scale.setScalar(0.5);
-  halo.position.y = 0.1;
-  lamp.add(halo);
-  const lampL = lights.add({
-    pos: new THREE.Vector3(87.55, 1.65, 13.3),
-    color: 0xff942f,
-    intensity: 0,
-    distance: 7,
-    decay: 1.5,
-    space: 'home',
-    priority: 3,
-  });
-  const windowL = lights.add({
-    pos: new THREE.Vector3(84.5, 1.75, z0 + 0.2),
-    color: 0x758fb8,
-    intensity: 0,
-    distance: 3.2,
-    decay: 2,
-    space: 'home',
-    priority: 0.7,
-  });
-  const stoveL = lights.add({
-    pos: new THREE.Vector3(87.2, 0.45, 14.4),
-    color: 0xff6a20,
-    intensity: 0,
-    distance: 3.5,
-    decay: 1.5,
-    space: 'home',
-    priority: 2,
-  });
-  // a small barred window: night sky
-  const win = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.7, 0.5),
-    new THREE.MeshBasicMaterial({ color: 0x1a2440, fog: false }),
-  );
-  win.position.set(84.5, 1.8, z0 + 0.02);
-  root.add(win);
-  for (let k = 1; k < 4; k++)
-    B.add(G.box(0.015, 0.5, 0.02), M(0x1a1a1a), 84.15 + k * 0.175, 1.8, z0 + 0.03);
-  B.build(root, { cast: true, receive: true });
-
-  // ---------- Scene 4 assets: GLBs at procedural anchors (not the Unity scene TRS) ----------
-  let gltfSource = 'pending';
-  const ready = (async () => {
-    const load = async (file, opts = {}) => {
-      const model = await loadModel(MODEL_BASE + file, opts);
-      prepareShadows(model);
-      return model;
-    };
-    const worldBox = (obj) => {
-      obj.updateMatrixWorld(true);
-      return new THREE.Box3().setFromObject(obj);
-    };
-    const worldSize = (obj) => worldBox(obj).getSize(new THREE.Vector3());
-
-    /** Fit brick_wall_section.glb into each wallSlots entry (yaw only; mesh is already upright). */
-    async function placeBrickWalls() {
-      const brickTemplate = await load('brick_wall_section.glb', { clone: true });
-      brickTemplate.traverse((o) => {
-        if (!o.isMesh) return;
-        const mats = Array.isArray(o.material) ? o.material : [o.material];
-        for (const mat of mats) {
-          if (!mat) continue;
-          mat.side = THREE.DoubleSide;
-          mat.roughness = 0.92;
-          // Export has no albedo maps — lift baked colours so bricks read under the oil lamp
-          if (mat.color) mat.color.offsetHSL(0.02, 0.05, 0.14);
-        }
-      });
-      const native = worldSize(brickTemplate);
-
-      // Solid mud backing behind the GLB (brick mesh has gaps between blocks)
-      shellWalls.forEach((plane, i) => {
-        const slot = wallSlots[i];
-        const t = mud.clone();
-        t.needsUpdate = true;
-        t.repeat.set(Math.max(1, slot.w / 2.5), Math.max(1, slot.hh / 2.5));
-        plane.material = new THREE.MeshStandardMaterial({
-          map: t,
-          color: 0x6a3a28,
-          roughness: 1,
-        });
-        plane.visible = true;
-      });
-
-      wallSlots.forEach((slot, i) => {
-        const wall = brickTemplate.clone(true);
-        const sx = slot.w / Math.max(native.x, 1e-4);
-        const sy = slot.hh / Math.max(native.y, 1e-4);
-        const sz = THREE.MathUtils.clamp((sx + sy) * 0.5 * 0.55, 0.35, 1.1);
-        wall.scale.set(sx, sy, sz);
-
-        const g = new THREE.Group();
-        g.name = `brick-wall-${i}`;
-        g.add(wall);
-        const c = worldBox(wall).getCenter(new THREE.Vector3());
-        wall.position.set(-c.x, -c.y, -c.z);
-
-        // PlaneGeometry normal after rotation.y is (sin ry, 0, cos ry) — inset into the room
-        const inset = 0.04;
-        g.position.set(
-          slot.x + Math.sin(slot.ry) * inset,
-          slot.y,
-          slot.z + Math.cos(slot.ry) * inset,
-        );
-        g.rotation.y = slot.ry;
-        root.add(g);
-      });
-    }
-
-    /** Swap one GLB onto a placeholder group; failures keep the procedural stand-in. */
-    const swap = async (file, apply) => {
-      try {
-        apply(await load(file));
-      } catch (e) {
-        console.warn('[home] asset failed', file, e);
-      }
-    };
-
-    /** Table, meal, stove, bedding, lamp — sized to the original placeholder footprints. */
-    async function placeProps() {
-      await Promise.all([
-        swap('old_decorative_wooden_round_table.glb', (m) => {
-          normalizeXZ(m, 0.9); // ~placeholder chowki width
-          m.updateMatrixWorld(true);
-          const h0 = worldSize(m).y;
-          if (h0 > 0.36) m.scale.y *= 0.34 / h0; // keep it low like a floor table
-          groundModel(m);
-          table.children.forEach((c) => {
-            if (c !== meal) c.visible = false;
-          });
-          m.position.x = 0;
-          m.position.z = 0;
-          table.add(m);
-          meal.position.set(0, worldBox(m).max.y + 0.01, 0);
-        }),
-        swap('thali.glb', (m) => {
-          normalizeXZ(m, 0.36);
-          groundModel(m);
-          while (meal.children.length) meal.remove(meal.children[0]);
-          meal.add(m);
-        }),
-        swap('clay_cooking_stove.glb', (m) => {
-          normalizeXZ(m, 0.6);
-          groundModel(m);
-          chulha.children.forEach((c) => {
-            if (c !== ember) c.visible = false;
-          });
-          m.position.x = 0;
-          m.position.z = 0;
-          chulha.add(m);
-          ember.position.set(0, Math.max(0.12, worldBox(m).max.y * 0.45), 0);
-        }),
-        swap('blanket_and_pillows.glb', (m) => {
-          normalizeXZ(m, 1.45);
-          groundModel(m);
-          m.name = 'blanket-gltf';
-          m.position.set(mat.position.x, 0, mat.position.z);
-          m.rotation.y = Math.PI / 2;
-          root.add(m);
-        }),
-        swap('oil_lamp_small.glb', (m) => {
-          normalizeHeight(m, 0.18);
-          groundModel(m);
-          [...lamp.children]
-            .filter((c) => c !== flame && c !== halo)
-            .forEach((c) => {
-              c.visible = false;
-            });
-          m.position.x = 0;
-          m.position.z = 0;
-          lamp.add(m);
-          const top = worldBox(m).max.y;
-          flame.position.y = top + 0.02;
-          halo.position.y = top + 0.02;
-        }),
-      ]);
-    }
-
-    try {
-      await placeBrickWalls();
-    } catch (e) {
-      console.warn('[home] brick walls failed — keeping mud planes', e);
-    }
-    await placeProps();
-
-    gltfSource = 'placeholder-aligned GLBs (brick meshes+props; people placeholders)';
-    if (typeof window !== 'undefined') {
-      window.__homeGltf = { url: MODEL_BASE, source: gltfSource, mode: 'placeholder-aligned' };
-    }
-    console.info('[home] Scene 4:', gltfSource);
-  })();
-
+  const doorGlow = lights.add({ pos: new THREE.Vector3(81,1.3,12.7), color: 0xffd090, intensity: 0, distance: 6, space:'home', priority:2 });
+  const lampL = lights.add({ pos:new THREE.Vector3(...homePoint(2.88,0.5,-8.14)),color:0xffb060,intensity:0,distance:10,decay:1.5,space:'home',priority:3 });
+  const windowL = lights.add({ pos:new THREE.Vector3(...homePoint(3.95,1.15,-6.64)),color:0x758fb8,intensity:0,distance:4,decay:2,space:'home',priority:0.7 });
+  const stoveL = lights.add({ pos:new THREE.Vector3(...homePoint(2.42,0.5,-8.03)),color:0xff6a20,intensity:0,distance:4,decay:1.5,space:'home',priority:2 });
+  let doorPivot = new THREE.Group();
   const colliders = [
-    { minX: x0 - 0.3, maxX: x0, minZ: z0, maxZ: dz0 },
-    { minX: x0 - 0.3, maxX: x0, minZ: dz1, maxZ: z1 },
-    { minX: x0, maxX: x1, minZ: z0 - 0.3, maxZ: z0 },
-    { minX: x0, maxX: x1, minZ: z1, maxZ: z1 + 0.3 },
-    { minX: x1, maxX: x1 + 0.3, minZ: z0, maxZ: z1 },
-    { minX: 84.5, maxX: 85.5, minZ: 12.35, maxZ: 13.05 },
-    { minX: 86.9, maxX: 88, minZ: 13.6, maxZ: 15.4 },
-    { minX: 82, maxX: 83.2, minZ: 14.5, maxZ: 15.4 },
-    { minX: 85.7, maxX: 87.5, minZ: 10.4, maxZ: 11.4 },
+    { minX:x0-0.17,maxX:x0+0.17,minZ:z0-0.17,maxZ:dz0 },
+    { minX:x0-0.17,maxX:x0+0.17,minZ:dz1,maxZ:z1+0.17 },
+    { minX:x1-0.17,maxX:x1+0.17,minZ:z0-0.17,maxZ:z1+0.17 },
+    { minX:x0,maxX:x1,minZ:z0-0.17,maxZ:z0+0.17 },
+    { minX:x0,maxX:x1,minZ:z1-0.17,maxZ:z1+0.17 },
   ];
-  const doorCollider = { minX: x0 - 0.1, maxX: x0 + 0.1, minZ: dz0, maxZ: dz1 };
-  let doorShut = false;
-
+  const doorCollider = { minX:x0-0.17,maxX:x0+0.17,minZ:dz0,maxZ:dz1 };
+  let doorShut = false, referenceData = null, sleepYaw = -Math.PI/2;
+  let gltfSource = 'pending';
+  const assetStatus = { loaded:[], failed:[] };
+  const ready = (async () => {
+    try {
+      referenceData = await loadHomeReference(root);
+      doorPivot = referenceData.doorPivot;
+      colliders.push(...referenceData.colliders);
+      const { bySource, box } = referenceData;
+      const tableModel = bySource.get('old_decorative_wooden_round_table');
+      tableModel.name = 'home-table-model'; table.attach(tableModel);
+      const stove = bySource.get('clay_cooking_stove'); stove.name='home-stove-model'; chulha.attach(stove);
+      const firstBed = box(bySource.get('blanket_and_pillows'));
+      const secondBed = box(bySource.get('blanket_and_pillows (1)'));
+      const c = firstBed.getCenter(new THREE.Vector3()); mat.position.set(c.x,0.028,c.z);
+      secondBed.getCenter(c); myMat.position.set(c.x,0.028,c.z);
+      const axis = new THREE.Vector3(1,0,0).applyQuaternion(bySource.get('blanket_and_pillows (1)').getWorldQuaternion(new THREE.Quaternion()));
+      sleepYaw = Math.atan2(-axis.x,-axis.z);
+      // Retain target ownership while making the actual bedding surface raycastable.
+      mat.attach(bySource.get('blanket_and_pillows'));
+      myMat.attach(bySource.get('blanket_and_pillows (1)'));
+      sibLie();
+      const tb = box(tableModel); colliders.push({minX:tb.min.x,maxX:tb.max.x,minZ:tb.min.z,maxZ:tb.max.z,source:'table'});
+      const floorMaterial = bySource.get('floor_material');
+      let floorMat; floorMaterial.traverse(o=>{if(o.isMesh)floorMat=o.material;});
+      const floor = new THREE.Mesh(new THREE.PlaneGeometry(x1-x0,z1-z0),floorMat);
+      floor.name='home-floor-backing'; floor.rotation.x=-Math.PI/2; floor.position.set((x0+x1)/2,-0.004,(z0+z1)/2); floor.receiveShadow=true; root.add(floor);
+      // The reference material is recovered; every physical wall is visible from both sides.
+      meal.position.set(0,tb.max.y+0.008,0);
+      const food=fitModel(await loadModel('models/home/thali.glb'),{span:0.42}); meal.clear();meal.add(food);
+      const motherBox=box(mother);colliders.push({minX:motherBox.min.x,maxX:motherBox.max.x,minZ:motherBox.min.z,maxZ:motherBox.max.z,source:'mother'});
+      ctx.homeDoorVisual=doorPivot;
+      assetStatus.loaded.push('unity-home.gltf','thali.glb');
+      gltfSource='reconstructed Unity/glTF hierarchy, uniform scale 1.4';
+      window.__homeGltf={url:'models/home/unity-home.gltf',source:gltfSource,mode:'unity-reference',corrections:referenceData.corrections,materials:referenceData.materialCompatibility};
+      ctx.refreshColliders();
+    } catch(e) { assetStatus.failed.push('unity-home.gltf'); console.error('[home] reference failed',e); throw e; }
+  })();
   // ---------- interactions ----------
   // setPhase resets the phase-local clock; reset restores flags for a fresh playthrough.
   const S = { phase: 'idle' };
@@ -685,14 +232,13 @@ export function buildHome(ctx) {
       enterFade: undefined,
     });
     meal.visible = false;
-    glowMat.opacity = 0.9;
-    glowDoor.visible = true;
-    doorPivot.visible = false;
+    doorPivot.visible = true;
+    ctx.homeDoorAngle = 0;
     lampL.intensity = 0;
     stoveL.intensity = 0;
     windowL.intensity = 0;
     doorGlow.intensity = 0;
-    mother.rotation.y = Math.PI / 2 + 0.5;
+    mother.rotation.y = motherYaw;
     mother.userData.look = 0;
     if (eyelids) eyelids.style.setProperty('--lid', '0');
     sibLie();
@@ -707,7 +253,7 @@ export function buildHome(ctx) {
       // Extra: you open your eyes on the floor by the door. It is night. They were waiting.
       if (eyelids) eyelids.style.setProperty('--lid', '1');
       ui.fade(false);
-      player.place(x0 + 0.75, 12.1, -Math.PI / 2 - 0.25, 0.82);
+      player.place(x0 + 0.9, (dz0 + dz1) / 2, -Math.PI / 2 - 0.25, 0.82);
       player.canMove = false;
       player.pitch = -0.1;
       ctx.police.forEach((p) => {
@@ -718,11 +264,10 @@ export function buildHome(ctx) {
       bagCtl.stow = 0;
       player.speedScale = 1;
       player.canRun = false;
-      glowDoor.visible = false;
       doorPivot.visible = true;
       setDoor(true);
       sibSit();
-      mother.rotation.y = -0.2;
+      mother.rotation.y = Math.atan2(player.dolly.position.x-mother.position.x, player.dolly.position.z-mother.position.z);
       if (snd.yells) snd.yells.setVolume(0);
       setPhase('wake');
       return;
@@ -738,7 +283,6 @@ export function buildHome(ctx) {
     bagCtl.heavy = 0;
     player.speedScale = 1;
     player.canRun = false;
-    glowDoor.visible = false;
     doorPivot.visible = true;
     setDoor(true);
     audio.oneShot('doorWood', { volume: 0.8 });
@@ -752,7 +296,6 @@ export function buildHome(ctx) {
   }
 
   function update(dt, t, active = true) {
-    glowMat.opacity = 0.75 + 0.25 * Math.sin(t * 3);
     // ---- relief: safe inside, the body calms down — the heart slows and fades, a long breath out,
     // the lamp's warm light grows and the cold blue night air of the chase gives way to the room ----
     if (S.phase !== 'idle' && S.phase !== 'done' && active) {
@@ -767,16 +310,16 @@ export function buildHome(ctx) {
         audio.oneShot('exhale', { volume: 0.55 });
     }
     doorGlow.intensity = S.phase === 'idle' ? 5 : 0;
-    flame.scale.set(1 + Math.sin(t * 17) * 0.1, 1.8 + Math.sin(t * 11) * 0.3, 1);
     if (!mother.userData.gltf) animateIdle(mother, t, dt);
     else mother.rotation.y += Math.sin(t * 0.7) * 0.0008;
+    doorPivot.rotation.y = ctx.homeDoorAngle || 0;
     if (S.phase === 'idle' || S.phase === 'done' || !active) return;
     S.t += dt;
     S.idle += dt;
     const entering = S.enter;
     S.enter = false;
     player.headWorld(head);
-    // A small cold pool by the barred window keeps the outside present as the lamp settles.
+    // A small cold pool by the source window keeps the outside present as the lamp settles.
     windowL.intensity = 1.15 - 0.3 * S.relief;
     const warm = 0.35 + 0.65 * S.relief;
     lampL.intensity = 5.8 * warm * (1 + 0.05 * Math.sin(t * 9) * Math.sin(t * 3.1));
@@ -827,7 +370,7 @@ export function buildHome(ctx) {
         if (S.t > 1.5) {
           player.canMove = true;
           setPhase('toTable');
-          thread.set(new THREE.Vector3(85, 0.5, 12.7));
+          thread.set(table.position.clone().setY(meal.position.y + 0.15));
           hint('Put the food on the table', 6);
         }
         break;
@@ -851,7 +394,7 @@ export function buildHome(ctx) {
         if (S.t > 1.3 && S.t - dt <= 1.3) {
           meal.visible = false;
           sibLie();
-          mother.rotation.y = Math.PI / 2 + 0.5;
+          mother.rotation.y = motherYaw;
         }
         if (S.t > 1.6 && S.t - dt <= 1.6) ui.subtitle('(later)', 1.8);
         if (S.t > 4.2 && S.t - dt <= 4.2) ui.thought('Tonight, we ate.', 3.5);
@@ -859,7 +402,7 @@ export function buildHome(ctx) {
           ui.subtitle('Mother: "Sleep now. Seven o\'clock tomorrow."', 3.5);
         if (S.t > 7) {
           setPhase('toMat');
-          thread.set(new THREE.Vector3(84.55, 0.3, 10.95));
+          thread.set(myMat.position.clone().setY(0.3));
           hint('Lie down on your mat', 6);
           player.canMove = true;
         }
@@ -875,11 +418,11 @@ export function buildHome(ctx) {
           bagCtl.stow = 1;
         }
         const k = ease(Math.min(1, S.t / 2));
-        player.dolly.position.lerpVectors(S.from, tmp.set(84.55, S.from.y, 10.95), k);
+        player.dolly.position.lerpVectors(S.from, tmp.set(myMat.position.x, S.from.y, myMat.position.z), k);
         if (!player.xr) {
           player.eye = lerp(S.fromEye, 0.32, k);
           player.pitch = lerp(0, 1.15, k);
-          player.yaw = lerp(S.fromYaw, -Math.PI / 2, k);
+          player.yaw = lerp(S.fromYaw, sleepYaw, k);
         }
         if (S.t > 2.2) {
           setPhase('rest');
@@ -903,7 +446,7 @@ export function buildHome(ctx) {
         if (S.t > 6.5) {
           player.canMove = true;
           setPhase('toTable');
-          thread.set(new THREE.Vector3(85, 0.5, 12.7));
+          thread.set(table.position.clone().setY(meal.position.y + 0.15));
           hint('Put the food on the table', 6);
         }
         break;
@@ -915,11 +458,12 @@ export function buildHome(ctx) {
           S.from = player.dolly.position.clone();
           S.fromYaw = player.yaw;
           // the nearest side of the table to where you clicked from
-          S.to =
-            Math.abs(S.from.x - 85) > Math.abs(S.from.z - 12.7)
-              ? new THREE.Vector3(S.from.x < 85 ? 84.15 : 85.85, 0, 12.7)
-              : new THREE.Vector3(85, 0, S.from.z < 12.7 ? 11.95 : 13.45);
-          S.toYaw = Math.atan2(-(85 - S.to.x), -(12.7 - S.to.z));
+          const tx = table.position.x, tz = table.position.z;
+          const half = new THREE.Box3().setFromObject(table).getSize(new THREE.Vector3()).multiplyScalar(0.5);
+          S.to = Math.abs(S.from.x-tx)>Math.abs(S.from.z-tz)
+            ? new THREE.Vector3(tx+(S.from.x<tx?-1:1)*(half.x+0.4),0,tz)
+            : new THREE.Vector3(tx,0,tz+(S.from.z<tz?-1:1)*(half.z+0.4));
+          S.toYaw = Math.atan2(-(tx-S.to.x),-(tz-S.to.z));
         }
         {
           const k = ease(Math.min(1, S.t / 0.6));
@@ -936,8 +480,8 @@ export function buildHome(ctx) {
           hands.set(0, {
             key: 'serve',
             mode: 'world',
-            pos: new THREE.Vector3(84.9, 0.5, 12.75),
-            rot: GRIP.toward(-1, head, table.position.clone().setY(0.4)),
+            pos: table.position.clone().add(new THREE.Vector3(-0.1, meal.position.y+0.1, 0.05)),
+            rot: GRIP.toward(-1, head, table.position.clone().setY(meal.position.y)),
             pose: 'grip',
             blend: 0.4,
           });
@@ -950,7 +494,7 @@ export function buildHome(ctx) {
           bagCtl.forceOpen = 0;
           hands.hide(0);
         }
-        if (S.t > 1.6) mother.rotation.y = damp(mother.rotation.y, Math.PI / 2 + 1.2, 1.5, dt);
+        if (S.t > 1.6) mother.rotation.y = damp(mother.rotation.y, Math.atan2(table.position.x-mother.position.x, table.position.z-mother.position.z), 1.5, dt);
         if (S.t > 2.0 && S.t - dt <= 2.0) ui.thought("She doesn't ask where it came from.", 4);
         // both editions end the same way at home: you eat together, lie down, and the day comes round again
         if (S.t > 4.5 && S.t - dt <= 4.5) ui.subtitle('Mother: "Sit. Eat."', 3);
@@ -1008,6 +552,10 @@ export function buildHome(ctx) {
   return {
     root,
     ready,
+    assetStatus,
+    get referenceData() { return referenceData; },
+    anchors: { table, mat, myMat, mother, chulha },
+    doorCollider,
     get gltfSource() {
       return gltfSource;
     },
