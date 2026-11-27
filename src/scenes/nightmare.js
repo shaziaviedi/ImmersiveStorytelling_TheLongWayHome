@@ -1,4 +1,5 @@
-import { HOME } from '../config/home-layout.js';
+import { CHASE_ROUTE, CHASE_BLOCKS, CHASE_LAYOUT_REVISION } from '../config/chase-layout.mjs';
+import { HOME, atHomeApproach } from '../config/home-layout.js';
 // Chase scene: route checkpoints and pursuit, plus the edition-specific nightmare beats.
 // Normal uses the scripted lanes; Extra adds looping, hiding, and the transition into the void.
 import * as THREE from 'three';
@@ -17,13 +18,7 @@ import { MARKET } from './street.js';
 import { buildLanes } from './lanes.js';
 import { loadChaseReference } from '../world/chase-reference.js';
 
-export const ROUTE = [
-  { x0: 40, x1: 54, z0: 7, z1: 9.6 },
-  { x0: 51.4, x1: 54, z0: -6, z1: 9.6 },
-  { x0: 51.4, x1: 68, z0: -6, z1: -3.4 },
-  { x0: 65.4, x1: 68, z0: -6, z1: 14 },
-  { x0: 65.4, x1: 82, z0: 11.4, z1: 14 },
-];
+export const ROUTE = CHASE_ROUTE;
 const CORNERS = [
   new THREE.Vector3(52.7, 0, 8.3),
   new THREE.Vector3(52.7, 0, -4.7),
@@ -49,6 +44,7 @@ export function buildNightmare(ctx) {
   scene.add(root);
   const colliders = [],
     buildings = [];
+  const closedHomeDoor={minX:HOME.x0-.17,maxX:HOME.x0+.17,minZ:HOME.door.z0,maxZ:HOME.door.z1};
   const B = new Batcher();
 
   // ---------- the city ----------
@@ -89,15 +85,19 @@ export function buildNightmare(ctx) {
         ...o,
       }),
     );
-  blk(46.7, 54, 9.6, 20);
-  blk(46.7, 51.4, -12, 7);
-  blk(51.4, 82, -12, -6);
-  blk(65.4, 81.4, 14, 20);
-  blk(54, 65.4, -3.4, 20, { period: LOOP.period });
-  blk(68, 81.4, -6, 11.4, { period: LOOP.period }); // the loop lane repeats every 8 m
-  blk(82, 96, -12, HOME.z0-1.4);
-  blk(82, 96, HOME.z1+1.2, 24);
-  blk(HOME.x1+2.2, 96, HOME.z0-1.4, HOME.z1+1.2); // clear of the source house and roof overhang
+  const blockRegions=[];
+  for(const [originalBlock,[a,b,c,d,period=0]]of CHASE_BLOCKS.entries()){
+    let regions=[[a,b,c,d]];
+    if(b>HOME.x0-.18){
+      const h={x0:HOME.x0-.18,x1:HOME.x1+(a>=82?2.2:.18),z0:HOME.z0-(a>=82?1.2:.18),z1:HOME.z1+(a>=82?1.2:.18)};
+      regions=regions.flatMap(([x0,x1,z0,z1])=>{
+        const ix0=Math.max(x0,h.x0),ix1=Math.min(x1,h.x1),iz0=Math.max(z0,h.z0),iz1=Math.min(z1,h.z1);
+        if(ix0>=ix1||iz0>=iz1)return[[x0,x1,z0,z1]];
+        return [[x0,ix0,z0,z1],[ix1,x1,z0,z1],[ix0,ix1,z0,iz0],[ix0,ix1,iz1,z1]].filter(([a,b,c,d])=>b-a>.12&&d-c>.12);
+      });
+    }
+    for(const [x0,x1,z0,z1]of regions){const first=buildings.length;blk(x0,x1,z0,z1,{period});blockRegions.push({x0,x1,z0,z1,period,originalBlock,owners:buildings.slice(first)});}
+  }
   buildings.forEach((m, i) => {
     m.userData.ph = i * 1.7;
     m.userData.spin = (rand() - 0.5) * 2;
@@ -650,7 +650,7 @@ export function buildNightmare(ctx) {
   const hint = (t, s = 5) => ui.hint(t, s),
     thought = (t, s) => ui.thought(t, s);
   const lanes = buildLanes(ctx, root, thought, () => {
-    if (!S.ended && !extra()) {
+    if (!S.ended && !extra() && atHomeApproach(player.headWorld(new THREE.Vector3()))) {
       S.ended = true;
       pursuit.stop();
       thread.set(null);
@@ -668,9 +668,10 @@ export function buildNightmare(ctx) {
     });
   }
   let referenceData = null;
-  const ready = loadChaseReference({root,buildings,statics,grounds,obstacles,route:ROUTE,laundry,lanes,placeholderWires})
+  const ready = loadChaseReference({root,buildings,statics,grounds,obstacles,route:ROUTE,laundry,lanes,placeholderWires,blockRegions})
     .then(data => { referenceData=data; ctx.refreshColliders(); return data; });
   function setPhase(p) {
+    if(S.phase!==p)ui.clearGuidance();
     S.phase = p;
     S.t = 0;
   }
@@ -827,14 +828,8 @@ export function buildNightmare(ctx) {
 
   function update(dt, t, active = true) {
     if (S.warp > 0.001 && S.phase !== 'collapse') {
-      buildings.forEach((m) => {
-        if (m.userData.calm && !extra()) return;
-        const w = S.warp,
-          ph = m.userData.ph;
-        m.rotation.z = w * 0.07 * Math.sin(t * 0.6 + ph);
-        m.rotation.x = w * 0.05 * Math.sin(t * 0.45 + ph * 1.3);
-        m.scale.y = 1 + w * 0.18 * Math.sin(t * 0.9 + ph);
-      });
+      // Solid architecture stays registered to its recovered collision footprint.
+      // The scripted collapse below still lifts/rotates the buildings at its original cue.
       laundry.forEach((c, i) => {
         c.rotation.x = 0.3 * S.warp * Math.sin(t * 2.3 + i);
       });
@@ -1155,8 +1150,8 @@ export function buildNightmare(ctx) {
       thought('Something is coming. It follows the light.', 3.5);
       hint(
         player.xr
-          ? 'Hold the bag to your chest to hide the light — and stay still'
-          : 'Hold R to hide the light — and stay still',
+          ? 'Hold the bag to your chest to hide the light and stay still'
+          : 'Hold R to hide the light and stay still',
         7,
       );
     }
@@ -1209,14 +1204,14 @@ export function buildNightmare(ctx) {
     switch (S.phase) {
       case 'chase':
         if (d < 0.9 && chasing && !lanes.safe && !ctx.noCatch) caught(); // (ctx.noCatch: automated route tests only)
-        if (!extra() && lanes.opened && !S.ended) {
+        if (!extra() && lanes.opened && !S.ended && atHomeApproach(head)) {
           S.ended = true;
           pursuit.stop();
           thread.set(null);
           setPhase('done');
           onEndFn && onEndFn('home');
         } // Normal: the door opens — home
-        if (head.x > HOME_DOOR.x - 1.1 && head.z > 11.4 && !S.ended) {
+        if (head.x > HOME_DOOR.x - 1.1 && atHomeApproach(head) && !S.ended) {
           if (extra() && S.hide === 'passed') {
             setPhase('collapse');
             startCollapse();
@@ -1337,6 +1332,11 @@ export function buildNightmare(ctx) {
   return {
     root,
     ready,
+    layoutRevision:CHASE_LAYOUT_REVISION,
+    route:ROUTE,
+    blockRegions,
+    obstacles,
+    grounds,
     get referenceData() { return referenceData; },
     update,
     start,
@@ -1351,8 +1351,11 @@ export function buildNightmare(ctx) {
     getColliders() {
       return [
         ...colliders,
+        ...(referenceData?.continuity?.colliders||[]),
+        ...(referenceData?.boundaries?.colliders||[]),
         ...closers.filter((c) => c.k >= 1).map((c) => c.col),
         ...lanes.colliders(),
+        ...(extra()&&S.phase!=='collapse'?[closedHomeDoor]:[]),
       ];
     },
     get phase() {

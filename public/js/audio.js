@@ -425,7 +425,7 @@ export class AudioEngine {
           this.buffers[name] = await this.ctx.decodeAudioData(await r.arrayBuffer());
           continue;
         } catch (e) {
-          console.warn('[audio] could not load', file, '— using placeholder');
+          console.warn('[audio] could not load', file, 'using placeholder');
         }
       }
       if (GEN[name]) this.buffers[name] = GEN[name](this.ctx);

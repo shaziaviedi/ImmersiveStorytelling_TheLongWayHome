@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { HOME, HOME_SCALE, homePoint } from '../src/config/home-layout.js';
 import { launchTestBrowser, TEST_URL, ARTIFACT_DIR } from './helpers/browser.mjs';
 const source=JSON.parse(fs.readFileSync('dev/fixtures/home-layout.json'));
-const manifest=JSON.parse(fs.readFileSync('public/models/home/unity-home-manifest.json'));
+const manifest=JSON.parse(fs.readFileSync('public/models/scene4/unity-home-manifest.json'));
 function bounds(id,parent=new THREE.Matrix4()) {
   const n=source.nodes[id], matrix=parent.clone().multiply(new THREE.Matrix4().compose(new THREE.Vector3(...n.translation||[0,0,0]),new THREE.Quaternion(...n.rotation||[0,0,0,1]),new THREE.Vector3(...n.scale||[1,1,1])));
   const b=new THREE.Box3();
@@ -18,7 +18,7 @@ const page=await browser.newPage({viewport:{width:1280,height:800}});
 const errors=[];
 page.on('pageerror',e=>errors.push(e.message));
 page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
-page.on('requestfailed',r=>{if(/models\/home/.test(r.url()))errors.push('asset request '+r.url());});
+page.on('requestfailed',r=>{if(/models\/scene4/.test(r.url()))errors.push('asset request '+r.url());});
 try {
   await page.goto(`${TEST_URL}/?debug&q=low&dtmax=0.25`);
   await page.waitForFunction(()=>window.__tlwh?.spaces.find(s=>s?.name==='home'),null,{timeout:180000});
@@ -66,7 +66,8 @@ try {
       home.update(1.0,1,true);check(w.audio.buffers.fabric?.duration>0&&w.audio.buffers.doorWood?.duration>0,'food/door one-shot sound buffers available');
       home.S.phase='toMat';const note=w.interactor.targets.find(t=>t.label==='Your page'&&t.enabled());note?.onPress();check(home.S.readPage,'notebook interaction preserved');
       home.S.phase='toMat';w.interactor.targets.find(t=>t.label==='Lie down'&&t.enabled())?.onPress();check(home.phase==='lying','sleep callback preserved');
-      home.reset();check(!home.getColliders().includes(home.doorCollider),'reset releases door collision');home.start();
+      home.setXRClose(true);home.reset();check(!home.S.xrClose,'reset clears stale VR close-eyes input');check(!home.getColliders().includes(home.doorCollider),'reset releases door collision');home.start();
+      home.S.phase='rest';home.S.holdC=0;w.player.keys={};home.setXRClose(true);home.update(.2,0,true);check(home.phase==='rest'&&home.S.holdC===0,'desktop ignores VR-only close-eyes input');home.stop();check(!home.S.xrClose,'scene exit releases VR close-eyes input');home.reset();home.start();
       let decoded=0;home.root.traverse(o=>{if(!o.isMesh)return;for(const m of Array.isArray(o.material)?o.material:[o.material])for(const key of ['map','normalMap','roughnessMap','metalnessMap','aoMap','emissiveMap'])if(m[key]){decoded++;check(m[key].image?.width>0,`decoded ${key} on ${o.name}`);}});
       check(decoded>100,'supplied textured assets replace placeholder surfaces');
       check(!home.root.getObjectByName('home-earth-floor'),'obsolete terrain overlay removed');

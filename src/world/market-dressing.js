@@ -1,3 +1,5 @@
+import { clothPieces } from './mesh-parts.js';
+import { fabricLibrary } from './fabric-library.js';
 import * as THREE from 'three';
 
 const box = object => { object.updateWorldMatrix(true, true); return new THREE.Box3().setFromObject(object); };
@@ -12,52 +14,8 @@ function place(object, x, z, floor = 0.006) {
 
 // Source laundry is baked into material batches. Recover its separate cloth pieces
 // so moving the supports does not stretch the fabric or leave it behind.
-function clothPieces(container) {
-  const pieces = [];
-  container.updateWorldMatrix(true, true);
-  container.traverse(mesh => {
-    if (!mesh.isMesh || !/Fabric/.test(mesh.material.name)) return;
-    const g = mesh.geometry, p = g.attributes.position, index = g.index;
-    const vertices = new Map(), triangles = [], parent = [];
-    const id = i => {
-      const key = [p.getX(i), p.getY(i), p.getZ(i)].map(v => Math.round(v * 10000)).join(',');
-      if (!vertices.has(key)) { const n = parent.length; vertices.set(key, n); parent.push(n); }
-      return vertices.get(key);
-    };
-    const root = n => parent[n] === n ? n : (parent[n] = root(parent[n]));
-    for (let i = 0; i < (index?.count || p.count); i += 3) {
-      const t = [0, 1, 2].map(k => index ? index.getX(i + k) : i + k), ids = t.map(id);
-      for (const n of ids.slice(1)) parent[root(n)] = root(ids[0]);
-      triangles.push(t);
-    }
-    const groups = new Map();
-    for (const t of triangles) { const key = root(id(t[0])); if (!groups.has(key)) groups.set(key, []); groups.get(key).push(...t); }
-    for (const ids of groups.values()) {
-      const geometry = new THREE.BufferGeometry();
-      for (const [name, a] of Object.entries(g.attributes)) {
-        const values = ids.flatMap(i => Array.from({ length: a.itemSize }, (_, c) => a[['getX', 'getY', 'getZ', 'getW'][c]](i)));
-        geometry.setAttribute(name, new THREE.Float32BufferAttribute(values, a.itemSize));
-      }
-      geometry.applyMatrix4(mesh.matrixWorld); geometry.computeBoundingBox();
-      const size = geometry.boundingBox.getSize(new THREE.Vector3());
-      // Ignore tiny decorative fragments; keep the authored cloth UVs and proportions.
-      if (size.y < 0.15) continue;
-      const center = geometry.boundingBox.getCenter(new THREE.Vector3());
-      geometry.translate(-center.x, -geometry.boundingBox.max.y, -center.z);
-      const piece = new THREE.Mesh(geometry, mesh.material); piece.castShadow = true;
-      const positions = geometry.attributes.position;
-      let xx = 0, zz = 0, xz = 0;
-      for (let i = 0; i < positions.count; i++) {
-        const x = positions.getX(i), z = positions.getZ(i); xx += x * x; zz += z * z; xz += x * z;
-      }
-      piece.userData.fabricAngle = Math.atan2(2 * xz, xx - zz) / 2;
-      pieces.push(piece);
-    }
-  });
-  return pieces;
-}
-
-export function dressMarket(root, find, lane, laneHangings) {
+export async function dressMarket(root, find, lane, laneHangings) {
+  const fabrics=await fabricLibrary();
   const report = { produce: [], fixtures: [], grounded: [], spans: [] };
   lane.updateWorldMatrix(true, true);
   const buildings = find('Buildings'), wallMeshes = [];
@@ -65,8 +23,8 @@ export function dressMarket(root, find, lane, laneHangings) {
   lane.traverse(o => { if (o.isMesh) wallMeshes.push(o); });
   const ray = new THREE.Raycaster();
   function floorHeight(x, z) {
-    ray.set(new THREE.Vector3(x, 0.35, z), new THREE.Vector3(0, -1, 0)); ray.far = 1;
-    const hit = ray.intersectObjects(wallMeshes).find(h => h.face.normal.clone().transformDirection(h.object.matrixWorld).y > 0.9);
+    ray.set(new THREE.Vector3(x, 1, z), new THREE.Vector3(0, -1, 0)); ray.far = 2;
+    const hit = ray.intersectObjects(wallMeshes).find(h => h.point.y<.6 && h.face.normal.clone().transformDirection(h.object.matrixWorld).y > 0.9);
     return Math.max(0, hit?.point.y || 0);
   }
   function ground(o, x, z) { place(o, x, z, floorHeight(x, z) + 0.006); }
@@ -125,7 +83,29 @@ export function dressMarket(root, find, lane, laneHangings) {
   mount('Clutter_26_utility_box_02', new THREE.Vector3(-1, 0, 0), 0.566);
   mount('Clutter_59_utility_box_01', new THREE.Vector3(-1, 0, 0), 1.55);
   mount('Clutter_60_power_box_01', new THREE.Vector3(0, 0, 1), 1.925);
-  mount('Clutter_61_utility_box_01', new THREE.Vector3(1, 0, 0), 1.65);
+  // The east medical frontage's left side is -Z as viewed from the plaza.
+  // Require real plaster/brick across the box footprint, not the garage shutter.
+  const medicalBox=find('Clutter_61_utility_box_01'),originalMedicalCenter=box(medicalBox).getCenter(new THREE.Vector3()),medicalSize=box(medicalBox).getSize(new THREE.Vector3());
+  let medicalWall=null;
+  for(let distance=.35;distance<=3;distance+=.1){
+    const candidate=originalMedicalCenter.clone();candidate.y=1.65;candidate.z-=distance;const hits=[];
+    for(const y of [-medicalSize.y/2,0,medicalSize.y/2])for(const z of [-medicalSize.z/2,0,medicalSize.z/2]){
+      ray.set(candidate.clone().add(new THREE.Vector3(0,y,z)),new THREE.Vector3(1,0,0));ray.far=5;
+      const hit=ray.intersectObjects(wallMeshes).find(h=>!/Decal/.test(h.object.material.name));
+      if(hit&&/Plaster|Brick|Concrete/.test(hit.object.material.name)&&Math.abs(hit.face.normal.clone().transformDirection(hit.object.matrixWorld).y)<.15)hits.push(hit);
+    }
+    if(hits.length===9&&Math.max(...hits.map(h=>h.point.x))-Math.min(...hits.map(h=>h.point.x))<.015){medicalWall={candidate,hit:hits[4],distance};break;}
+  }
+  if(!medicalWall)throw Error('No clear wall left of the medical garage for the electricity box');
+  const center=medicalWall.hit.point.clone();center.x-=medicalSize.x/2+.006;center.y=1.65;
+  shift(medicalBox,center.sub(box(medicalBox).getCenter(new THREE.Vector3())));
+  report.fixtures.push({object:medicalBox,wall:medicalWall.hit.point.clone(),direction:new THREE.Vector3(1,0,0)});
+  report.medicalBox={object:medicalBox,wallMaterial:medicalWall.hit.object.material.name,leftShift:medicalWall.distance,originalCenter:originalMedicalCenter};
+  report.chairs=[38,39,46].map(n=>find('Clutter').children.find(o=>(o.userData.sourceName||o.name).startsWith(`Clutter_${n}_`)));
+  for(const chair of report.chairs){const b=box(chair),c=b.getCenter(new THREE.Vector3());
+    const level=Math.max(...[b.min.x+.03,b.max.x-.03].flatMap(x=>[b.min.z+.03,b.max.z-.03].map(z=>floorHeight(x,z))));
+    shift(chair,new THREE.Vector3(0,level+.006-b.min.y,0));
+  }
 
   const broom = find('Clutter_28_plastic_broom');
   // The authored broom already has a lean along Z; turn that lean toward the west wall.
@@ -177,6 +157,30 @@ export function dressMarket(root, find, lane, laneHangings) {
   laneCloth.forEach((piece, i) => {
     dressing.attach(piece); piece.position.copy(laneLines[Math.floor(i / 4)]((i % 4 + 0.5) / 4)); piece.rotation.y = Math.PI / 2;
   });
+  // Open the seller's front. Cloth hangs only along the rear half of the booth's side.
+  const booth=find('Stall_Tailor'), boothBox=box(booth),frameBox=new THREE.Box3();
+  booth.traverse(o=>{if(!o.isMesh)return;const ms=Array.isArray(o.material)?o.material:[o.material];
+    if(ms.some(m=>m.name==='M_Post'))frameBox.union(box(o));
+    if(ms.some(m=>/Fabric/.test(m.name)||m.name==='M_Metal')){
+      const hiddenMaterials=ms.map(m=>{if(!/Fabric/.test(m.name)&&m.name!=='M_Metal')return m;const hidden=m.clone();hidden.visible=false;return hidden;});
+      o.material=Array.isArray(o.material)?hiddenMaterials:hiddenMaterials[0];
+    }
+  });
+  if(frameBox.isEmpty())throw Error('Tailor booth structural posts missing');
+  const sideX=frameBox.max.x-.04,backZ=frameBox.max.z-.04,frontZ=frameBox.min.z+.04,topY=2.1;
+  const a=new THREE.Vector3(sideX,topY,frontZ),b=new THREE.Vector3(sideX,topY,backZ);
+  // Both endpoints terminate inside the original booth corner posts.
+  const curve=new THREE.CatmullRomCurve3(Array.from({length:25},(_,i)=>a.clone().lerp(b,i/24).add(new THREE.Vector3(0,-.035*Math.sin(i/24*Math.PI),0))));
+  const line=new THREE.Mesh(new THREE.TubeGeometry(curve,24,.009,5,false),wireMaterial);line.name='tailor-supported-cloth-line';dressing.add(line);
+  const boothCloths=[];
+  for(let i=0;i<3;i++){const c=fabrics.hanging(Math.min(.42,(backZ-frontZ)*.24),.68,i+2);c.position.copy(curve.getPoint(.35+i*.23));c.rotation.y=Math.PI/2;c.name='tailor-side-fabric';dressing.add(c);boothCloths.push(c);}
+  // Original scattered scraps retain their shapes and UVs, with distinct authored fabric textures.
+  find('ClothScraps').traverse(o=>{if(o.isMesh){const m=o.material;const variant=/Fabric([0-7])/.exec(m.name)?.[1];o.material=fabrics.materials[variant===undefined?3:Number(variant)];}});
+  const piles=[];
+  for(const name of ['Counter_Tailor_L','Counter_Tailor_R']){const bb=box(find(name)),center=bb.getCenter(new THREE.Vector3());
+    for(let i=0;i<4;i++){const c=fabrics.piece({width:.36,height:.028,depth:.26,variant:i+(name.endsWith('L')?0:4)});c.position.set(center.x,bb.max.y+.002+i*.028,center.z);c.rotation.y=(i%2-.5)*.1;dressing.add(c);piles.push(c);}
+  }
+  report.booth={a,b,line,cloth:boothCloths,piles,frameBounds:frameBox,bounds:boothBox};
   report.cloth = cloth;
   report.flags = flags;
   return report;

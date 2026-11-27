@@ -21,7 +21,7 @@ export function makeAtmosphere() {
     home: [0.045, 2.0, 0.08, 0x8a6237, 0.32, 0.82],
     void: [0, 1, 0, 0xeee4d1, 0, 1],
   };
-  const tint = new THREE.Color();
+  const tint = new THREE.Color(),entryTint=new THREE.Color();
   const doorTint = new THREE.Color(profiles.door[3]);
   return {
     install(root) {
@@ -78,9 +78,10 @@ export function makeAtmosphere() {
         }
       });
     },
-    update(dt, time, name, door = 0) {
-      const p = profiles[name] || profiles.sweatshop,
-        d = profiles.door;
+    update(dt, time, name, door = 0,marketBlend=1) {
+      let p=profiles[name]||profiles.sweatshop;
+      if(name==='nightmare'&&marketBlend<1){const m=profiles.street;p=p.map((v,i)=>i===3?entryTint.setHex(m[3]).lerp(tint.setHex(v),marketBlend).getHex():THREE.MathUtils.lerp(m[i],v,marketBlend));}
+      const d = profiles.door;
       const k = 1 - Math.exp(-dt * 0.8);
       uniforms.airTime.value = time;
       uniforms.airWarmth.value = THREE.MathUtils.lerp(

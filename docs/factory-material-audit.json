@@ -1,0 +1,1011 @@
+{
+  "sourceRoot": "_raw_assets/public/models/scene1/Assets",
+  "originalArchive": "_raw_assets/prior/factory-material-recovery/0ee8d4e8dcba5d81.glb",
+  "policy": "Only source-authored non-white _Tint values restored. Missing albedo is not replaced. Unity sources unchanged.",
+  "materials": [
+    {
+      "material": "M_Desk_Metal_Runtime",
+      "unityMaterial": null,
+      "unityMaterialMissing": true,
+      "hasBaseTexture": false,
+      "hasNormal": true,
+      "hasORM": false,
+      "restoredTint": null,
+      "references": [],
+      "missingNamedBase": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Desk_Metal_BaseColor.png"
+    },
+    {
+      "material": "M_Chair_Metal_Runtime",
+      "unityMaterial": null,
+      "unityMaterialMissing": true,
+      "hasBaseTexture": true,
+      "hasNormal": true,
+      "hasORM": false,
+      "restoredTint": null,
+      "references": [],
+      "missingNamedBase": null
+    },
+    {
+      "material": "M_Workbench_Runtime",
+      "unityMaterial": null,
+      "unityMaterialMissing": true,
+      "hasBaseTexture": true,
+      "hasNormal": false,
+      "hasORM": true,
+      "restoredTint": null,
+      "references": [],
+      "missingNamedBase": null
+    },
+    {
+      "material": "M_Concrete_Runtime",
+      "unityMaterial": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Materials/M_Concrete.mat",
+      "unityMaterialMissing": false,
+      "hasBaseTexture": false,
+      "hasNormal": false,
+      "hasORM": true,
+      "restoredTint": null,
+      "references": [
+        {
+          "slot": "_BaseMap",
+          "guid": "1c719bde11abb474e9a1ee080358a621",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_ChipBaseMap",
+          "guid": "61d3b5026c8def541b01d46b70e0ba48",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png",
+          "available": true
+        },
+        {
+          "slot": "_ChipORMMap",
+          "guid": "0ed6ba0a0d5edf840912d562b9fc528f",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_OcclusionRoughnessMetallic.png",
+          "available": false
+        },
+        {
+          "slot": "_GrungeMap",
+          "guid": "d7886d37ca9ddd34ab15a2767afcd57d",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_NormalMap",
+          "guid": "cff076622a5e14e41bf2b4001576e633",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Concrete_Normal.png",
+          "available": false
+        },
+        {
+          "slot": "_ORMMap",
+          "guid": "8bfac928652f4554b9ef16a40f25df09",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Concrete_OcclusionRoughnessMetallic.png",
+          "available": true
+        }
+      ],
+      "missingNamedBase": null
+    },
+    {
+      "material": "M_Brick_Runtime",
+      "unityMaterial": null,
+      "unityMaterialMissing": true,
+      "hasBaseTexture": true,
+      "hasNormal": false,
+      "hasORM": true,
+      "restoredTint": null,
+      "references": [],
+      "missingNamedBase": null
+    },
+    {
+      "material": "M_Concrete_Runtime.001",
+      "unityMaterial": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Materials/M_Concrete.mat",
+      "unityMaterialMissing": false,
+      "hasBaseTexture": false,
+      "hasNormal": false,
+      "hasORM": true,
+      "restoredTint": null,
+      "references": [
+        {
+          "slot": "_BaseMap",
+          "guid": "1c719bde11abb474e9a1ee080358a621",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_ChipBaseMap",
+          "guid": "61d3b5026c8def541b01d46b70e0ba48",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png",
+          "available": true
+        },
+        {
+          "slot": "_ChipORMMap",
+          "guid": "0ed6ba0a0d5edf840912d562b9fc528f",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_OcclusionRoughnessMetallic.png",
+          "available": false
+        },
+        {
+          "slot": "_GrungeMap",
+          "guid": "d7886d37ca9ddd34ab15a2767afcd57d",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_NormalMap",
+          "guid": "cff076622a5e14e41bf2b4001576e633",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Concrete_Normal.png",
+          "available": false
+        },
+        {
+          "slot": "_ORMMap",
+          "guid": "8bfac928652f4554b9ef16a40f25df09",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Concrete_OcclusionRoughnessMetallic.png",
+          "available": true
+        }
+      ],
+      "missingNamedBase": null
+    },
+    {
+      "material": "M_Plaster_Runtime",
+      "unityMaterial": null,
+      "unityMaterialMissing": true,
+      "hasBaseTexture": false,
+      "hasNormal": false,
+      "hasORM": false,
+      "restoredTint": null,
+      "references": [],
+      "missingNamedBase": null
+    },
+    {
+      "material": "M_Concrete_Runtime.002",
+      "unityMaterial": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Materials/M_Concrete.mat",
+      "unityMaterialMissing": false,
+      "hasBaseTexture": false,
+      "hasNormal": false,
+      "hasORM": true,
+      "restoredTint": null,
+      "references": [
+        {
+          "slot": "_BaseMap",
+          "guid": "1c719bde11abb474e9a1ee080358a621",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_ChipBaseMap",
+          "guid": "61d3b5026c8def541b01d46b70e0ba48",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png",
+          "available": true
+        },
+        {
+          "slot": "_ChipORMMap",
+          "guid": "0ed6ba0a0d5edf840912d562b9fc528f",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_OcclusionRoughnessMetallic.png",
+          "available": false
+        },
+        {
+          "slot": "_GrungeMap",
+          "guid": "d7886d37ca9ddd34ab15a2767afcd57d",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_NormalMap",
+          "guid": "cff076622a5e14e41bf2b4001576e633",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Concrete_Normal.png",
+          "available": false
+        },
+        {
+          "slot": "_ORMMap",
+          "guid": "8bfac928652f4554b9ef16a40f25df09",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Concrete_OcclusionRoughnessMetallic.png",
+          "available": true
+        }
+      ],
+      "missingNamedBase": null
+    },
+    {
+      "material": "M_Wood_Dark_Runtime",
+      "unityMaterial": null,
+      "unityMaterialMissing": true,
+      "hasBaseTexture": false,
+      "hasNormal": false,
+      "hasORM": false,
+      "restoredTint": null,
+      "references": [],
+      "missingNamedBase": null
+    },
+    {
+      "material": "M_Wood_Runtime",
+      "unityMaterial": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Materials/M_Wood.mat",
+      "unityMaterialMissing": false,
+      "hasBaseTexture": true,
+      "hasNormal": true,
+      "hasORM": false,
+      "restoredTint": null,
+      "references": [
+        {
+          "slot": "_BaseMap",
+          "guid": "6424f2905a84a8a4ea56af4e3f0cab96",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_WoodGrain_BaseColor.png",
+          "available": true
+        },
+        {
+          "slot": "_ChipBaseMap",
+          "guid": "61d3b5026c8def541b01d46b70e0ba48",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png",
+          "available": true
+        },
+        {
+          "slot": "_ChipORMMap",
+          "guid": "0ed6ba0a0d5edf840912d562b9fc528f",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_OcclusionRoughnessMetallic.png",
+          "available": false
+        },
+        {
+          "slot": "_GrungeMap",
+          "guid": "d7886d37ca9ddd34ab15a2767afcd57d",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_NormalMap",
+          "guid": "92c6bd92be8c9054d9f15909716c10d3",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_WoodGrain_Normal.png",
+          "available": true
+        },
+        {
+          "slot": "_ORMMap",
+          "guid": "e1e0da58f4865b24f858d202a12ed953",
+          "path": null,
+          "available": false
+        }
+      ],
+      "missingNamedBase": null
+    },
+    {
+      "material": "M_Concrete_Runtime.003",
+      "unityMaterial": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Materials/M_Concrete.mat",
+      "unityMaterialMissing": false,
+      "hasBaseTexture": false,
+      "hasNormal": false,
+      "hasORM": true,
+      "restoredTint": null,
+      "references": [
+        {
+          "slot": "_BaseMap",
+          "guid": "1c719bde11abb474e9a1ee080358a621",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_ChipBaseMap",
+          "guid": "61d3b5026c8def541b01d46b70e0ba48",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png",
+          "available": true
+        },
+        {
+          "slot": "_ChipORMMap",
+          "guid": "0ed6ba0a0d5edf840912d562b9fc528f",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_OcclusionRoughnessMetallic.png",
+          "available": false
+        },
+        {
+          "slot": "_GrungeMap",
+          "guid": "d7886d37ca9ddd34ab15a2767afcd57d",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_NormalMap",
+          "guid": "cff076622a5e14e41bf2b4001576e633",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Concrete_Normal.png",
+          "available": false
+        },
+        {
+          "slot": "_ORMMap",
+          "guid": "8bfac928652f4554b9ef16a40f25df09",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Concrete_OcclusionRoughnessMetallic.png",
+          "available": true
+        }
+      ],
+      "missingNamedBase": null
+    },
+    {
+      "material": "M_Rust_Runtime",
+      "unityMaterial": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Materials/M_Rust.mat",
+      "unityMaterialMissing": false,
+      "hasBaseTexture": true,
+      "hasNormal": true,
+      "hasORM": false,
+      "restoredTint": null,
+      "references": [
+        {
+          "slot": "_BaseMap",
+          "guid": "61d3b5026c8def541b01d46b70e0ba48",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png",
+          "available": true
+        },
+        {
+          "slot": "_ChipBaseMap",
+          "guid": "61d3b5026c8def541b01d46b70e0ba48",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png",
+          "available": true
+        },
+        {
+          "slot": "_ChipORMMap",
+          "guid": "0ed6ba0a0d5edf840912d562b9fc528f",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_OcclusionRoughnessMetallic.png",
+          "available": false
+        },
+        {
+          "slot": "_GrungeMap",
+          "guid": "d7886d37ca9ddd34ab15a2767afcd57d",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_NormalMap",
+          "guid": "c8c0d81814994da4c8c8c8a93f499e90",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_ORMMap",
+          "guid": "0ed6ba0a0d5edf840912d562b9fc528f",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_OcclusionRoughnessMetallic.png",
+          "available": false
+        }
+      ],
+      "missingNamedBase": null
+    },
+    {
+      "material": "M_Hazard_Runtime",
+      "unityMaterial": null,
+      "unityMaterialMissing": true,
+      "hasBaseTexture": true,
+      "hasNormal": false,
+      "hasORM": true,
+      "restoredTint": null,
+      "references": [],
+      "missingNamedBase": null
+    },
+    {
+      "material": "M_Concrete_Runtime.004",
+      "unityMaterial": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Materials/M_Concrete.mat",
+      "unityMaterialMissing": false,
+      "hasBaseTexture": false,
+      "hasNormal": false,
+      "hasORM": true,
+      "restoredTint": null,
+      "references": [
+        {
+          "slot": "_BaseMap",
+          "guid": "1c719bde11abb474e9a1ee080358a621",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_ChipBaseMap",
+          "guid": "61d3b5026c8def541b01d46b70e0ba48",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png",
+          "available": true
+        },
+        {
+          "slot": "_ChipORMMap",
+          "guid": "0ed6ba0a0d5edf840912d562b9fc528f",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_OcclusionRoughnessMetallic.png",
+          "available": false
+        },
+        {
+          "slot": "_GrungeMap",
+          "guid": "d7886d37ca9ddd34ab15a2767afcd57d",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_NormalMap",
+          "guid": "cff076622a5e14e41bf2b4001576e633",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Concrete_Normal.png",
+          "available": false
+        },
+        {
+          "slot": "_ORMMap",
+          "guid": "8bfac928652f4554b9ef16a40f25df09",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Concrete_OcclusionRoughnessMetallic.png",
+          "available": true
+        }
+      ],
+      "missingNamedBase": null
+    },
+    {
+      "material": "M_Rust_Runtime.001",
+      "unityMaterial": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Materials/M_Rust.mat",
+      "unityMaterialMissing": false,
+      "hasBaseTexture": true,
+      "hasNormal": true,
+      "hasORM": false,
+      "restoredTint": null,
+      "references": [
+        {
+          "slot": "_BaseMap",
+          "guid": "61d3b5026c8def541b01d46b70e0ba48",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png",
+          "available": true
+        },
+        {
+          "slot": "_ChipBaseMap",
+          "guid": "61d3b5026c8def541b01d46b70e0ba48",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png",
+          "available": true
+        },
+        {
+          "slot": "_ChipORMMap",
+          "guid": "0ed6ba0a0d5edf840912d562b9fc528f",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_OcclusionRoughnessMetallic.png",
+          "available": false
+        },
+        {
+          "slot": "_GrungeMap",
+          "guid": "d7886d37ca9ddd34ab15a2767afcd57d",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_NormalMap",
+          "guid": "c8c0d81814994da4c8c8c8a93f499e90",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_ORMMap",
+          "guid": "0ed6ba0a0d5edf840912d562b9fc528f",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_OcclusionRoughnessMetallic.png",
+          "available": false
+        }
+      ],
+      "missingNamedBase": null
+    },
+    {
+      "material": "M_Steel_Dark_Runtime",
+      "unityMaterial": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Materials/M_Steel_Dark.mat",
+      "unityMaterialMissing": false,
+      "hasBaseTexture": false,
+      "hasNormal": true,
+      "hasORM": false,
+      "restoredTint": [
+        0.17254902,
+        0.18431373,
+        0.19215687,
+        1
+      ],
+      "references": [
+        {
+          "slot": "_BaseMap",
+          "guid": "fd3403340707c5144b3e8277788989b2",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_PaintedMetal_BaseColor.png",
+          "available": false
+        },
+        {
+          "slot": "_ChipBaseMap",
+          "guid": "61d3b5026c8def541b01d46b70e0ba48",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png",
+          "available": true
+        },
+        {
+          "slot": "_ChipORMMap",
+          "guid": "0ed6ba0a0d5edf840912d562b9fc528f",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_OcclusionRoughnessMetallic.png",
+          "available": false
+        },
+        {
+          "slot": "_GrungeMap",
+          "guid": "d7886d37ca9ddd34ab15a2767afcd57d",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_NormalMap",
+          "guid": "e5be8d88243ea424e879fa77136648a8",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_PaintedMetal_Normal.png",
+          "available": true
+        },
+        {
+          "slot": "_ORMMap",
+          "guid": "e28b16d24354cbc418ff376ab8bc73b5",
+          "path": null,
+          "available": false
+        }
+      ],
+      "missingNamedBase": null
+    },
+    {
+      "material": "M_Paint_Teal_Runtime",
+      "unityMaterial": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Materials/M_Paint_Teal.mat",
+      "unityMaterialMissing": false,
+      "hasBaseTexture": false,
+      "hasNormal": true,
+      "hasORM": false,
+      "restoredTint": [
+        0.24705882,
+        0.43529412,
+        0.42352942,
+        1
+      ],
+      "references": [
+        {
+          "slot": "_BaseMap",
+          "guid": "fd3403340707c5144b3e8277788989b2",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_PaintedMetal_BaseColor.png",
+          "available": false
+        },
+        {
+          "slot": "_ChipBaseMap",
+          "guid": "61d3b5026c8def541b01d46b70e0ba48",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png",
+          "available": true
+        },
+        {
+          "slot": "_ChipORMMap",
+          "guid": "0ed6ba0a0d5edf840912d562b9fc528f",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_OcclusionRoughnessMetallic.png",
+          "available": false
+        },
+        {
+          "slot": "_GrungeMap",
+          "guid": "d7886d37ca9ddd34ab15a2767afcd57d",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_NormalMap",
+          "guid": "e5be8d88243ea424e879fa77136648a8",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_PaintedMetal_Normal.png",
+          "available": true
+        },
+        {
+          "slot": "_ORMMap",
+          "guid": "e28b16d24354cbc418ff376ab8bc73b5",
+          "path": null,
+          "available": false
+        }
+      ],
+      "missingNamedBase": null
+    },
+    {
+      "material": "M_Paint_Yellow_Runtime",
+      "unityMaterial": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Materials/M_Paint_Yellow.mat",
+      "unityMaterialMissing": false,
+      "hasBaseTexture": false,
+      "hasNormal": true,
+      "hasORM": false,
+      "restoredTint": [
+        0.70980394,
+        0.5176471,
+        0.12156863,
+        1
+      ],
+      "references": [
+        {
+          "slot": "_BaseMap",
+          "guid": "fd3403340707c5144b3e8277788989b2",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_PaintedMetal_BaseColor.png",
+          "available": false
+        },
+        {
+          "slot": "_ChipBaseMap",
+          "guid": "61d3b5026c8def541b01d46b70e0ba48",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png",
+          "available": true
+        },
+        {
+          "slot": "_ChipORMMap",
+          "guid": "0ed6ba0a0d5edf840912d562b9fc528f",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_OcclusionRoughnessMetallic.png",
+          "available": false
+        },
+        {
+          "slot": "_GrungeMap",
+          "guid": "d7886d37ca9ddd34ab15a2767afcd57d",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_NormalMap",
+          "guid": "e5be8d88243ea424e879fa77136648a8",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_PaintedMetal_Normal.png",
+          "available": true
+        },
+        {
+          "slot": "_ORMMap",
+          "guid": "e28b16d24354cbc418ff376ab8bc73b5",
+          "path": null,
+          "available": false
+        }
+      ],
+      "missingNamedBase": null
+    },
+    {
+      "material": "M_Steel_Dark_Runtime.001",
+      "unityMaterial": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Materials/M_Steel_Dark.mat",
+      "unityMaterialMissing": false,
+      "hasBaseTexture": false,
+      "hasNormal": true,
+      "hasORM": false,
+      "restoredTint": [
+        0.17254902,
+        0.18431373,
+        0.19215687,
+        1
+      ],
+      "references": [
+        {
+          "slot": "_BaseMap",
+          "guid": "fd3403340707c5144b3e8277788989b2",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_PaintedMetal_BaseColor.png",
+          "available": false
+        },
+        {
+          "slot": "_ChipBaseMap",
+          "guid": "61d3b5026c8def541b01d46b70e0ba48",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png",
+          "available": true
+        },
+        {
+          "slot": "_ChipORMMap",
+          "guid": "0ed6ba0a0d5edf840912d562b9fc528f",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_OcclusionRoughnessMetallic.png",
+          "available": false
+        },
+        {
+          "slot": "_GrungeMap",
+          "guid": "d7886d37ca9ddd34ab15a2767afcd57d",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_NormalMap",
+          "guid": "e5be8d88243ea424e879fa77136648a8",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_PaintedMetal_Normal.png",
+          "available": true
+        },
+        {
+          "slot": "_ORMMap",
+          "guid": "e28b16d24354cbc418ff376ab8bc73b5",
+          "path": null,
+          "available": false
+        }
+      ],
+      "missingNamedBase": null
+    },
+    {
+      "material": "M_Door_Metal_Single_Runtime",
+      "unityMaterial": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Materials/M_Door_Metal_Single.mat",
+      "unityMaterialMissing": false,
+      "hasBaseTexture": true,
+      "hasNormal": false,
+      "hasORM": true,
+      "restoredTint": null,
+      "references": [
+        {
+          "slot": "_BaseMap",
+          "guid": "3694679ce14c67a4d9cde76b7c097b78",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_BumpMap",
+          "guid": "def579ee2ba6b404e887155b7b55603d",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Door_Metal_Single_Normal.png",
+          "available": false
+        },
+        {
+          "slot": "_MainTex",
+          "guid": "3694679ce14c67a4d9cde76b7c097b78",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_MetallicGlossMap",
+          "guid": "96d198a5f9e6eff47967d20ff109879f",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Door_Metal_Single_MetallicSmoothness.png",
+          "available": true
+        },
+        {
+          "slot": "_OcclusionMap",
+          "guid": "8199c315694b07a489b14a6a1b1eabff",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Door_Metal_Single_Occlusion.png",
+          "available": false
+        }
+      ],
+      "missingNamedBase": null
+    },
+    {
+      "material": "M_Window_Steel_C_Runtime",
+      "unityMaterial": null,
+      "unityMaterialMissing": true,
+      "hasBaseTexture": false,
+      "hasNormal": false,
+      "hasORM": false,
+      "restoredTint": null,
+      "references": [],
+      "missingNamedBase": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Window_Steel_C_BaseColor.png"
+    },
+    {
+      "material": "M_Glass_Dirty_Runtime",
+      "unityMaterial": null,
+      "unityMaterialMissing": true,
+      "hasBaseTexture": false,
+      "hasNormal": false,
+      "hasORM": false,
+      "restoredTint": null,
+      "references": [],
+      "missingNamedBase": null
+    },
+    {
+      "material": "M_Clock_Wall_Runtime",
+      "unityMaterial": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Materials/M_Clock_Wall.mat",
+      "unityMaterialMissing": false,
+      "hasBaseTexture": true,
+      "hasNormal": false,
+      "hasORM": false,
+      "restoredTint": null,
+      "references": [
+        {
+          "slot": "_BaseMap",
+          "guid": "7f5308928bbd5cd40b7d09e8357179fc",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_BumpMap",
+          "guid": "bf8733352a9d11c41954ae74832b6f5b",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_MainTex",
+          "guid": "7f5308928bbd5cd40b7d09e8357179fc",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_MetallicGlossMap",
+          "guid": "d7d6e442ab8eef54f998127087c9457a",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Clock_Wall_MetallicSmoothness.png",
+          "available": false
+        },
+        {
+          "slot": "_OcclusionMap",
+          "guid": "56addb33dfa86a945bb1357855c168df",
+          "path": null,
+          "available": false
+        }
+      ],
+      "missingNamedBase": null
+    },
+    {
+      "material": "M_Lamp_Fluorescent_Runtime",
+      "unityMaterial": null,
+      "unityMaterialMissing": true,
+      "hasBaseTexture": true,
+      "hasNormal": false,
+      "hasORM": false,
+      "restoredTint": null,
+      "references": [],
+      "missingNamedBase": null
+    },
+    {
+      "material": "M_Fuse_Box_Runtime",
+      "unityMaterial": null,
+      "unityMaterialMissing": true,
+      "hasBaseTexture": true,
+      "hasNormal": false,
+      "hasORM": true,
+      "restoredTint": null,
+      "references": [],
+      "missingNamedBase": null
+    },
+    {
+      "material": "M_Shelf_Rack_B_Runtime",
+      "unityMaterial": null,
+      "unityMaterialMissing": true,
+      "hasBaseTexture": false,
+      "hasNormal": true,
+      "hasORM": true,
+      "restoredTint": null,
+      "references": [],
+      "missingNamedBase": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Shelf_Rack_B_BaseColor.png"
+    },
+    {
+      "material": "M_Crate_Wood_Small_Runtime",
+      "unityMaterial": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Materials/M_Crate_Wood_Small.mat",
+      "unityMaterialMissing": false,
+      "hasBaseTexture": true,
+      "hasNormal": false,
+      "hasORM": false,
+      "restoredTint": null,
+      "references": [
+        {
+          "slot": "_BaseMap",
+          "guid": "95adccf3d5f032f4289e779489790952",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_BumpMap",
+          "guid": "490cbb79784839a41bc1200a5234f1da",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Crate_Wood_Small_Normal.png",
+          "available": false
+        },
+        {
+          "slot": "_MainTex",
+          "guid": "95adccf3d5f032f4289e779489790952",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_MetallicGlossMap",
+          "guid": "63313c19fb194bc46a41884641991d9c",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Crate_Wood_Small_MetallicSmoothness.png",
+          "available": false
+        },
+        {
+          "slot": "_OcclusionMap",
+          "guid": "6d2030ee717512444b610b5de84baf53",
+          "path": null,
+          "available": false
+        }
+      ],
+      "missingNamedBase": null
+    },
+    {
+      "material": "M_Hand_Truck_Runtime",
+      "unityMaterial": null,
+      "unityMaterialMissing": true,
+      "hasBaseTexture": true,
+      "hasNormal": false,
+      "hasORM": false,
+      "restoredTint": null,
+      "references": [],
+      "missingNamedBase": null
+    },
+    {
+      "material": "M_Bucket_Metal_Runtime",
+      "unityMaterial": null,
+      "unityMaterialMissing": true,
+      "hasBaseTexture": false,
+      "hasNormal": true,
+      "hasORM": true,
+      "restoredTint": null,
+      "references": [],
+      "missingNamedBase": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Bucket_Metal_BaseColor.png"
+    },
+    {
+      "material": "M_Galvanized_Runtime",
+      "unityMaterial": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Materials/M_Galvanized.mat",
+      "unityMaterialMissing": false,
+      "hasBaseTexture": false,
+      "hasNormal": true,
+      "hasORM": false,
+      "restoredTint": [
+        0.5411765,
+        0.5647059,
+        0.5803922,
+        1
+      ],
+      "references": [
+        {
+          "slot": "_BaseMap",
+          "guid": "fd3403340707c5144b3e8277788989b2",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_PaintedMetal_BaseColor.png",
+          "available": false
+        },
+        {
+          "slot": "_ChipBaseMap",
+          "guid": "61d3b5026c8def541b01d46b70e0ba48",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png",
+          "available": true
+        },
+        {
+          "slot": "_ChipORMMap",
+          "guid": "0ed6ba0a0d5edf840912d562b9fc528f",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_OcclusionRoughnessMetallic.png",
+          "available": false
+        },
+        {
+          "slot": "_GrungeMap",
+          "guid": "d7886d37ca9ddd34ab15a2767afcd57d",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_NormalMap",
+          "guid": "e5be8d88243ea424e879fa77136648a8",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_PaintedMetal_Normal.png",
+          "available": true
+        },
+        {
+          "slot": "_ORMMap",
+          "guid": "e28b16d24354cbc418ff376ab8bc73b5",
+          "path": null,
+          "available": false
+        }
+      ],
+      "missingNamedBase": null
+    },
+    {
+      "material": "M_Steel_Dark_Runtime.002",
+      "unityMaterial": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Materials/M_Steel_Dark.mat",
+      "unityMaterialMissing": false,
+      "hasBaseTexture": false,
+      "hasNormal": true,
+      "hasORM": false,
+      "restoredTint": [
+        0.17254902,
+        0.18431373,
+        0.19215687,
+        1
+      ],
+      "references": [
+        {
+          "slot": "_BaseMap",
+          "guid": "fd3403340707c5144b3e8277788989b2",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_PaintedMetal_BaseColor.png",
+          "available": false
+        },
+        {
+          "slot": "_ChipBaseMap",
+          "guid": "61d3b5026c8def541b01d46b70e0ba48",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_BaseColor.png",
+          "available": true
+        },
+        {
+          "slot": "_ChipORMMap",
+          "guid": "0ed6ba0a0d5edf840912d562b9fc528f",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_Rust_OcclusionRoughnessMetallic.png",
+          "available": false
+        },
+        {
+          "slot": "_GrungeMap",
+          "guid": "d7886d37ca9ddd34ab15a2767afcd57d",
+          "path": null,
+          "available": false
+        },
+        {
+          "slot": "_NormalMap",
+          "guid": "e5be8d88243ea424e879fa77136648a8",
+          "path": "_raw_assets/public/models/scene1/Assets/Dzendor/StylizedFactory/Textures/T_PaintedMetal_Normal.png",
+          "available": true
+        },
+        {
+          "slot": "_ORMMap",
+          "guid": "e28b16d24354cbc418ff376ab8bc73b5",
+          "path": null,
+          "available": false
+        }
+      ],
+      "missingNamedBase": null
+    },
+    {
+      "material": "Folded_Cloth_Piles_Runtime",
+      "unityMaterial": null,
+      "unityMaterialMissing": true,
+      "hasBaseTexture": true,
+      "hasNormal": true,
+      "hasORM": false,
+      "restoredTint": null,
+      "references": [],
+      "missingNamedBase": null
+    },
+    {
+      "material": "Folded_Cloth_Piles_Runtime.001",
+      "unityMaterial": null,
+      "unityMaterialMissing": true,
+      "hasBaseTexture": true,
+      "hasNormal": true,
+      "hasORM": false,
+      "restoredTint": null,
+      "references": [],
+      "missingNamedBase": null
+    }
+  ]
+}

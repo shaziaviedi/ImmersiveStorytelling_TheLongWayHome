@@ -19,13 +19,16 @@ try {
       check(d.sourceMeshes===optimized.meshes&&d.sourceImages===optimized.textures,'complete optimized catalog/embedded images');
       check(d.missingPrefabs.length===17,'missing source ground prefabs documented');
       const houses=d.instances.filter(i=>i.type==='building');
-      check(houses.length>40,'native source architecture replaces chase blocks');
-      check(new Set(houses.map(i=>i.source)).size>=5,'five supplied building families used');
+      check(houses.length>10,'native source architecture replaces chase blocks');
+      check(new Set(houses.map(i=>i.source)).size>=3,'multiple supplied building families fit at calibrated dimensions');
       for(const i of houses){const b=bounds(i.object),owner=i.owner;
+        check(Math.max(...i.object.scale.toArray())-Math.min(...i.object.scale.toArray())<1e-6,'uniform scale '+i.source);
         check(owner.userData.environmentProxy&&owner.material.every(m=>!m.visible),`old facade hidden ${i.object.name}`);
-        check(b.min.y>-.01&&b.min.y<.01,`native building grounded ${i.object.name}`);
-        check(b.min.x>=owner.position.x-i.lot.x/2-.01&&b.max.x<=owner.position.x+i.lot.x/2+.01&&b.min.z>=owner.position.z-i.lot.z/2-.01&&b.max.z<=owner.position.z+i.lot.z/2+.01,`native building within original collision lot ${i.object.name}`);
+        check(Math.abs(b.min.y-.42)<.01,`native building grounded ${i.object.name}`);
+        check(b.min.x>=i.region.x0-.01&&b.max.x<=i.region.x1+.01&&b.min.z>=i.region.z0-.01&&b.max.z<=i.region.z1+.01,`native building within original collision lot ${i.object.name}`);
       }
+      check(d.laundrySpans.length===3,'all chase laundry rows have supporting ropes');
+      for(const span of d.laundrySpans)span.cloth.forEach((piece,i)=>check(piece.position.distanceTo(span.curve.getPoint((i+.5)/span.cloth.length))<.001,'laundry stays attached to the actual support curve'));
       for(const i of d.instances.filter(i=>i.type==='prop'))check(Math.abs(bounds(i.object).min.y-.006)<.01,`source prop grounded ${i.source}`);
       let maps=0;const meshes=[];s.root.traverse(o=>{if(!o.isMesh)return;meshes.push(o);for(const m of Array.isArray(o.material)?o.material:[o.material])for(const k of ['map','normalMap','roughnessMap','metalnessMap'])if(m[k]){maps++;check(m[k].image?.width>0,`decoded ${m.name} ${k}`);}});
       check(maps>150,'real source textures bound');

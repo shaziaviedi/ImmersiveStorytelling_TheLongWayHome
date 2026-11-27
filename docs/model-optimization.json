@@ -10,10 +10,10 @@
   "models": [
     {
       "input": "public/models/factory/factory.glb",
-      "output": "public/models/factory/factory.glb",
-      "before": 52242672,
-      "after": 2827636,
-      "version": "91cdd136bca4d1e4",
+      "output": "public/models/scene1/factory.glb",
+      "before": 52237652,
+      "after": 2828260,
+      "version": "a7c7d4eec081ba3a",
       "verification": {
         "nodes": 44,
         "maxLocalPositionError": 0.0003528594970703125,
@@ -32,7 +32,7 @@
     },
     {
       "input": "public/models/market/market.gltf",
-      "output": "public/models/market/market.glb",
+      "output": "public/models/scene2/market.glb",
       "before": 179010949,
       "after": 40107576,
       "version": "db6693a37e897ca4",
@@ -76,7 +76,7 @@
     },
     {
       "input": "public/models/home/unity-home.gltf",
-      "output": "public/models/home/unity-home.glb",
+      "output": "public/models/scene4/unity-home.glb",
       "before": 125007623,
       "after": 8004500,
       "version": "7cc0627f18b25442",
@@ -98,7 +98,7 @@
     },
     {
       "input": "public/models/home/front_doors_pack.glb",
-      "output": "public/models/home/front_doors_pack.glb",
+      "output": "public/models/scene4/front_doors_pack.glb",
       "before": 829432,
       "after": 184084,
       "version": "da0ca22fe8a27f0a",
@@ -119,7 +119,7 @@
     },
     {
       "input": "public/models/home/thali.glb",
-      "output": "public/models/home/thali.glb",
+      "output": "public/models/scene4/thali.glb",
       "before": 9514988,
       "after": 647748,
       "version": "7c459fd1cb096063",

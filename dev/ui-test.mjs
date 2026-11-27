@@ -82,7 +82,7 @@ try {
   ]) {
     await page.setViewportSize({ width, height });
     const r = await page.evaluate(() => {
-      const ids = ['thought', 'subtitle', 'hint'];
+      const ids = ['hint', 'thought', 'subtitle'];
       const boxes = ids.map((id) => {
         const el = document.getElementById(id),
           b = el.getBoundingClientRect();

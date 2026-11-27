@@ -1,8 +1,9 @@
+import fs from 'node:fs';
 import { launchTestBrowser,TEST_URL,ARTIFACT_DIR } from './helpers/browser.mjs';
 const browser=await launchTestBrowser({args:['--autoplay-policy=no-user-gesture-required']});
 const page=await browser.newPage({viewport:{width:1280,height:800}}),errors=[];
 page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
-page.on('requestfailed',r=>{if(r.url().includes('/models/factory/'))errors.push(r.url());});
+page.on('requestfailed',r=>{if(r.url().includes('/models/scene1/'))errors.push(r.url());});
 try {
  await page.goto(`${TEST_URL}/?debug&q=low&dtmax=0.25`);
  await page.waitForFunction(()=>window.__tlwh?.spaces[0]?.referenceData||document.querySelector('#error')?.textContent,null,{timeout:180000});
@@ -23,8 +24,27 @@ try {
     let backZ=0,backCount=0;chair.object.traverse(o=>{if(!o.isMesh)return;const a=o.geometry.attributes.position;for(let i=0;i<a.count;i++){const v=new V().fromBufferAttribute(a,i).applyMatrix4(o.matrixWorld);if(v.y>chair.seat+.1){backZ+=v.z;backCount++;}}});
     check(backCount&&backZ/backCount>p.z+.03,`chair back behind seated worker ${p.x},${p.z}`);
    }
-   const fabricColors=new Set();s.anchors.leftPile.traverse(o=>{if(o.userData.sourceCloth)fabricColors.add(o.material.color.getHex());});
-   check(fabricColors.size>=4&&d.clothInstances.instanceColor,'fabric colors vary while sharing native geometry');
+   check(new Set(d.clothInstances.children.map(o=>o.material.map?.uuid)).size>=4,'fabric colors vary while sharing native geometry');
+   check(d.wageCloth.children.length===8,'eight source wage cloth layers');
+   const carrierBundle=s.root.getObjectByName('source-carried-factory-cloth');check(carrierBundle?.children.length===3&&carrierBundle.children.every(c=>c.userData.sourceCloth&&c.material.map?.image?.width>0),'decorative carrier uses imported folded fabric instead of a low-poly sphere');
+   const deskBounds=d.wageDeskBounds;
+   let pileMinY=Infinity,pileMaxY=-Infinity;
+   d.wageCloth.updateWorldMatrix(true,true);
+   for(const layer of d.wageCloth.children){
+    check(layer.userData.sourceCloth&&layer.name==='shared-imported-cloth'&&layer.geometry.attributes.position.count>24,'wage fabric is imported geometry');
+    check(layer.material.map?.image?.width>0&&layer.geometry.attributes.uv,'wage fabric has decoded source texture and UVs');
+    const a=layer.geometry.attributes.position;
+    for(let i=0;i<a.count;i++){const v=new V().fromBufferAttribute(a,i).applyMatrix4(layer.matrixWorld);pileMinY=Math.min(pileMinY,v.y);pileMaxY=Math.max(pileMaxY,v.y);
+     check(v.x>deskBounds.minX+.03&&v.x<deskBounds.maxX-.03&&v.z>deskBounds.minZ+.03&&v.z<deskBounds.maxZ-.03,'entire wage pile contained by tabletop');
+     check(v.x>5.68&&v.z>4.56,'pile clears cash tin, receipt spike, ledger and wage area');
+    }
+   }
+   check(Math.abs(pileMinY-d.wageSupport-.002)<.002&&Math.abs(pileMaxY-pileMinY-.2)<.005,'wage cloth grounded, believable stack thickness');
+   const restored=new Map();d.group.traverse(o=>{if(o.isMesh)for(const m of Array.isArray(o.material)?o.material:[o.material])if(/M_(Steel_Dark|Paint_Teal|Paint_Yellow)_Runtime/.test(m.name))restored.set(m.name,m);});
+   for(const [name,color]of Object.entries({Steel_Dark:[.17254902,.18431373,.19215687],Paint_Teal:[.24705882,.43529412,.42352942],Paint_Yellow:[.70980394,.5176471,.12156863]})){
+    const m=[...restored.values()].find(m=>m.name===`M_${name}_Runtime`);check(m&&[m.color.r,m.color.g,m.color.b].every((v,i)=>Math.abs(v-color[i])<.0001),`authored Unity ${name} tint retained separately`);
+   }
+
    check(s.anchors.playerMachine.getObjectByName('machine-furniture-placeholder').visible===false,'old machine furniture hidden');
    check(d.door.children[0].children[0].children.length>4,'native door includes its separate panel and hardware pieces');
    for(const y of [.8,1.5,2.4]){ray.set(new V(6.8,y,3.9),new V(1,0,0));ray.far=2;check(ray.intersectObject(d.door,true).length>0,`complete closed door surface at ${y}`);}
@@ -56,12 +76,19 @@ try {
    check(w.audio.buffers.machine?.duration>0||w.audio.buffers.factory?.duration>0,'factory audio buffers retained');
    let maps=0;d.group.traverse(o=>{if(!o.isMesh)return;for(const m of Array.isArray(o.material)?o.material:[o.material]){check(!m.vertexColors,'custom Unity vertex channels excluded from surface color');for(const k of ['map','normalMap','roughnessMap','metalnessMap','aoMap'])if(m[k]){maps++;check(m[k].image?.width>0,`decoded source ${k}`);}}});
    check(maps>50,'source PBR maps used');
+   const materialAudit=new Map();s.root.traverseVisible(o=>{if(!o.isMesh)return;for(const m of Array.isArray(o.material)?o.material:[o.material]){
+    const entry=materialAudit.get(m.uuid)||{name:m.name||'(procedural)',type:m.type,color:m.color?.toArray(),textured:!!m.map,normal:!!m.normalMap,meshes:0,uv:true};entry.meshes++;if(m.map||m.normalMap)entry.uv&&=!!o.geometry.attributes.uv;
+    for(const slot of ['map','normalMap','roughnessMap','metalnessMap','aoMap'])if(m[slot])check(m[slot].image?.width>0,`full scene decoded ${m.name} ${slot}`);
+    check(entry.uv,`full scene UVs ${m.name}`);materialAudit.set(m.uuid,entry);
+   }});
+
    w.setExplore(true);s.S.phase='idle';w.spaces.filter(Boolean).forEach(p=>p.root.visible=p===s);w.player.canMove=false;w.ui.fade(false);w.post.setCamera(w.camera);await w.renderer.compileAsync(w.scene,w.camera);
    check(!w.renderer.info.programs.some(p=>p.diagnostics&&!p.diagnostics.runnable),'factory source shaders compile');
-   return{fail,maps,deskSupport:d.deskSupport,chairSupport:d.chairSupport};
+   return{materialAudit:[...materialAudit.values()],fail,maps,deskSupport:d.deskSupport,chairSupport:d.chairSupport};
   },edition);
+  fs.writeFileSync(`${ARTIFACT_DIR}/factory-materials-${edition}.json`,JSON.stringify(result.materialAudit,null,2));
   if(result.fail.length)throw Error(`${edition}: ${result.fail.join('; ')}`);console.log(`PASS ${edition}: source factory furniture/PBR, pick-sew-fold/reset, bag/wages/door, routes and height; supports ${result.deskSupport}/${result.chairSupport}; ${result.maps} texture bindings`);
-  for(const[name,x,z,yaw,pitch]of[['seated',-6.57,2.07,0,-.12],['fabric',-6.55,2.35,.7,-.6],['aisle',-.2,3.5,0,0],['desk',5.1,2.8,Math.PI,-.1],['storage',5.9,-2.2,-.8,-.1],['door',6.8,3.9,-Math.PI/2,0]]){
+  for(const[name,x,z,yaw,pitch]of[['seated',-6.57,2.07,0,-.12],['fabric',-6.55,2.35,.7,-.6],['aisle',-.2,3.5,0,0],['desk',5.1,2.8,Math.PI,-.1],['storage',5.9,-2.2,-.8,-.1],['rolls',-3.1,-3.8,1,-.12],['overhead',0,2,0,.65],['door',6.8,3.9,-Math.PI/2,0]]){
    await page.evaluate(({x,z,yaw,pitch,name})=>{const w=window.__tlwh;w.player.place(x,z,yaw,name==='seated'?1.3:1.52);w.player.pitch=pitch;w.player.apply(0);},{x,z,yaw,pitch,name});await page.waitForTimeout(1000);await page.screenshot({path:`${ARTIFACT_DIR}/tlwh-factory-source-${edition}-${name}.png`,timeout:120000});
   }
  }

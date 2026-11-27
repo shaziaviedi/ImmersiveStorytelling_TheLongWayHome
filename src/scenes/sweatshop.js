@@ -1,7 +1,9 @@
+import { getFabricLibrary } from '../world/fabric-library.js';
 // Factory scene: sewing, daydreams, wages, and collecting the bag before the shift ends.
 import * as THREE from 'three';
 import * as TX from '../world/textures.js';
 import { loadFactoryReference } from '../world/factory-reference.js';
+import { PhysicalSewing } from '../systems/physical/sewing.mjs';
 import { GRIP } from '../characters/first-person.js';
 import {
   lerp,
@@ -1027,18 +1029,7 @@ export function buildSweatshop(ctx) {
         TOP + 0.02,
         DESK.z + 0.1 + r * 0.035,
       );
-  // a stack of finished pieces waiting to be counted
-  for (let k = 0; k < 8; k++)
-    B.add(
-      G.box(0.32, 0.022, 0.2),
-      fabM[k % fabM.length],
-      DESK.x + 0.05,
-      TOP + 0.011 + k * 0.022,
-      DESK.z - 0.22,
-      0,
-      (rr() - 0.5) * 0.2,
-      0,
-    );
+  // The source folded-cloth pile is fitted to the wage desk in loadFactoryReference.
   // cold tube lamp over the counter on chains (mixed colour temperature with the warm bulbs)
   B.add(G.box(1.25, 0.05, 0.09), M(0xd8d8d0), DESK.x, 2.62, DESK.z - 0.1);
   [-0.55, 0.55].forEach((dx) =>
@@ -1309,10 +1300,11 @@ export function buildSweatshop(ctx) {
 
   // ---------- walking worker with a bundle, a woman folding at the cutting table ----------
   const carrier = makePerson({ top: 0x6a7d9a, bottom: 0xe9e1cf, skin: 0x6e4228, scale: 1.3 });
-  const bundle = mesh(new THREE.SphereGeometry(0.28, 8, 6), fabM[3], 0, 0.32, 0, null);
-  bundle.scale.set(1.2, 0.6, 0.9);
+  const bundle = new THREE.Group();bundle.name='source-carried-factory-cloth';
+  for(let i=0;i<3;i++){const layer=getFabricLibrary().piece({width:.56-i*.015,height:.11,depth:.48,variant:3+i});layer.position.y=i*.11;bundle.add(layer);}
   carrier.userData.J.head.add(bundle);
-  bundle.position.y = 0.3;
+  bundle.position.y = 0.135; // retain the former bundle's lower/upper envelope and carrier animation
+
   carrier.userData.J.shL.rotation.set(-2.7, 0, 0.3);
   root.add(carrier);
   const carrierPath = { x0: -3.2, x1: 4.4, z: 3.55, t: 0 };
@@ -1355,31 +1347,13 @@ export function buildSweatshop(ctx) {
     -4.75,
     root,
   );
-  foldCloth.rotation.x = -Math.PI / 2;
+  const workCloth=getFabricLibrary().piece({width:.6,height:.012,depth:.45,variant:4});
+  foldCloth.geometry=workCloth.geometry.clone();foldCloth.geometry.scale(...workCloth.scale.toArray());foldCloth.material=workCloth.material;foldCloth.position.y=1.055;
+  const foldingRest=foldCloth.geometry.attributes.position.array.slice();
   addCol(3.3, 5.9, -5.6, -4.1);
 
   // ---------- garments drying on lines, sacks, bolts, shrine, calendar, clock, ceiling fans ----------
   const cloths = [];
-  const shirt = new THREE.Shape();
-  shirt.moveTo(-0.16, 0);
-  shirt.lineTo(-0.3, -0.12);
-  shirt.lineTo(-0.24, -0.24);
-  shirt.lineTo(-0.15, -0.18);
-  shirt.lineTo(-0.15, -0.75);
-  shirt.lineTo(0.15, -0.75);
-  shirt.lineTo(0.15, -0.18);
-  shirt.lineTo(0.24, -0.24);
-  shirt.lineTo(0.3, -0.12);
-  shirt.lineTo(0.16, 0);
-  shirt.lineTo(0.06, 0.02);
-  shirt.lineTo(0, -0.06);
-  shirt.lineTo(-0.06, 0.02);
-  const shirtGeo = new THREE.ShapeGeometry(shirt, 2);
-  {
-    const p = shirtGeo.attributes.position,
-      uv = shirtGeo.attributes.uv;
-    for (let i = 0; i < p.count; i++) uv.setXY(i, p.getX(i) * 1.5 + 0.5, p.getY(i) * 1.5 + 1);
-  }
   [
     [-3.3, 2.0, 7.2],
     [-3.9, 2.4, 6.9],
@@ -1393,18 +1367,7 @@ export function buildSweatshop(ctx) {
       const piv = new THREE.Group();
       piv.position.set(x, 3.25 - sag, z);
       root.add(piv);
-      const c = mesh(
-        shirtGeo,
-        new THREE.MeshStandardMaterial({
-          map: T.fab[(Math.floor(x * 3) + li) % T.fab.length],
-          side: THREE.DoubleSide,
-          roughness: 0.95,
-        }),
-        0,
-        0,
-        0,
-        piv,
-      );
+      const c = getFabricLibrary().hanging(.55,.75,Math.floor(x*3)+li);piv.add(c);
       piv.rotation.y = (rr() - 0.5) * 0.3;
       cloths.push(piv);
     }
@@ -1672,13 +1635,13 @@ export function buildSweatshop(ctx) {
   const pileT = interactor.add({
     object: leftPile,
     label: 'Take a piece of fabric',
-    enabled: () => S.phase === 'pick',
+    enabled: () => S.phase === 'pick' && !player.xr,
     onPress: pickFabric,
   });
   const machineT = interactor.add({
     object: playerMachine,
     label: 'Hold to sew',
-    enabled: () => S.phase === 'push',
+    enabled: () => S.phase === 'push' && !player.xr,
     onPress: () => {
       S.pushing = true;
     },
@@ -1776,17 +1739,20 @@ export function buildSweatshop(ctx) {
     windowGlow: 0,
     ended: false,
   };
+  const physicalSewing=new PhysicalSewing(NEEDLE,leftPile.localToWorld(new THREE.Vector3(0,.17,0)),TXp+HEAD_X);
   const flying = [];
   let doorOpen = false;
   const hint = (text, secs = 5) => ui.hint(text, secs);
   const thought = (text, secs) => ui.thought(text, secs);
   function setPhase(p) {
+    if(S.phase!==p)ui.clearGuidance();
     S.phase = p;
     S.t = 0;
     S.idle = 0;
   }
 
-  function pickFabric() {
+  function pickFabric(physicalPick=false) {
+    if(player.xr&&physicalPick!==true)return;
     const top = pileLayers[pileLayers.length - 1 - S.pieces];
     if (top) top.visible = false;
     piece.material.map = top ? top.material.map : T.fab[0];
@@ -1805,7 +1771,9 @@ export function buildSweatshop(ctx) {
     };
     audio.oneShot('fabric', { object: machineSoundObj, volume: 0.7 });
     S.progress = 0;
+    S.feedGuidanceSeen=false;
     setPhase('placing');
+    if(player.xr)hint('Carry the fabric flat to the needle',8);
   }
   function takeBag() {
     // the right hand reaches for the bag first; it comes off the hook when the fingers close
@@ -1835,6 +1803,8 @@ export function buildSweatshop(ctx) {
   const DOOR_PUSH = new THREE.Vector3(ROOM.maxX - 0.12, 1.15, DOOR.z1 - 0.25);
 
   function reset() {
+    physicalSewing.reset();
+    ui.progress(0);
     sun.intensity = SUN_BASE;
     flying.forEach((f) => root.remove(f.mesh));
     flying.length = 0;
@@ -1898,6 +1868,7 @@ export function buildSweatshop(ctx) {
     setPhase('intro');
   }
   function stop() {
+    physicalSewing.suspend();S.pushing=false;
     stopSounds();
     setPhase('idle');
     sun.intensity = 0;
@@ -2041,8 +2012,8 @@ export function buildSweatshop(ctx) {
       J.elR.rotation.x = -0.6;
       const p = foldCloth.geometry.attributes.position;
       for (let i = 0; i < p.count; i++) {
-        const x = p.getX(i);
-        p.setZ(i, Math.max(0, x) * Math.sin(k * Math.PI) * 0.7);
+        const x=foldingRest[i*3],y=foldingRest[i*3+1],z=foldingRest[i*3+2];
+        p.setXYZ(i,x>0?x*Math.cos(k*Math.PI):x,y+Math.max(0,x)*Math.sin(k*Math.PI),z);
       }
       p.needsUpdate = true;
       foldCloth.geometry.computeVertexNormals();
@@ -2072,7 +2043,7 @@ export function buildSweatshop(ctx) {
       J.handR.getWorldPosition(foremanHand);
     }
 
-    if (S.phase === 'idle' || S.phase === 'done' || !active) return;
+    if (S.phase === 'idle' || S.phase === 'done' || !active) {physicalSewing.suspend();return;}
     S.t += dt;
     S.idle += dt;
     thread.urgent = S.idle > 20;
@@ -2090,6 +2061,21 @@ export function buildSweatshop(ctx) {
       audio.oneShot('schoolBell', { object: windowSound, volume: 0.25 + S.gaze * 0.4 });
     }
 
+    if(player.xr&&['pick','placing','push'].includes(S.phase)){
+      const top=pileLayers[pileLayers.length-1-S.pieces];
+      const result=physicalSewing.update(ctx.xrInput,dt,top?.getWorldPosition(new THREE.Vector3()));
+      if(result.picked)pickFabric(true);
+      if(physicalSewing.mode!=='pick'){
+        piece.position.copy(physicalSewing.position);piece.quaternion.copy(physicalSewing.rotation);
+        S.progress=physicalSewing.progress;
+        if(physicalSewing.mode==='feed'&&S.phase==='placing'){
+          setPhase('push');hint('Keep gripping · slowly push the fabric away from you through the needle',8);
+        }
+      }
+      S.pushing=physicalSewing.moving;
+      if(S.pushing||result.picked)S.idle=0;
+      if(S.progress>.08&&!S.feedGuidanceSeen){ui.clearGuidance();S.feedGuidanceSeen=true;}
+    }
     const pm = playerMachine.userData;
     pm.speed = lerp(pm.speed, S.pushing && S.phase === 'push' ? 1 : 0, dt * 8);
     if (snd.machine) snd.machine.setVolume(pm.speed * 0.55 * (1 - 0.6 * S.dreamK));
@@ -2159,6 +2145,7 @@ export function buildSweatshop(ctx) {
         }
         break;
       case 'placing': {
+        if(player.xr)break;
         const a = S.anim;
         a.t += dt / a.dur;
         const k = ease(clamp(a.t, 0, 1));
@@ -2173,12 +2160,12 @@ export function buildSweatshop(ctx) {
         break;
       }
       case 'push':
-        if (S.pushing) {
+        if (S.pushing && !player.xr) {
           S.progress += dt / 3.2;
           S.idle = 0;
         }
         ui.progress(S.progress);
-        piece.position.set(
+        if(!player.xr)piece.position.set(
           NEEDLE.x + 0.04 + Math.sin(S.progress * 30) * 0.004 * (S.pushing ? 1 : 0),
           NEEDLE.y,
           NEEDLE.z + 0.16 - S.progress * 0.34,
@@ -2216,6 +2203,7 @@ export function buildSweatshop(ctx) {
           referenceData?.skinFolded(folded,piece);
           folded.rotation.y = (Math.random() - 0.5) * 0.2;
           S.pieces++;
+          physicalSewing.reset();
           if (S.pieces === 2) {
             startDream('school');
             setPhase('pick');
@@ -2459,7 +2447,7 @@ export function buildSweatshop(ctx) {
     const m = {
       pick: 'Click the fabric on your left',
       push: 'Hold the mouse button on the machine',
-      toBag: 'Your bag hangs by the door — look for the glow',
+      toBag: 'Your bag hangs by the door. Look for the glow',
       toWages: 'Click the supervisor at his desk',
       toDoor: 'Click the door to go outside',
       outside: 'Walk out into the street',
@@ -2562,8 +2550,10 @@ export function buildSweatshop(ctx) {
         player.place(ROOM.maxX + 1, (DOOR.z0 + DOOR.z1) / 2, -Math.PI / 2, 1.52);
     },
     setPushing(v) {
-      S.pushing = v;
+      if(!player.xr)S.pushing = v;
     },
+    suspendXR(){physicalSewing.suspend();S.pushing=false;},
+    get physicalSewing(){return physicalSewing;},
     // debug: open the door with the bag already paid
     debugDoor() {
       this.debugStand();

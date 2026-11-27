@@ -1,57 +1,55 @@
 {
   "runtimeEntryPoints": [
-    "public/models/factory/factory.glb",
-    "public/models/market/market.glb",
+    "public/models/scene1/factory.glb",
+    "public/models/scene2/market.glb",
     "public/models/scene3/Scene 3.glb",
-    "public/models/home/unity-home.glb",
-    "public/models/home/front_doors_pack.glb",
-    "public/models/home/thali.glb"
+    "public/models/scene4/unity-home.glb",
+    "public/models/scene4/front_doors_pack.glb",
+    "public/models/scene4/thali.glb"
   ],
   "references": {
-    "public/models/factory/factory.glb": [
+    "public/models/scene1/factory.glb": [
       "src/config/optimized-assets.js",
-      "src/world/factory-reference.js",
+      "src/config/scene-assets.mjs",
       "public/app.js",
       "public/app.js"
     ],
-    "public/models/market/market.glb": [
+    "public/models/scene2/market.glb": [
       "src/config/optimized-assets.js",
-      "src/world/street-reference.js",
+      "src/config/scene-assets.mjs",
       "public/app.js",
       "public/app.js"
     ],
     "public/models/scene3/Scene 3.glb": [
       "src/config/optimized-assets.js",
-      "src/world/chase-reference.js",
+      "src/config/scene-assets.mjs",
       "public/app.js",
       "public/app.js"
     ],
-    "public/models/home/unity-home.glb": [
+    "public/models/scene4/unity-home.glb": [
       "src/config/optimized-assets.js",
-      "src/scenes/home.js",
-      "src/world/home-reference.js",
-      "public/app.js",
+      "src/config/scene-assets.mjs",
       "public/app.js",
       "public/app.js"
     ],
-    "public/models/home/front_doors_pack.glb": [
+    "public/models/scene4/front_doors_pack.glb": [
       "src/config/optimized-assets.js",
-      "src/world/home-reference.js",
+      "src/config/scene-assets.mjs",
       "public/app.js",
       "public/app.js"
     ],
-    "public/models/home/thali.glb": [
+    "public/models/scene4/thali.glb": [
       "src/config/optimized-assets.js",
-      "src/scenes/home.js",
+      "src/config/scene-assets.mjs",
       "public/app.js",
       "public/app.js"
     ]
   },
-  "totalBytes": 61211702,
-  "totalFiles": 14,
+  "totalBytes": 61213757,
+  "totalFiles": 15,
   "filesOver5MiB": [
     {
-      "file": "public/models/market/market.glb",
+      "file": "public/models/scene2/market.glb",
       "bytes": 40107576
     },
     {
@@ -59,7 +57,7 @@
       "bytes": 9339528
     },
     {
-      "file": "public/models/home/unity-home.glb",
+      "file": "public/models/scene4/unity-home.glb",
       "bytes": 8004500
     }
   ],

@@ -1,17 +1,11 @@
 import * as THREE from 'three';
 import { loadGltf, fitModel, prepareShadows } from './gltf-assets.js';
-import { FACTORY_ASSET_VERSION } from '../config/factory-assets.js';
+import { geometryFrom, parts } from './mesh-parts.js';
+import { fabricLibrary } from './fabric-library.js';
+import { SCENE_ASSETS } from '../config/scene-assets.mjs';
 
 const bounds=o=>{o.updateWorldMatrix(true,true);return new THREE.Box3().setFromObject(o);};
 const triangle=(p,ids,matrix)=>ids.map(i=>new THREE.Vector3().fromBufferAttribute(p,i).applyMatrix4(matrix));
-function geometryFrom(source,ids,matrix) {
-  const g=new THREE.BufferGeometry();
-  for(const[name,a]of Object.entries(source.attributes)) {
-    const values=ids.flatMap(i=>Array.from({length:a.itemSize},(_,c)=>a[['getX','getY','getZ','getW'][c]](i)));
-    g.setAttribute(name,new THREE.Float32BufferAttribute(values,a.itemSize));
-  }
-  g.applyMatrix4(matrix);g.computeBoundingBox();return g;
-}
 function supportHeight(object) {
   const levels=new Map(),normal=new THREE.Vector3();object.updateWorldMatrix(true,true);
   const b=bounds(object),low=b.min.y+(b.max.y-b.min.y)*.15;
@@ -25,18 +19,8 @@ function supportHeight(object) {
   const level=[...levels.entries()].sort((a,b)=>b[1]-a[1])[0];
   if(!level)throw Error(`No furniture support surface: ${object.name}`);return level[0]-b.min.y;
 }
-function parts(object) {
-  const result=[];object.updateWorldMatrix(true,true);
-  object.traverse(o=>{if(!o.isMesh)return;const g=o.geometry,p=g.attributes.position,index=g.index,parents=[],vertices=new Map(),tris=[];
-    const id=i=>{const key=[p.getX(i),p.getY(i),p.getZ(i)].map(x=>Math.round(x*100000)).join(',');if(!vertices.has(key)){vertices.set(key,parents.length);parents.push(parents.length);}return vertices.get(key);};
-    const root=i=>parents[i]===i?i:(parents[i]=root(parents[i]));
-    for(let i=0;i<(index?.count||p.count);i+=3){const t=[0,1,2].map(k=>index?index.getX(i+k):i+k),ids=t.map(id);ids.slice(1).forEach(n=>{parents[root(n)]=root(ids[0]);});tris.push(t);}
-    const groups=new Map();for(const t of tris){const key=root(id(t[0]));if(!groups.has(key))groups.set(key,[]);groups.get(key).push(...t);}
-    for(const ids of groups.values())result.push(new THREE.Mesh(geometryFrom(g,ids,o.matrixWorld),o.material));
-  });return result;
-}
 export async function loadFactoryReference({root,ROOM,WIN,DOOR,shellPanels,floor,ceil,machines,workers,seatSlots,placeholders,pileLayers,rightPile,piece,DESK,doorPivot,leaf,piers,tableHeight}) {
-  const gltf=await loadGltf(`models/factory/factory.glb?v=${FACTORY_ASSET_VERSION}`);
+  const gltf=await loadGltf(SCENE_ASSETS.scene1.environment);
   const catalog=gltf.scene,instances=[],colliders=[];
   // These RGB vertex channels are Unity shader wear/blend masks, not surface
   // colors. Treating them as glTF vertex colors makes floors green and piers purple.
@@ -46,7 +30,7 @@ export async function loadFactoryReference({root,ROOM,WIN,DOOR,shellPanels,floor
   const add=(name,x,y,z,w,d,h,rotation=0,parent=group)=>{
     const o=fitModel(source(name).clone(true),{size:{x:w,z:d},height:h,rotation:[0,rotation,0]});
     o.position.set(x,y,z);o.name=`source-${name}`;o.userData.sourceAsset=name;
-    if(name.startsWith('Folded_Cloth'))o.traverse(mesh=>{if(mesh.isMesh)mesh.material=fabrics[fabricIndex++%fabrics.length];});
+    if(name.startsWith('Folded_Cloth'))o.traverse(mesh=>{if(mesh.isMesh)mesh.material=library.materials[fabricIndex++%library.materials.length];});
     prepareShadows(o);parent.add(o);instances.push({object:o,source:name});return o;
   };
   // Keep the light-blocking shell/openings. The visible wall planes are replaced
@@ -98,36 +82,34 @@ export async function loadFactoryReference({root,ROOM,WIN,DOOR,shellPanels,floor
     desks.push({object:d,support:tableHeight});m.getObjectByName('machine-furniture-placeholder').visible=false;
   }
   const officeDesk=source('SM_Desk_Metal');
-  const nativeDesk=add('SM_Desk_Metal',DESK.x,0,DESK.z,DESK.w,DESK.d,bounds(officeDesk).getSize(new THREE.Vector3()).y*DESK.h/supportHeight(officeDesk),Math.PI);
+  // Source desk includes static tabletop accessories. Retain its furniture below
+  // the support plane; the existing ledger/cash/wage props already own this space.
+  const officeSupport=supportHeight(officeDesk),officeTop=officeSupport+bounds(officeDesk).min.y,officeCore=new THREE.Group();
+  officeDesk.updateWorldMatrix(true,true);
+  officeDesk.traverse(o=>{if(!o.isMesh)return;const g=o.geometry,p=g.attributes.position,index=g.index,ids=[];
+    for(let i=0;i<(index?.count||p.count);i+=3){const t=[0,1,2].map(k=>index?index.getX(i+k):i+k);if(triangle(p,t,o.matrixWorld).every(v=>v.y<=officeTop+.015))ids.push(...t);}
+    if(ids.length)officeCore.add(new THREE.Mesh(geometryFrom(g,ids,o.matrixWorld),o.material));
+  });
+  const nativeDesk=fitModel(officeCore,{size:{x:DESK.w,z:DESK.d},height:bounds(officeCore).getSize(new THREE.Vector3()).y*DESK.h/officeSupport,rotation:[0,Math.PI,0]});
+  nativeDesk.position.set(DESK.x,0,DESK.z);nativeDesk.name='source-SM_Desk_Metal';nativeDesk.userData.sourceAsset='SM_Desk_Metal';prepareShadows(nativeDesk);group.add(nativeDesk);instances.push({object:nativeDesk,source:'SM_Desk_Metal'});
   openBench(4.6,-4.6,2.4,.9,1.05);
   const chair=source('SM_Chair_Metal'),chairSupport=supportHeight(chair),chairHeight=bounds(chair).getSize(new THREE.Vector3()).y;
   const chairs=seatSlots.map(slot=>({object:add('SM_Chair_Metal',slot.x,0,slot.z,slot.w,slot.d,chairHeight*slot.seat/chairSupport,Math.PI),seat:slot.seat}));
   // Use one connected folded-cloth piece, keeping the original interactive layer
   // owners so taking/returning/sewing fabric follows the existing state machine.
-  const candidates=parts(source('Folded_Cloth_Piles_Short_FBX')).filter(o=>{const s=bounds(o).getSize(new THREE.Vector3());return s.x>.15&&s.z>.15&&s.y>.001;});
-  candidates.sort((a,b)=>bounds(a).getSize(new THREE.Vector3()).y-bounds(b).getSize(new THREE.Vector3()).y);
-  if(!candidates.length)throw Error('No connected source cloth piece');
-  const cloth=candidates[0],cb=bounds(cloth),cs=cb.getSize(new THREE.Vector3()),cc=cb.getCenter(new THREE.Vector3());
-  cloth.geometry.translate(-cc.x,-cb.min.y,-cc.z);cloth.geometry.scale(1/cs.x,1/cs.y,1/cs.z);
-  // Share one neutralized weave texture; tint materials/instances rather than
-  // allocating a new large texture for every fabric color.
-  const palette=[0xb45543,0x6587b5,0xd4b26c,0x65947c,0xb77e9e,0xc9c1ac];
-  if(cloth.material.map){
-    const map=cloth.material.map,canvas=document.createElement('canvas');
-    canvas.width=map.image.width;canvas.height=map.image.height;
-    const context=canvas.getContext('2d');context.drawImage(map.image,0,0);
-    const pixels=context.getImageData(0,0,canvas.width,canvas.height);
-    for(let i=0;i<pixels.data.length;i+=4){
-      const luminance=.2126*pixels.data[i]+.7152*pixels.data[i+1]+.0722*pixels.data[i+2];
-      // The supplied brown variant is very dark (mean 55/255). Lift its neutral
-      // albedo before tinting so the weave and colors survive workshop shadows.
-      const gray=Math.min(245,Math.round(90+1.1*luminance));pixels.data[i]=pixels.data[i+1]=pixels.data[i+2]=gray;
-    }
-    context.putImageData(pixels,0,0);
-    const neutral=map.clone();neutral.image=canvas;neutral.needsUpdate=true;
-    cloth.material=cloth.material.clone();cloth.material.map=neutral;cloth.material.color.set(0xffffff);
-  }
-  const fabrics=palette.map(color=>{const m=cloth.material.clone();m.color.setHex(color);return m;});let fabricIndex=0;
+  const library=await fabricLibrary();
+  const cloth=library.folded, fabrics=library.materials;let fabricIndex=0;
+  // Left corner as seen by the child approaching from the factory aisle (+Z).
+  // Keep the ledger, cash tin, receipt spike and wage target in their existing places.
+  const wageCloth=new THREE.Group();wageCloth.name='source-wage-desk-cloth';group.add(wageCloth);
+  const wageX=DESK.x+DESK.w/2-.25,wageZ=DESK.z+DESK.d/2-.23;
+  const wageRay=new THREE.Raycaster(new THREE.Vector3(wageX,DESK.h+.15,wageZ),new THREE.Vector3(0,-1,0));
+  nativeDesk.updateWorldMatrix(true,true);
+  const wageSupport=wageRay.intersectObject(nativeDesk,true).find(hit=>hit.face.normal.clone().transformDirection(hit.object.matrixWorld).y>.9);
+  if(!wageSupport||Math.abs(wageSupport.point.y-DESK.h)>.025)throw Error('Wage cloth requires the native tabletop');
+  wageCloth.position.set(wageX,wageSupport.point.y+.002,wageZ);
+  for(let i=0;i<8;i++){const folded=library.piece({width:.32,height:.025,depth:.22,variant:i});folded.position.y=i*.025;wageCloth.add(folded);}
+
   function skinFolded(owner,from){
     owner.geometry.computeBoundingBox();const s=owner.geometry.boundingBox.getSize(new THREE.Vector3());
     owner.material=cloth.material.clone();owner.material.colorWrite=false;owner.material.depthWrite=false;
@@ -141,9 +123,16 @@ export async function loadFactoryReference({root,ROOM,WIN,DOOR,shellPanels,floor
     for(let k=0;k<todo;k++)stock.push([x-.9,.62+k*.024,z+.35,.34,.024,.26]);
   });
   for(let k=0;k<9;k++)stock.push([3.8+k%3*.5,1.06+Math.floor(k/3)*.03,-4.55,.4,.03,.3]);
-  const clothInstances=new THREE.InstancedMesh(cloth.geometry,cloth.material,stock.length),matrix=new THREE.Matrix4();
-  stock.forEach(([x,y,z,w,h,d],i)=>{matrix.compose(new THREE.Vector3(x,y,z),new THREE.Quaternion(),new THREE.Vector3(w,h,d));clothInstances.setMatrixAt(i,matrix);clothInstances.setColorAt(i,new THREE.Color(palette[i%palette.length]));});
-  clothInstances.name='source-folded-cloth-stock';clothInstances.castShadow=true;clothInstances.receiveShadow=true;group.add(clothInstances);
+  const clothInstances=new THREE.Group();clothInstances.name='source-folded-cloth-stock';
+  for(let variant=0;variant<fabrics.length;variant++){
+    const items=stock.filter((_,i)=>i%fabrics.length===variant);if(!items.length)continue;
+    const batch=new THREE.InstancedMesh(cloth.geometry,fabrics[variant],items.length),matrix=new THREE.Matrix4();
+    items.forEach(([x,y,z,w,h,d],i)=>{matrix.compose(new THREE.Vector3(x,y,z),new THREE.Quaternion(),new THREE.Vector3(w,h,d));batch.setMatrixAt(i,matrix);});
+    batch.castShadow=batch.receiveShadow=true;clothInstances.add(batch);
+  }
+  group.add(clothInstances);
+  const rolls=[];
+  for(let i=0;i<6;i++){const roll=library.roll(i);roll.position.set(-5.6+i*.3,0,-5.77);roll.rotation.x=-.055;group.add(roll);roll.updateWorldMatrix(true,true);roll.position.y-=bounds(roll).min.y;rolls.push(roll);}
   const rack=add('SM_Shelf_Rack_B',7.4,0,-4.6,.6,1.8,2,-Math.PI/2);
   const down=new THREE.Raycaster();
   for(const z of [-5.1,-4.4]){rack.updateWorldMatrix(true,true);down.set(new THREE.Vector3(7.4,2.3,z),new THREE.Vector3(0,-1,0));const hit=down.intersectObject(rack,true).find(h=>h.face.normal.clone().transformDirection(h.object.matrixWorld).y>.8);
@@ -183,7 +172,8 @@ export async function loadFactoryReference({root,ROOM,WIN,DOOR,shellPanels,floor
   doorFrame.rotation.y=-Math.PI/2;doorFrame.position.set(ROOM.maxX,.005-bodyBox.min.y*sy,(DOOR.z0+DOOR.z1)/2);
   doorFrame.name='source-factory-exit-frame';group.add(doorFrame);prepareShadows(doorFrame);
   for(const list of Object.values(placeholders))list.forEach(o=>{o.visible=false;});
-  return {instances,desks,chairs,tiles,group,skinFolded,clothInstances,door,doorFrame,colliders,nativeDesk,
+  return {instances,desks,chairs,tiles,group,skinFolded,clothInstances,rolls,door,doorFrame,colliders,nativeDesk,
+    wageCloth,wageSupport:wageSupport.point.y,wageDeskBounds:{minX:DESK.x-DESK.w/2,maxX:DESK.x+DESK.w/2,minZ:DESK.z-DESK.d/2,maxZ:DESK.z+DESK.d/2},
     sourceModels:gltf.parser.json.scenes[0].nodes.length,deskSupport,chairSupport,missingPrimaryModels:['28.fbx','table_01_SM.FBX','chair_02_SM.FBX']};
 }
 export { parts as splitFactoryParts };

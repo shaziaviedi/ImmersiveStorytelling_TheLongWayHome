@@ -1,17 +1,17 @@
 import { launchTestBrowser, TEST_URL, ARTIFACT_DIR } from './helpers/browser.mjs';
 import fs from 'node:fs';
-const optimized=JSON.parse(fs.readFileSync('docs/model-optimization.json','utf8')).models.find(m=>m.output==='public/models/market/market.glb');
+const optimized=JSON.parse(fs.readFileSync('docs/model-optimization.json','utf8')).models.find(m=>m.output==='public/models/scene2/market.glb');
 const browser=await launchTestBrowser({args:['--autoplay-policy=no-user-gesture-required']});
 const page=await browser.newPage({viewport:{width:1280,height:800}}),errors=[];
 page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
-page.on('requestfailed',r=>{if(r.url().includes('/models/market/'))errors.push(`asset request failed: ${r.url()}`);});
+page.on('requestfailed',r=>{if(r.url().includes('/models/scene2/'))errors.push(`asset request failed: ${r.url()}`);});
 try{
  await page.goto(`${TEST_URL}/?debug&q=low&dtmax=0.25`);
  await page.waitForFunction(()=>window.__tlwh?.built===5,null,{timeout:180000});
  await page.evaluate(async()=>{for(const s of window.__tlwh.spaces)if(s?.ready)await s.ready;await window.__tlwh.audio.init();await window.__tlwh.audio.rest;});
  for(const edition of ['normal','extra']){
   const result=await page.evaluate(async ({edition,optimizedMeshes})=>{
-   const w=window.__tlwh;w.ctx.edition=edition;document.querySelector('#title').style.display='none';w.setMode('play');await w.goTo('street');
+   const w=window.__tlwh;w.bagCtl.resetContents();w.ctx.edition=edition;document.querySelector('#title').style.display='none';w.setMode('play');await w.goTo('street');
    const s=w.world,d=s.referenceData,fail=[];const check=(ok,m)=>{if(!ok)fail.push(m);};
    check(!!d,'source plaza loaded');check(s.marketPlaceholders.visible===false,'old market visuals hidden');
    const V=w.camera.position.constructor,Box=d.dressing.mat.geometry.boundingBox.constructor;
@@ -27,8 +27,8 @@ try{
    }
    const floorRay=new w.interactor.ray.constructor();
    for(const o of d.dressing.grounded){const b=bounds(o),c=b.getCenter(new V());
-    floorRay.set(new V(c.x,.35,c.z),new V(0,-1,0));floorRay.far=1;
-    const hit=floorRay.intersectObject(d.find('Buildings'),true).find(h=>h.face.normal.clone().transformDirection(h.object.matrixWorld).y>.9);
+    floorRay.set(new V(c.x,1,c.z),new V(0,-1,0));floorRay.far=2;
+    const hit=floorRay.intersectObject(d.find('Buildings'),true).find(h=>h.point.y<.6&&h.face.normal.clone().transformDirection(h.object.matrixWorld).y>.9);
     check(Math.abs(b.min.y-Math.max(0,hit?.point.y||0)-.006)<.003,`${o.name} rests on actual pavement/ground`);
    }
    check(d.dressing.cloth.length>=10,'supplied fabric pieces retained on supported ropes');
@@ -57,7 +57,7 @@ try{
    }
    const reach=(x,z)=>queue.some(([a,b])=>Math.hypot(8+a*.1-x,b*.1-z)<.22);
    for(const[x,z,label]of[[31,-.8,'food'],[23.3,-1.9,'scraps'],[28,8.6,'tailor'],[36.9,10.53,'begging'],[41,8.3,'chase exit']])check(reach(x,z),`walkable route to ${label}`);
-   const table=s.anchors.food,parcel=s.anchors.parcel;check(parcel.children.some(o=>o.visible&&o.userData.sourceName==='FoodParcel'),'real parcel bound to theft target');
+   const table=s.anchors.food,parcel=s.anchors.parcel;check(parcel.children.some(o=>o.visible&&o.userData.storyFood),'shared realistic meal bound to theft target');
    check(s.anchors.heap.children.some(o=>o.visible&&o.userData.sourceScraps),'source cloth patch bound to scraps target');
    s.S.phase='stealing';s.S.t=.49;s.update(.02,0,true);check(parcel.visible===false,'taking food hides real parcel');s.reset();check(parcel.visible===true,'replay restores real parcel');
    let maps=0;d.reference.traverse(o=>{if(!o.isMesh)return;for(const m of Array.isArray(o.material)?o.material:[o.material])for(const k of ['map','normalMap','metalnessMap','roughnessMap'])if(m[k]){maps++;check(m[k].image?.width>0,`decoded ${k}`);}});

@@ -110,25 +110,27 @@
           <button class="x" data-action="close-scenes" aria-label="Close">×</button>
         </header>
         <p class="mono dim small">
-          Scene 1 is Begin. Each scene starts with everything before it done, in the edition chosen
-          below the menu.
+          Load a scene directly in the selected edition, with its required story items.
         </p>
         <div class="stack scene-list">
+          <button class="ghost scene-btn" data-action="scene" data-n="1">
+            <span class="lbl">Scene 1 · The Workshop</span><span class="sub mono">Begin the shift at the sewing machine.</span>
+          </button>
           <button class="ghost scene-btn" data-action="scene" data-n="2">
             <span class="lbl">Scene 2 · The Market</span
             ><span class="sub mono"
-              >The shift is over. Outside the factory door, your bag, three coins.</span
+              >The market, with your bag and three coins.</span
             >
           </button>
           <button class="ghost scene-btn" data-action="scene" data-n="3">
             <span class="lbl">Scene 3 · The Run</span
             ><span class="sub mono"
-              >The food is in your bag. The mouth of the lane — the police are behind you.</span
+              >Carry the food into the lane. The police are behind you.</span
             >
           </button>
           <button class="ghost scene-btn" data-action="scene" data-n="4">
-            <span class="lbl">Scene 4 · The Door</span
-            ><span class="sub mono">The end of the last lane, in front of your own door.</span>
+            <span class="lbl">Scene 4 · Home</span
+            ><span class="sub mono">Inside your home, with the food still in your hand.</span>
           </button>
         </div>
       </div>
@@ -169,6 +171,10 @@
           <div class="f-row">
             <label for="hints">Show hints</label><input id="hints" type="checkbox" />
           </div>
+          <div class="f-row">
+            <label for="vr-seated-alternative">VR begging: use trigger instead of seated posture</label>
+            <input id="vr-seated-alternative" type="checkbox" />
+          </div>
         </div>
         <footer>
           <span></span><button class="solid" data-action="close-settings">Done</button>
@@ -184,12 +190,11 @@
           workshop.
         </p>
         <p class="end-stat" id="pro-3">
-          When the shift ends, six rupees go into a cloth bag — and the long road home begins.
+          <span class="intro-copy">When the shift ends, six rupees go into a cloth bag, and </span><span id="pro-title">the long way home</span><span class="intro-copy"> begins.</span>
         </p>
         <p class="end-stat" id="pro-4">
           Somewhere ahead, your mother and little brother are waiting.
         </p>
-        <p class="mono small dim end-src" id="pro-phones">Put on your headphones.</p>
         <p class="mono small end-src" id="pro-click">Click anywhere to sit down.</p>
       </div>
     </section>
@@ -244,10 +249,10 @@
       <div id="ring" role="progressbar" aria-label="Sewing progress" aria-valuemin="0"
         aria-valuemax="100" aria-valuenow="0"><span class="sew-fill"></span></div>
       <div id="label" class="mono"></div>
+      <div id="hint" role="status" aria-live="polite"></div>
       <div id="caption-stack" aria-live="polite">
         <div id="thought"></div>
         <div id="subtitle"></div>
-        <div id="hint"></div>
       </div>
       <div id="debug" class="mono"></div>
       <svg
@@ -317,6 +322,6 @@
     <div id="eyelids" aria-hidden="true"><i class="lid-top"></i><i class="lid-bot"></i></div>
     <div id="fade"></div>
     <div id="error" class="mono"></div>
-    <script src="app.js?v=07e55411f4ad9306" defer></script>
+    <script src="app.js?v=668c2e05f49f189c" defer></script>
   </body>
 </html>

@@ -1,4 +1,4 @@
-import { HOME } from '../config/home-layout.js';
+import { HOME, atHomeApproach } from '../config/home-layout.js';
 // SPACE 3 · NORMAL EDITION — five lanes, five refusals (docs/nightmare-design.md, v2.4).
 // References: Little Nightmares (threats shown before they act; a catch is survivable),
 // P.T. (one familiar space that keeps changing), VR-horror studies (dread through meaningful
@@ -425,14 +425,16 @@ export function buildLanes(ctx, root, say, onOpened) {
     object: leaf,
     label: 'Knock',
     maxDist: 2.4,
-    enabled: () => S.on && S.knocks < 3 && !S.doorOpen && S.alive,
+    enabled: () => S.on && S.knocks < 3 && !S.doorOpen && S.alive && atHomeApproach(player.headWorld(new THREE.Vector3())),
     onPress: knock,
   });
+  const knockTimers=new Set();
+  function schedule(fn,ms){const generation=S.generation;const timer=setTimeout(()=>{knockTimers.delete(timer);if(generation===S.generation&&S.on)fn();},ms);knockTimers.add(timer);}
   function knock() {
     S.knocks++;
     S.knockT = 0;
     [0, 0.22, 0.44].forEach((d) =>
-      setTimeout(
+      schedule(
         () =>
           audio.oneShot('doorWood', {
             object: leaf,
@@ -444,11 +446,11 @@ export function buildLanes(ctx, root, say, onOpened) {
       ),
     );
     if (S.knocks === 1) say('Ma! Open the door!', 2.5);
-    if (S.knocks === 2) setTimeout(() => ui.subtitle('Mother (inside): "…Who is it?"', 2.6), 900);
+    if (S.knocks === 2) schedule(() => ui.subtitle('Mother (inside): "…Who is it?"', 2.6), 900);
     if (S.knocks === 3) {
       S.safe = true;
       ui.subtitle('"Ma, it\'s me!"', 2);
-      setTimeout(() => {
+      schedule(() => {
         if (S.on) {
           S.doorOpen = true;
           S.openT = 0;
@@ -456,7 +458,7 @@ export function buildLanes(ctx, root, say, onOpened) {
           ctx.refreshColliders();
         }
       }, 1000);
-      setTimeout(() => {
+      schedule(() => {
         if (S.on && S.doorOpen && onOpened) onOpened();
       }, 2200);
     } // home — even if the frame loop is paused (explore mode)
@@ -464,6 +466,7 @@ export function buildLanes(ctx, root, say, onOpened) {
 
   // ---------- state ----------
   function reset() {
+    knockTimers.forEach(clearTimeout);knockTimers.clear();S.generation=(S.generation||0)+1;
     Object.assign(S, {
       on: false,
       alive: false,

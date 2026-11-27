@@ -17,6 +17,10 @@ transitions between them, and runs the frame loop.
 - `src/ui/interface.js` owns DOM captions, progress, fades, and menu visibility. Scenes use this
   interface instead of manipulating the caption layout themselves.
 - `src/config/settings.js` loads and saves browser preferences, with defaults when storage is blocked.
+- `src/config/scene-assets.mjs` defines the runtime paths for `public/models/scene1/`
+  through `scene4/`. The scene adapters and `tools/model-assets.mjs` share this registry.
+  `src/config/optimized-assets.js` is the generated content-version map; the common
+  `src/world/gltf-assets.js` loader applies versions and Draco decoding.
 
 `public/index.html` is the current page. `public/app.js` is generated from `src/main.js`; edit the sources
 and rebuild instead of editing that bundle. Both `npm run dev` and `npm run build` use
@@ -52,10 +56,13 @@ Inactive neighboring scenes may remain visible during a transition.
 `S` is a scene's local story state. `setPhase` changes the current beat and resets its local timer;
 `reset` restores the flags and objects needed for replay. `onEnd` requests the next scene through
 `main.js`. The `atmosphere` result describes target lighting and fog, which the main loop blends
-rather than applying abruptly. Colliders are refreshed after doors or routes change.
+rather than applying abruptly. Colliders are refreshed each movement frame from the active scene only. The chase also includes the Home boundary at its destination. Visible neighboring environments do not contribute unrelated collision boxes.
 
-The scene picker completes the prerequisite state before moving the player: bag, coins, stolen food,
-and edition-specific route flags. Keep that logic aligned with the normal story transitions.
+The scene picker awaits `startJourney(selected)` and loads an explicit menu-number mapping:
+1 workshop, 2 street, 3 nightmare, 4 Home. The internal void index is not a menu scene number.
+It clears prior scene state, pending door timers and input, then seeds the bag, coins and stolen
+food appropriate to the selected scene. Normal story progression uses `goTo` and retains inventory.
+Asynchronous transition versions prevent cancelled loads from restarting after a return to title.
 
 ## Desktop and headset presentation
 

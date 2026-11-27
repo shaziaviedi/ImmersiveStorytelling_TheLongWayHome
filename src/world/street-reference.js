@@ -1,7 +1,9 @@
 // Adapt the supplied Unity plaza to the existing WebXR market and interaction anchors.
 import * as THREE from 'three';
 import { loadGltf, fitModel, prepareShadows } from './gltf-assets.js';
-import { MARKET_ASSET_VERSION } from '../config/market-assets.js';
+import { SCENE_ASSETS } from '../config/scene-assets.mjs';
+import { fabricLibrary } from './fabric-library.js';
+import { repairRotiSign } from './market-sign.js';
 import { dressMarket } from './market-dressing.js';
 const bounds = o => {o.updateWorldMatrix(true,true);return new THREE.Box3().setFromObject(o);};
 function splitRegion(mesh, region) {
@@ -26,8 +28,8 @@ function splitRegion(mesh, region) {
     return g;
   });
 }
-export async function loadStreetReference(root, {food,tailor,parcel,heap,carton,laneLots,laneHangings}) {
-  const gltf=await loadGltf(`models/market/market.glb?v=${MARKET_ASSET_VERSION}`);
+export async function loadStreetReference(root, {food,tailor,parcel,heap,carton,laneLots,laneHangings,foodItem}) {
+  const gltf=await loadGltf(SCENE_ASSETS.scene2.environment);
   const reference=gltf.scene;reference.name='scene2-unity-reference';
   reference.position.set(31,0,3.8);reference.rotation.y=Math.PI;root.add(reference);
   const authoredNames=new Set(gltf.parser.json.nodes.map(n=>n.name));
@@ -53,11 +55,13 @@ export async function loadStreetReference(root, {food,tailor,parcel,heap,carton,
     const m=fitModel(donor,{size:{x:w,z:d},height:s.y*w/s.x,rotation:[0,lot.south?Math.PI:0,0]});
     m.name=`native-lane-house-${i}`;m.position.set((lot.box.min.x+lot.box.max.x)/2,0,(lot.box.min.z+lot.box.max.z)/2);lane.add(m);lot.object.visible=false;
   });
-  const dressing = dressMarket(root, find, lane, laneHangings);
+  const dressing = await dressMarket(root, find, lane, laneHangings);
+  const rotiSign=repairRotiSign(find('Stall_Food'));
   const oldParcel=find('FoodParcel',true),pb=bounds(oldParcel),pc=pb.getCenter(new THREE.Vector3());
-  parcel.position.set(pc.x-food.position.x,pb.min.y,pc.z-food.position.z);
-  parcel.children.forEach(c=>{c.visible=false;});parcel.attach(oldParcel);
-  oldParcel.material=oldParcel.material.clone();oldParcel.material.emissive.setHex(0xff9a30);oldParcel.material.emissiveIntensity=0;
+  parcel.position.set(pc.x-food.position.x,bounds(find('Counter_Food')).max.y+.003,pc.z-food.position.z);
+  parcel.clear();oldParcel.visible=false;
+  await foodItem.ready;foodItem.showStock(parcel);
+
   const sourceFood=[];
   for(const name of ['Stall_Food','Counter_Food','Food_Stove','Food_Pan','Food_SabziPot','Food_Bowl','Food_Plate','FoodPots']){
     const o=find(name);food.attach(o);sourceFood.push(o);
@@ -70,9 +74,14 @@ export async function loadStreetReference(root, {food,tailor,parcel,heap,carton,
   for(const mesh of scrapMeshes){
     mesh.updateWorldMatrix(true,false);const [rest,patch]=splitRegion(mesh,region);mesh.geometry=rest;
     if(!patch.attributes.position.count)continue;
-    const part=new THREE.Mesh(patch,mesh.material);part.userData.sourceScraps=true;part.name='source-interactive-cloth';part.matrix.copy(mesh.matrixWorld);part.matrix.decompose(part.position,part.quaternion,part.scale);root.add(part);heap.attach(part);selected++;
+    selected++;
   }
   if(!selected)throw Error('No source cloth patch covers the existing scrap target');
+  const fabrics=await fabricLibrary(),scrapPile=new THREE.Group();scrapPile.name='shared-factory-market-scraps';scrapPile.userData.sourceScraps=true;heap.add(scrapPile);
+  for(const [cluster,x,z]of [[0,-.35,-.1],[1,.05,.14],[2,.4,-.08]])for(let i=0;i<(cluster?3:4);i++){
+    const piece=fabrics.piece({width:.34,height:.022,depth:.25,variant:cluster*3+i});piece.position.set(x,.006+i*.022,z);piece.rotation.y=(cluster-1)*.16;piece.userData.sourceScraps=true;scrapPile.add(piece);
+  }
+
   const sourceCarton=find('BeggingCarton',true),cb=bounds(sourceCarton),cc=cb.getCenter(new THREE.Vector3());
   const target=sourceCarton.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(carton.position.x-cc.x,0.004-cb.min.y,carton.position.z-cc.z));
   sourceCarton.position.copy(sourceCarton.parent.worldToLocal(target));
@@ -86,5 +95,8 @@ export async function loadStreetReference(root, {food,tailor,parcel,heap,carton,
   // Ground props along the perimeter must not introduce invisible barriers across the story route.
   const objects=find('Clutter').children;
   for(const o of objects){const b=bounds(o);if(b.max.y-b.min.y>0.3&&(b.max.z<-2.5||b.min.z>9.7||b.max.x<23.4||b.min.x>38.2))addBox(b,o.userData.sourceName||o.name);}
-  return {reference,lane,find,colliders,sourceFood,parcelMaterial:oldParcel.material,materialCompatibility:compatibility,scrapParts:selected,sourceMeshCount:gltf.parser.json.meshes.length,dressing};
+  const npcObstacles=colliders.map(b=>({...b}));
+  for(const name of ['Stall_Food','Stall_Tailor','Stall_Chai','VegetableMat']){const b=bounds(find(name));npcObstacles.push({minX:b.min.x,maxX:b.max.x,minZ:b.min.z,maxZ:b.max.z,source:name});}
+  for(const o of objects){const b=bounds(o);if(b.max.y-b.min.y>.25)npcObstacles.push({minX:b.min.x,maxX:b.max.x,minZ:b.min.z,maxZ:b.max.z,source:o.userData.sourceName||o.name});}
+  return {reference,lane,find,colliders,npcObstacles,rotiSign,scrapPile,sourceFood,parcelMaterial:{set emissiveIntensity(value){foodItem.highlight(value);}},materialCompatibility:compatibility,scrapParts:selected,sourceMeshCount:gltf.parser.json.meshes.length,dressing};
 }

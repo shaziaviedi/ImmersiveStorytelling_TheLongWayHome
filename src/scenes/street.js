@@ -1,7 +1,9 @@
 // Market scene: failed attempts to afford food lead into stealing and the pursuit.
 import * as THREE from 'three';
 import * as TX from '../world/textures.js';
+import { marketNavigation } from '../world/market-navigation.mjs';
 import { loadStreetReference } from '../world/street-reference.js';
+import { BeggingPosture } from '../systems/physical/begging.mjs';
 import { M, G, Batcher, slab, ease, lerp, damp, clamp } from '../world/builders.js';
 import {
   makePerson,
@@ -599,22 +601,6 @@ export function buildStreet(ctx) {
   const heap = new THREE.Group();
   heap.position.set(23.2, 0, -3.3);
   root.add(heap);
-  {
-    const hb = new Batcher();
-    for (let k = 0; k < 14; k++)
-      hb.add(
-        G.box(0.3 + rand() * 0.3, 0.04, 0.25),
-        fabM[k % 6],
-        (rand() - 0.5) * 0.9,
-        0.04 + k * 0.03,
-        (rand() - 0.5) * 0.5,
-        rand() * 0.4,
-        rand() * 3,
-        rand() * 0.4,
-      );
-    hb.add(sackGeo, jute, 0.6, 0, 0.2, 0, 1, 0, 0.8, 0.8, 0.8);
-    hb.build(heap);
-  }
   colliders.push({ minX: 22.4, maxX: 24.0, minZ: -3.9, maxZ: -2.8 });
   const carton = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.02, 0.6), texMat(T.cardboard()));
   carton.position.set(BEG.x, 0.012, BEG.z);
@@ -694,9 +680,9 @@ export function buildStreet(ctx) {
   const marketPlaceholders = new THREE.Group();marketPlaceholders.name='market-placeholder-visuals';root.add(marketPlaceholders);
   const preserved = new Set([food,tailor,heap,carton,vendor,tailorMan,chaiMan,seller,dust,...kids,...counted]);
   for(const o of [...root.children])if(!laneChildren.has(o)&&o!==marketPlaceholders&&!preserved.has(o))marketPlaceholders.attach(o);
-  let referenceData = null;
+  let referenceData = null,crowdNav=null;
   const ready = (async()=>{
-    referenceData=await loadStreetReference(root,{food,tailor,parcel,heap,carton,laneLots,laneHangings});
+    referenceData=await loadStreetReference(root,{food,tailor,parcel,heap,carton,laneLots,laneHangings,foodItem:ctx.foodItem});
     marketPlaceholders.visible=false;
     // Hide only the original visual children; keep the existing target owners and story state.
     food.children.filter(o=>o!==parcel&&!referenceData.sourceFood.includes(o)).forEach(o=>{o.visible=false;});
@@ -705,6 +691,7 @@ export function buildStreet(ctx) {
     parcelMat=referenceData.parcelMaterial;
     colliders.splice(laneColliderCount);
     colliders.push(...referenceData.colliders,{minX:22.4,maxX:24,maxZ:-2.8,minZ:-3.9,source:'cloth scraps'});
+    installCrowdNavigation();
     ctx.refreshColliders();
   })();
 
@@ -767,9 +754,25 @@ export function buildStreet(ctx) {
     walkers.push(f);
   });
 
+  function installCrowdNavigation(){
+    const reserve=(x,z,w,d,source)=>({minX:x-w/2,maxX:x+w/2,minZ:z-d/2,maxZ:z+d/2,source});
+    const reservations=[reserve(28,9.15,2.4,2.6,'seller approach'),reserve(31,-.8,1.6,1.4,'food interaction'),reserve(23.3,-1.9,1.5,1.2,'scrap pickup'),reserve(BEG.x,BEG.z-1.4,1.8,1.8,'begging approach'),reserve(29,6.55,1.2,1.2,'produce seller')];
+    crowdNav=marketNavigation([...referenceData.npcObstacles,...reservations]);
+    for(const [index,w] of walkers.entries()){const u=w.userData;
+      if(u.idle){const safe=crowdNav.project(w.position);w.position.set(safe.x,0,safe.z);continue;}
+      const original=u.path,path=[];
+      for(let i=0;i<original.length;i++)path.push(...crowdNav.route(original[i],original[(i+1)%original.length]).slice(0,-1));
+      u.path=path.map(p=>new THREE.Vector3(p.x,0,p.z));const start=Math.floor(index/15*path.length)%path.length;w.position.copy(u.path[start]);u.seg=(start+1)%u.path.length;
+    }
+    referenceData.pedestrianReservations=reservations;
+  }
+
   // ---------- interactions ----------
   // setPhase resets the phase-local clock; reset restores flags for a fresh playthrough.
   const S = { phase: 'idle', t: 0, idle: 0, beg: 0, ended: false };
+  const posture=new BeggingPosture();
+  const postureFeedback=new THREE.Mesh(new THREE.RingGeometry(.21,.225,40),new THREE.MeshBasicMaterial({color:0xadcbb5,transparent:true,opacity:0,depthWrite:false,side:THREE.DoubleSide}));
+  postureFeedback.rotation.x=-Math.PI/2;postureFeedback.position.set(BEG.x,.035,BEG.z);postureFeedback.visible=false;root.add(postureFeedback);
   const stallT = interactor.add({
     object: food,
     label: 'Buy food',
@@ -844,6 +847,10 @@ export function buildStreet(ctx) {
   const hint = (t, s = 5) => ui.hint(t, s),
     thought = (t, s) => ui.thought(t, s);
   function setPhase(p) {
+    if(S.phase!==p)ui.clearGuidance();
+    if(['sitting','begging','standUp'].includes(S.phase)&&!['sitting','begging','standUp'].includes(p)){
+      player.xrPostureLock=false;postureFeedback.visible=false;
+    }
     S.phase = p;
     S.t = 0;
     S.idle = 0;
@@ -859,11 +866,14 @@ export function buildStreet(ctx) {
   };
 
   function reset() {
+    posture.reset();postureFeedback.visible=false;player.xrPostureLock=false;
     Object.assign(S, {
       phase: 'idle',
       t: 0,
       idle: 0,
       beg: 0,
+      xrBeg:false,
+      riseHint:false,
       ended: false,
       tension: 0,
       flee: 0,
@@ -875,7 +885,7 @@ export function buildStreet(ctx) {
     vendor.rotation.y = 0;
     vendor.userData.look = 0;
     tailorMan.userData.look = 0;
-    parcel.visible = true;
+    parcel.visible = true;ctx.foodItem.showStock(parcel);
     parcelMat.emissiveIntensity = 0;
     counted.forEach((c) => {
       c.visible = false;
@@ -889,6 +899,7 @@ export function buildStreet(ctx) {
   }
   function start() {
     reset();
+    begT.label=player.xr?'Begin begging':'Sit down';
     startSounds();
     player.canMove = true;
     player.canRun = true;
@@ -897,6 +908,7 @@ export function buildStreet(ctx) {
     S.hintAt = 3.5;
   }
   function stop() {
+    player.xrPostureLock=false;postureFeedback.visible=false;S.xrBeg=false;
     audio.stopAll(sounds);
     sounds = [];
     snd = {};
@@ -998,35 +1010,22 @@ export function buildStreet(ctx) {
         animateIdle(w, t, dt);
         return;
       }
-      const tgt = u.path[u.seg];
-      const dx = tgt.x - w.position.x,
-        dz = tgt.z - w.position.z,
-        d = Math.hypot(dx, dz);
-      const near = Math.hypot(head.x - w.position.x, head.z - w.position.z);
-      const v = u.v * (near < 1.2 ? 0.55 : 1);
-      if (d < 0.2) u.seg = (u.seg + 1) % u.path.length;
-      else {
-        w.position.x += (dx / d) * v * dt;
-        w.position.z += (dz / d) * v * dt;
-        w.rotation.y = damp(
-          w.rotation.y,
-          w.rotation.y +
-            Math.atan2(
-              Math.sin(Math.atan2(dx, dz) - w.rotation.y),
-              Math.cos(Math.atan2(dx, dz) - w.rotation.y),
-            ),
-          6,
-          dt,
-        );
+      if(!crowdNav)return;
+      const tgt = u.path[u.seg],dx=tgt.x-w.position.x,dz=tgt.z-w.position.z,d=Math.hypot(dx,dz);
+      const near=Math.hypot(head.x-w.position.x,head.z-w.position.z),v=u.v*(near<1.2?.55:1);
+      const beforeX=w.position.x,beforeZ=w.position.z;
+      if(d<.001){w.position.copy(tgt);u.seg=(u.seg+1)%u.path.length;}
+      else{
+        const step=Math.min(d,v*dt),candidate={x:w.position.x+dx/d*step,z:w.position.z+dz/d*step};
+        if(crowdNav.segment(w.position,candidate)&&Math.hypot(candidate.x-head.x,candidate.z-head.z)>=.62){
+          w.rotation.y=damp(w.rotation.y,w.rotation.y+Math.atan2(Math.sin(Math.atan2(candidate.x-w.position.x,candidate.z-w.position.z)-w.rotation.y),Math.cos(Math.atan2(candidate.x-w.position.x,candidate.z-w.position.z)-w.rotation.y)),6,dt);
+          w.position.x=candidate.x;w.position.z=candidate.z;
+        }
       }
-      if (near < 0.8 && near > 0.01) {
-        const k = 0.8 / near;
-        w.position.x = head.x + (w.position.x - head.x) * k;
-        w.position.z = head.z + (w.position.z - head.z) * k;
-      } // nobody walks through you (they step round)
-      u.stride += v * dt;
-      u.walk = 1;
-      animateWalker(w, t, dt);
+      const travelled=Math.hypot(w.position.x-beforeX,w.position.z-beforeZ);
+      u.stride += travelled;
+      u.walk = travelled>1e-5?1:0;
+      if(u.walk)animateWalker(w,t,dt);else animateIdle(w,t,dt);
       const stepN = Math.floor(u.stride / 0.7);
       if (stepN !== u.lastStep) {
         u.lastStep = stepN;
@@ -1064,7 +1063,7 @@ export function buildStreet(ctx) {
       }
       p.needsUpdate = true;
     }
-    if (S.phase === 'idle' || S.phase === 'done' || !active) return;
+    if (S.phase === 'idle' || S.phase === 'done' || !active) {posture.confirm=0;posture.ready=false;S.xrBeg=false;postureFeedback.visible=false;return;}
 
     S.t += dt;
     S.idle += dt;
@@ -1074,7 +1073,7 @@ export function buildStreet(ctx) {
     if (S.idle > 20 && S.idle - dt <= 20) remind();
     if (S.hintAt && S.t > S.hintAt) {
       S.hintAt = 0;
-      if (S.phase === 'toStall') hint('Find the food stall — look for the glow', 5);
+      if (S.phase === 'toStall') hint('Find the food stall. Look for the glow', 5);
       if (S.phase === 'toScraps') hint('Pick up the cloth scraps by the wall', 5);
     }
     updateHands(t);
@@ -1151,25 +1150,36 @@ export function buildStreet(ctx) {
           S.fromEye = player.eye;
           S.fromYaw = Math.atan2(Math.sin(player.yaw), Math.cos(player.yaw));
           bagCtl.stow = 1;
+          if(player.xr){
+            player.xrPostureLock=true;posture.reset(ctx.xrInput);
+            hint(player.settings.vrSeatedAlternative?'Accessible begging: stay comfortable and hold either trigger to hold out your hands':'Lower yourself onto a stable seat, then extend both hands · or hold both triggers for an accessible alternative',15);
+          }
         }
         const k = ease(Math.min(1, S.t / 1.2));
-        player.dolly.position.lerpVectors(S.from, tmp.set(BEG.x, S.from.y, BEG.z - 0.05), k);
+        if(!player.xr)player.dolly.position.lerpVectors(S.from, tmp.set(BEG.x, S.from.y, BEG.z - 0.05), k);
         if (!player.xr) {
           player.eye = lerp(S.fromEye, 0.82, k);
           player.yaw = lerp(S.fromYaw, 0, k);
           player.pitch = lerp(player.pitch, -0.05, k);
         }
-        if (S.t > 1.3) {
+        const ready=!player.xr||posture.update(ctx.xrInput,dt,player.settings.vrSeatedAlternative);
+        postureFeedback.visible=player.xr;postureFeedback.material.opacity=Math.min(.45,posture.confirm*.45);
+        if (S.t > 1.3 && ready) {
           setPhase('begging');
           hint(
-            player.xr ? 'Hold the trigger to hold out your hands' : 'Hold E to hold out your hands',
-            8,
+            player.xr ? (posture.accessible?'Keep either trigger held to hold out your hands':'Posture ready · keep both hands gently extended') : 'Hold E to hold out your hands',
+            3,
           );
         }
         break;
       }
       case 'begging': {
-        const holding = player.keys.KeyE || S.xrBeg;
+        const wasReady=S.xrBeg;
+        const holding = player.xr?posture.update(ctx.xrInput,dt,player.settings.vrSeatedAlternative):player.keys.KeyE||S.xrBeg;
+        if(player.xr&&wasReady&&!holding)hint(posture.accessible?'Hold either trigger to continue':'Sit comfortably and extend both hands to continue',6);
+        if(player.xr&&!wasReady&&holding&&S.t>1)ui.clearGuidance();
+        S.xrBeg=player.xr&&holding;
+        postureFeedback.visible=player.xr;postureFeedback.material.opacity=holding ? .4 : Math.min(.25,posture.confirm*.3);
         if (holding) {
           S.beg += dt;
           S.idle = 0;
@@ -1182,17 +1192,29 @@ export function buildStreet(ctx) {
         if (S.beg > 0.5 && S.beg - dt <= 0.5) thought('Please…', 2.5);
         if (S.beg > 4.5 && S.beg - dt <= 4.5) thought("They don't even look down.", 3.5);
         if (S.beg > 9.5 && S.beg - dt <= 9.5) thought("It's like I'm not here.", 3.5);
-        if (S.beg > 13 || S.t > 45) {
+        if (S.beg > 13 || (!player.xr && S.t > 45)) {
           setPhase('standUp');
           hands.hide();
         }
         break;
       }
       case 'standUp': {
+        postureFeedback.visible=false;
         const k = ease(Math.min(1, S.t / 1.0));
         if (!player.xr) player.eye = lerp(0.82, 1.52, k);
         if (S.t > 0.5) bagCtl.stow = 0;
         if (S.t > 1.1) {
+          if(player.xr){
+            const input=ctx.xrInput;
+            if(!input?.valid)break;
+            if(!posture.accessible&&input.headLocal.y<posture.baseline-posture.uprightDrop){
+              posture.update(input,dt,player.settings.vrSeatedAlternative);
+              if(!S.riseHint){hint('Rise when comfortable · or hold both triggers to continue seated',15);S.riseHint=true;}
+              if(!posture.accessible)break;
+            }
+            player.xrPostureLock=false;
+            if(posture.accessible)player.xrRecalibrate=true;
+          }
           player.canMove = true;
           vendor.rotation.y = Math.PI; // the vendor has turned away to serve someone
           walkers.forEach((w) => {
@@ -1286,6 +1308,9 @@ export function buildStreet(ctx) {
     thread.set(goals[S.phase] || null);
   }
   function remind() {
+    if(player.xr&&['sitting','begging'].includes(S.phase)){
+      hint(posture.accessible?'Accessible mode: hold either trigger':'Lower onto a stable seat and extend both hands · or hold both triggers for an alternative',8);return;
+    }
     const m = {
       toStall: 'Find the food stall (look for the glow)',
       toScraps: 'Pick up the cloth scraps by the wall',
@@ -1297,9 +1322,9 @@ export function buildStreet(ctx) {
     if (m) hint(m, 5);
   }
   // Sunlit, dusty market; the narrow approach stays in architectural shade.
-  function atmosphere(x) {
+  function atmosphere(x,flee=S.flee||0) {
     const k = clamp((x - 17) / 5, 0, 1),
-      f = S.flee || 0;
+      f = flee;
     const a = {
       // Cooler shade in the approach opens into warm daylight at the stalls.
       fog: new THREE.Color(0x9a7042).lerp(new THREE.Color(0xd5a263), k),
@@ -1331,6 +1356,7 @@ export function buildStreet(ctx) {
     get referenceData() { return referenceData; },
     anchors: { food, tailor, parcel, heap, carton, vendor, tailorMan, seller },
     marketPlaceholders,
+    crowd:{walkers,get navigation(){return crowdNav;}},
     update,
     start,
     stop,
@@ -1353,8 +1379,10 @@ export function buildStreet(ctx) {
       return S.phase;
     },
     setXRBeg(v) {
-      S.xrBeg = v;
+      if(!player.xr)S.xrBeg = v;
     },
+    get beggingPosture(){return posture;},
+    suspendXR(){posture.confirm=0;posture.choice=0;posture.ready=false;S.xrBeg=false;postureFeedback.visible=false;},
     skip() {
       const p = S.phase;
       if (p === 'toStall') {

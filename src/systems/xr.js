@@ -1,9 +1,10 @@
 // VR (WebXR): the same scene in a headset. Controllers become the child's floating hands,
-// the trigger interacts (point at something, pull to use; hold on the machine to sew),
+// the trigger interacts; sewing uses proximity grips and actual cloth movement,
 // left stick walks, right stick turns in 30° steps, and words appear on a board in front of you.
 // The page's own overlays (the black and white fades, the eyelids) are drawn inside the headset by a
 // "veil" around your eyes, so every blink and fade the desktop shows is seen in VR too.
 import * as THREE from 'three';
+import {layoutCard,INTRO_TIMING,playerText} from '../ui/presentation.mjs';
 
 // the veil: a small sphere around the eyes. It mirrors the page's fade (black or the warm white), the
 // eyelids (closing from the top and bottom), and darkens the edge of sight a little while the stick moves you.
@@ -76,18 +77,14 @@ export class XRRig {
           if (this.endKind === 'prologue' && this.onPrologueContinue) {
             const next = this.onPrologueContinue;
             this.onPrologueContinue = null;
-            this.endMode = false;
-            this.endReady = false;
-            this.endKind = null;
-            this.endBoard.visible = false;
-            this.board.visible = true;
+            this.endReady=false;this.prologueLeaving=true;
             next();
             return;
           }
           this.exit();
           return;
         }
-        if (this.blurred) return;
+        if (this.blurred||this.endMode) return;
         this.pressFrom = i;
         this.interactor.pressXR(c);
         if (this.interactor.pressed) this.buzz(i); // the controller answers every use with a small tap
@@ -100,11 +97,11 @@ export class XRRig {
     // caption board: thoughts, subtitles and hints floating in front of you
     this.capCanvas = document.createElement('canvas');
     this.capCanvas.width = 1024;
-    this.capCanvas.height = 640;
+    this.capCanvas.height = 512;
     this.capTex = new THREE.CanvasTexture(this.capCanvas);
     this.capTex.colorSpace = THREE.SRGBColorSpace;
     this.board = new THREE.Mesh(
-      new THREE.PlaneGeometry(1.2, 0.75),
+      new THREE.PlaneGeometry(1.2, 0.6),
       new THREE.MeshBasicMaterial({
         map: this.capTex,
         transparent: true,
@@ -114,12 +111,18 @@ export class XRRig {
         toneMapped: false,
       }),
     );
-    this.board.position.set(0, -0.52, -1.35);
-    this.board.rotation.x = -0.18;
+    this.board.position.set(0, -0.35, -1.65);
+    this.board.rotation.x = 0;
     this.board.renderOrder = 99;
     this.board.visible = false;
     this.board.frustumCulled = false;
     camera.add(this.board);
+    this.instructionCanvas=document.createElement('canvas');
+    this.instructionCanvas.width=1024;this.instructionCanvas.height=256;
+    this.instructionTex=new THREE.CanvasTexture(this.instructionCanvas);this.instructionTex.colorSpace=THREE.SRGBColorSpace;
+    this.instructionBoard=new THREE.Mesh(new THREE.PlaneGeometry(1.2,.3),new THREE.MeshBasicMaterial({map:this.instructionTex,transparent:true,depthTest:false,depthWrite:false,fog:false,toneMapped:false}));
+    this.instructionBoard.position.set(0,.38,-1.65);this.instructionBoard.renderOrder=99;
+    this.instructionBoard.frustumCulled=false;this.instructionBoard.visible=false;camera.add(this.instructionBoard);
     this.lastCap = '';
     const curve = document.querySelector('#title .thread path');
     this.progressPath = new Path2D(curve.getAttribute('d'));
@@ -159,7 +162,7 @@ export class XRRig {
     this.endTex = new THREE.CanvasTexture(this.endCanvas);
     this.endTex.colorSpace = THREE.SRGBColorSpace;
     this.endBoard = new THREE.Mesh(
-      new THREE.PlaneGeometry(1.5, 1.5),
+      new THREE.PlaneGeometry(1.45, 1.45),
       new THREE.MeshBasicMaterial({
         map: this.endTex,
         transparent: true,
@@ -172,7 +175,7 @@ export class XRRig {
     this.endBoard.renderOrder = 101;
     this.endBoard.visible = false;
     this.endBoard.frustumCulled = false;
-    player.dolly.add(this.endBoard);
+    camera.add(this.endBoard);
     this.endMode = false;
     this.endReady = false;
     this.endKind = null; // 'finale' | 'prologue'
@@ -227,6 +230,10 @@ export class XRRig {
     this.frames = 0;
     this.blurred = false;
     this._lastEye = undefined;
+    this.standingHeadY=undefined;
+    this.bodyHeight=1.65;
+    this.player.xrPostureLock=false;
+    this.player.xrRecalibrate=false;
     this.player.xrPoseOK = false;
     this.player.xrPending = null;
     this.endMode = false;
@@ -270,6 +277,7 @@ export class XRRig {
       this.interactor.xrMode = false;
       this.interactor.release();
       this.board.visible = false;
+      this.instructionBoard.visible=false;
       this.veil.visible = false;
       this.endBoard.visible = false;
       this.endMode = false;
@@ -291,6 +299,7 @@ export class XRRig {
       this.player.dolly.rotation.y = 0; // the desktop view turns the camera, not the play space
       this.player.xrPending = null;
       this.player.xrPoseOK = false;
+      this.player.xrPostureLock=false;
       onEnd && onEnd();
     });
     onStart && onStart();
@@ -313,26 +322,34 @@ export class XRRig {
     }
   }
   recalibrate() {
+    if (this.player.xrPostureLock) return;
     this.calib = 1;
+  }
+  interactionPose() {
+    const p=this.player,frame=this.renderer.xr.getFrame(),space=this.renderer.xr.getReferenceSpace();
+    const headTracked=!!(frame&&space&&frame.getViewerPose(space));
+    const valid=this.active&&!this.blurred&&!this.endMode&&p.xrPoseOK&&headTracked;
+    p.dolly.updateWorldMatrix(true,true);
+    const head=this.camera.getWorldPosition(new THREE.Vector3()),forward=this.camera.getWorldDirection(new THREE.Vector3());
+    forward.y=0;if(forward.lengthSq()<1e-4)forward.set(-Math.sin(p.yaw),0,-Math.cos(p.yaw));forward.normalize();
+    return {valid,head,headLocal:this.camera.position.clone(),standingHeadY:this.standingHeadY,
+      bodyHeight:this.bodyHeight||1.65,forward,right:new THREE.Vector3(-forward.z,0,forward.x),
+      hands:this.hand.map(i=>{const g=this.grip[i],c=this.ctrl[i],s=this.state[i];return {
+        tracked:valid&&!!c.userData.gp&&g.visible&&c.visible,
+        position:new THREE.Vector3(0,-.01,.06).applyMatrix4(g.matrixWorld),
+        local:g.position.clone(),quaternion:g.getWorldQuaternion(new THREE.Quaternion()),
+        squeeze:s.squeeze,trigger:s.trigger};})};
   }
   /** Place the dark reading board ~1.7 m in front of the headset. */
   _placeEndBoard() {
-    const head = new THREE.Vector3(),
-      fwd = new THREE.Vector3();
-    this.camera.getWorldPosition(head);
-    this.camera.getWorldDirection(fwd);
-    fwd.y = 0;
-    if (fwd.lengthSq() < 1e-4) fwd.set(0, 0, -1);
-    fwd.normalize();
-    const p = head.clone().addScaledVector(fwd, 1.7);
-    this.player.dolly.updateWorldMatrix(true, false);
-    this.endBoard.position.copy(this.player.dolly.worldToLocal(p));
-    const look = head.clone();
-    look.y = p.y;
-    this.endBoard.lookAt(look); // lookAt aims +Z at the target (play-space yaw already applied)
-    this.endBoard.visible = true;
-    this.board.visible = false;
+    this.endBoard.position.set(0,0,-1.9);this.endBoard.rotation.set(0,0,0);
+    this.endBoard.visible=true;this.board.visible=false;this.instructionBoard.visible=false;
   }
+  finishPrologue(){
+    this.endMode=false;this.endReady=false;this.endKind=null;this.prologueLeaving=false;
+    this.endBoard.visible=false;this.board.visible=true;this.instructionBoard.visible=true;this.lastCap='';
+  }
+
   // the end card: read the page's end card line by line and show it in the dark
   showEnd() {
     if (!this.active) return;
@@ -353,7 +370,8 @@ export class XRRig {
     this.endMode = true;
     this.endReady = false;
     this.endKind = 'prologue';
-    this.endIds = ['pro-1', 'pro-2', 'pro-3', 'pro-4', 'pro-phones', 'pro-click'];
+    this.endIds = ['pro-1', 'pro-2', 'pro-3', 'pro-4', 'pro-click'];
+    this.prologueLeaving=false;
     this.onPrologueContinue = onContinue || null;
     this.endT = 0;
     this.finT = 0;
@@ -399,7 +417,9 @@ export class XRRig {
       pl.dolly.position.y = pl.eye - headY;
       this.calib = 0;
       this._lastEye = pl.eye;
+      if(pl.eye>=1.45&&!pl.xrPostureLock){this.standingHeadY=headY;this.bodyHeight=headY>1&&headY<2.3?headY:1.65;}
     }
+    if(pl.xrRecalibrate&&!pl.xrPostureLock){this.calib=1;pl.xrRecalibrate=false;}
     // the first real head pose: put you where the story placed you, facing the way it wants
     if (posed && !pl.xrPoseOK) {
       pl.xrPoseOK = true;
@@ -435,7 +455,8 @@ export class XRRig {
       dx = Math.abs(L.stick[0]) > 0.15 ? L.stick[0] : 0;
     pl.xrMove.set(0, 0, 0).addScaledVector(fwd, dz).addScaledVector(right, dx);
     const turn = Rt.stick[0];
-    if (Math.abs(turn) > 0.7 && !Rt.turned) {
+    if(pl.xrManipulating&&Math.abs(turn)>.7)Rt.turned=true;
+    if (Math.abs(turn) > 0.7 && !Rt.turned && !pl.xrManipulating) {
       Rt.turned = true;
       // rotate the dolly about the head, not the play-area centre
       const head = new THREE.Vector3();
@@ -514,258 +535,72 @@ export class XRRig {
     return lines;
   }
   _draw([thought, subtitle, hint], label, prog, stam) {
-    const g = this.capCanvas.getContext('2d'),
-      W = this.capCanvas.width,
-      H = this.capCanvas.height;
-    g.clearRect(0, 0, W, H);
-    const maxW = W - 120;
-    // build the blocks, shrinking the type if everything would not fit
-    let scale = 1,
-      blocks = [],
-      total = 0;
-    for (let tries = 0; tries < 4; tries++) {
-      blocks = [];
-      total = 0;
-      const add = (text, font, size, color, upper, plain = false) => {
-        g.font = font.replace('#', Math.round(size * scale) + 'px');
-        const lines = this._wrap(g, upper ? String(text).toUpperCase() : text, maxW);
-        const lh = Math.round(size * scale * 1.3);
-        blocks.push({ lines, font: g.font, color, lh, plain });
-        total += lines.length * lh + 10;
-      };
-      if (label) add('▸ ' + label, '400 # "Gowun Batang", Georgia, serif', 24, '#f3ead8');
-      if (thought && thought.text) {
-        add(
-          thought.text,
-          'italic 400 # "Gowun Batang", Georgia, serif',
-          44,
-          '#f3ead8',
-          false,
-          true,
-        );
-      }
-      if (subtitle && subtitle.text) {
-        add(
-          subtitle.who || 'Around you',
-          '400 # "Gowun Batang", Georgia, serif',
-          24,
-          '#e3b77c',
-          true,
-        );
-        add(subtitle.text, '400 # "Gowun Batang", Georgia, serif', 42, '#fff4df');
-      }
-      if (hint && hint.text) add(hint.text, '400 # "Gowun Batang", Georgia, serif', 36, '#f3ead8');
-      const bars = (prog > 0 ? 1 : 0) + (stam >= 0 ? 1 : 0);
-      total += bars * 92;
-      if (total <= H - 60) break;
-      scale *= 0.85;
+    const top=this.instructionCanvas.getContext('2d'),IW=this.instructionCanvas.width,IH=this.instructionCanvas.height;
+    top.clearRect(0,0,IW,IH);top.textAlign='center';top.textBaseline='middle';
+    const instruction=playerText(hint?.text||label||'');
+    let size=34,lines=[];
+    do{top.font=`400 ${size}px "Gowun Batang", Georgia, serif`;lines=this._wrap(top,instruction,IW-140);if(lines.length*size*1.4<IH-40)break;size-=2;}while(size>24);
+    top.fillStyle='#f3ead8';top.shadowColor='rgba(0,0,0,.95)';top.shadowBlur=10;top.shadowOffsetY=2;
+    lines.forEach((line,i)=>top.fillText(line,IW/2,(IH-lines.length*size*1.4)/2+(i+.5)*size*1.4));
+    this.instructionTex.needsUpdate=true;
+    this.instructionBoard.visible=this.active&&!this.endMode&&!!instruction;
+    const g=this.capCanvas.getContext('2d'),W=this.capCanvas.width,H=this.capCanvas.height;
+    g.clearRect(0,0,W,H);g.textAlign='center';g.textBaseline='middle';
+    const bars=[];if(prog>0)bars.push({v:prog,sewing:true});if(stam>=0)bars.push({v:stam});
+    let scale=1,blocks,total;
+    for(let pass=0;pass<12;pass++){
+      blocks=[];total=bars.length*70;
+      if(thought?.text){const font=`italic 400 ${Math.round(38*scale)}px "Gowun Batang", Georgia, serif`;g.font=font;const rows=this._wrap(g,thought.text,W-140),line=50*scale;blocks.push({rows,font,line,height:rows.length*line+14,dialogue:false});total+=rows.length*line+14;}
+      if(subtitle?.text){const font=`400 ${Math.round(36*scale)}px "Gowun Batang", Georgia, serif`;g.font=font;const rows=this._wrap(g,subtitle.text,W-160),line=48*scale;blocks.push({rows,font,line,height:rows.length*line+64*scale,dialogue:true,who:subtitle.who||'Around you'});total+=rows.length*line+64*scale;}
+      if(total<H-40)break;scale*=.9;
     }
-    const bars = [];
-    if (prog > 0) bars.push({ v: prog, c: '#e6decc', sewing: true });
-    if (stam >= 0) bars.push({ v: stam, c: '#d23a2c' });
-    if (!blocks.length && !bars.length) {
-      this.capTex.needsUpdate = true;
-      return;
+    let y=Math.max(20,(H-total)/2);
+    for(const block of blocks){
+      if(block.dialogue){g.font=block.font;const bw=Math.min(W-84,Math.max(260,...block.rows.map(row=>g.measureText(row).width+72))),bx=(W-bw)/2;g.shadowBlur=0;g.fillStyle='rgba(9,7,4,.78)';g.fillRect(bx,y,bw,block.height-8);g.fillStyle='#d2a46a';g.fillRect(bx,y,3,block.height-8);g.font=`400 ${Math.round(21*scale)}px "Gowun Batang", Georgia, serif`;g.fillStyle='#e3b77c';g.fillText(block.who.toUpperCase(),W/2,y+22*scale);}
+      g.font=block.font;g.fillStyle=block.dialogue?'#fff4df':'#f3ead8';g.shadowColor='rgba(0,0,0,.9)';g.shadowBlur=block.dialogue?0:10;
+      const textY=y+(block.dialogue?43*scale:0);
+      block.rows.forEach((row,i)=>g.fillText(row,W/2,textY+(i+.5)*block.line));y+=block.height;
     }
-    const top = Math.max(20, (H - total) / 2 - 10);
-
-    g.textAlign = 'center';
-    g.textBaseline = 'middle';
-    let y = top + 6;
-    for (const b of blocks) {
-      if (!b.plain) {
-        g.fillStyle = 'rgba(10,8,6,0.75)';
-        g.fillRect(30, y - 5, W - 60, b.lines.length * b.lh + 10);
-      }
-      g.shadowColor = 'rgba(0,0,0,0.95)';
-      g.shadowBlur = b.plain ? 12 : 0;
-      g.shadowOffsetY = b.plain ? 2 : 0;
-      g.font = b.font;
-      g.fillStyle = b.color;
-      for (const l of b.lines) {
-        g.fillText(l, W / 2, y + b.lh / 2);
-        y += b.lh;
-      }
-      y += 10;
+    g.shadowBlur=0;
+    for(const bar of bars){const bw=320,bx=(W-bw)/2;
+      if(bar.sewing){g.fillStyle='#302b27';g.fillRect(bx,y+24,bw,10);g.fillStyle='#ece4d6';g.fillRect(bx,y+24,bw*Math.max(0,Math.min(1,bar.v)),10);}
+      else{g.save();g.translate(bx,y);g.scale(bw/1656,bw/1656);g.translate(28,-400);g.lineWidth=12;g.lineCap='round';g.strokeStyle='rgba(210,58,44,.22)';g.stroke(this.progressPath);g.setLineDash([this.progressLength*Math.max(0,Math.min(1,bar.v)),this.progressLength+1]);g.strokeStyle='#d23a2c';g.stroke(this.progressPath);g.restore();}y+=70;
     }
-    g.shadowBlur = 0;
-    g.shadowOffsetY = 0;
-    // The same red thread curve as the title; reveal it by distance along the path.
-    for (const bar of bars) {
-      const bw = 360,
-        bx = (W - bw) / 2;
-      if (bar.sewing) {
-        g.fillStyle = '#302b27';g.fillRect(bx,y+24,bw,12);
-        g.fillStyle = bar.c;g.fillRect(bx,y+24,bw*Math.max(0,Math.min(1,bar.v)),12);
-        y += 92;
-        continue;
-      }
-      g.save();
-      g.translate(bx, y);
-      g.scale(bw / 1656, bw / 1656);
-      g.translate(28, -400);
-      g.lineWidth = 12;
-      g.lineCap = 'round';
-      g.strokeStyle = 'rgba(210,58,44,0.22)';
-      g.stroke(this.progressPath);
-      const length = this.progressLength * Math.max(0, Math.min(1, bar.v));
-      if (length > 0) {
-        g.setLineDash([length, this.progressLength + 1]);
-        g.strokeStyle = bar.c;
-        g.stroke(this.progressPath);
-      }
-      g.restore();
-      y += 92;
-    }
-    this.capTex.needsUpdate = true;
+    this.captionLayout={instruction:{lines,boxed:false},narrative:{height:total,bottom:y,scale},separate:true};
+    this.capTex.needsUpdate=true;
   }
-  // Finale or prologue: the same lines as the page, appearing one after another on the board
   _end(dt) {
-    this.endT += dt;
-    const ids = this.endIds || [
-      'stat-0a',
-      'stat-0b',
-      'stat-1',
-      'stat-2',
-      'stat-3',
-      'stat-src',
-      'stat-fin',
-    ];
-    const lines = [];
-    let any = false,
-      finOn = false;
-    for (const id of ids) {
-      const el = document.getElementById(id);
-      if (!el || el.hidden) continue;
-      const on = el.classList.contains('on');
-      const a = (this.endAlpha[id] = THREE.MathUtils.clamp(
-        (this.endAlpha[id] || 0) + (on ? dt / 1.6 : -dt / 0.3),
-        0,
-        1,
-      ));
-      if (a < 1 && on) any = true;
-      if (id === 'stat-fin') {
-        finOn = on;
-        const h = el.querySelector('h2'),
-          ps = el.querySelectorAll('p');
-        if (h) lines.push({ a, kind: 'title', el: h });
-        ps.forEach((p) => lines.push({ a, kind: 'small', el: p }));
-      } else if (id === 'pro-click' || id === 'pro-phones' || id === 'stat-src') {
-        if (id === 'pro-click') finOn = on;
-        lines.push({ a, kind: 'small', el });
-      } else lines.push({ a, kind: 'stat', el });
+    this.endT+=dt;const groups=[];let cue=false;
+    for(const id of this.endIds||[]){const el=document.getElementById(id);if(!el||el.hidden)continue;
+      const a=Number(getComputedStyle(el).opacity);
+      if(id==='stat-fin'){cue=el.classList.contains('on');const title=el.querySelector('h2');if(title)groups.push({id,a,kind:'title',el:title});for(const p of el.querySelectorAll('p'))groups.push({id,a,kind:'small',el:p});}
+      else{if(id==='pro-click')cue=el.classList.contains('on');groups.push({id,a,kind:id==='pro-title'?'title':/pro-click|stat-src/.test(id)?'small':'stat',el});}
     }
-    if (finOn) {
-      this.finT = (this.finT || 0) + dt;
-      if (this.finT > 2.5 && !this.endReady) {
-        this.endReady = true;
-        any = true;
-      }
-    } else this.finT = 0;
-    const key = lines.map((l) => l.a.toFixed(2)).join(',') + this.endReady;
-    if (!any && key === this._endKey) return;
-    this._endKey = key;
-    const g = this.endCanvas.getContext('2d'),
-      W = 1024,
-      H = 1024;
-    g.clearRect(0, 0, W, H);
-    g.textAlign = 'left';
-    g.textBaseline = 'middle';
-    const STYLE = {
-      stat: { size: 46, fam: '"Spectral", Georgia, serif', color: '#ece4d6', lh: 58, gap: 14 },
-      small: {
-        size: 24,
-        fam: '"Gowun Batang", Georgia, serif',
-        color: 'rgba(236,228,214,0.62)',
-        lh: 32,
-        gap: 8,
-      },
-      title: { size: 72, fam: '"Spectral", Georgia, serif', color: '#ece4d6', lh: 84, gap: 14 },
-    };
-    // words with their own colour and slant (<strong> is red, <em> italic), wrapped and centred
-    const laid = [];
-    let total = 0;
-    for (const l of lines) {
-      const st = STYLE[l.kind],
-        toks = [];
-      const walk = (node, strong, em) =>
-        node.childNodes.forEach((n) => {
-          if (n.nodeType === 3)
-            n.textContent.split(/(\s+)/).forEach((w) => {
-              if (w) toks.push({ w, strong, em });
-            });
-          else if (n.nodeType === 1)
-            walk(n, strong || n.nodeName === 'STRONG', em || n.nodeName === 'EM');
-        });
-      walk(l.el, false, false);
-      const font = (t) => (t.em ? 'italic ' : '') + '400 ' + st.size + 'px ' + st.fam;
-      const rows = [];
-      let row = [],
-        rw = 0;
-      for (const t of toks) {
-        g.font = font(t);
-        const w = g.measureText(t.w).width;
-        const space = /^\s+$/.test(t.w);
-        if (!space && rw + w > W - 120 && row.length) {
-          while (row.length && /^\s+$/.test(row[row.length - 1].w)) rw -= row.pop().width;
-          rows.push({ row, rw });
-          row = [];
-          rw = 0;
-        }
-        if (space && !row.length) continue;
-        row.push({ ...t, width: w, font: font(t) });
-        rw += w;
-      }
-      while (row.length && /^\s+$/.test(row[row.length - 1].w)) rw -= row.pop().width;
-      if (row.length) rows.push({ row, rw });
-      if (rows.length > 1) {
-        const last = rows[rows.length - 1],
-          prev = rows[rows.length - 2];
-        const words = last.row.filter((t) => !/^\s+$/.test(t.w));
-        if (words.length === 1 && prev.row.filter((t) => !/^\s+$/.test(t.w)).length > 1) {
-          const moved = [];
-          while (prev.row.length && /^\s+$/.test(prev.row.at(-1).w))
-            prev.rw -= prev.row.pop().width;
-          const word = prev.row.pop();
-          prev.rw -= word.width;
-          moved.push(word);
-          g.font = word.font;
-          const space = { ...word, w: ' ', width: g.measureText(' ').width };
-          last.row.unshift(...moved, space);
-          last.rw += word.width + space.width;
-          while (prev.row.length && /^\s+$/.test(prev.row.at(-1).w))
-            prev.rw -= prev.row.pop().width;
-        }
-      }
-      laid.push({ ...l, st, rows });
-      total += rows.length * st.lh + st.gap + (l.kind === 'title' ? 24 : 0);
+    this.finT=cue&&!this.prologueLeaving?this.finT+dt:0;
+    if(this.finT>2.5&&!this.prologueLeaving)this.endReady=true;
+    const g=this.endCanvas.getContext('2d'),W=this.endCanvas.width,H=this.endCanvas.height;
+    if(this.endKind!=='prologue'){
+      if(!this.exitCue){this.exitCue=document.createElement('span');this.exitCue.textContent='Pull the trigger to leave VR';}
+      groups.push({id:'exit-cue',a:THREE.MathUtils.clamp((this.finT-2.5)/.8,0,1),kind:'small',el:this.exitCue});
     }
-    if (this.endReady) total += 70;
-    let y = Math.max(30, (H - total) / 2);
-    for (const l of laid) {
-      if (l.kind === 'title') y += 24;
-      g.globalAlpha = l.a;
-      for (const r of l.rows) {
-        let x = (W - r.rw) / 2;
-        for (const t of r.row) {
-          g.font = t.font;
-          g.fillStyle = t.strong ? '#d23a2c' : l.st.color;
-          g.fillText(t.w, x, y + l.st.lh / 2);
-          x += t.width;
-        }
-        y += l.st.lh;
-      }
-      y += l.st.gap;
+    const layout=layoutCard(g,groups,W,H),exit=this.ui.state.introExit;
+    g.clearRect(0,0,W,H);g.textAlign='left';g.textBaseline='middle';
+    let hero=null;
+    for(const block of layout.blocks){block.rows.forEach((row,i)=>{let x=(W-row.width)/2;for(const token of row.tokens){
+      g.font=token.font;const y=block.y+(i+.5)*block.line;
+      if(token.hero){hero={x:x+token.width/2,y,font:token.font,width:token.width};}
+      else{g.globalAlpha=block.id==='pro-3'&&exit?Number(getComputedStyle(document.querySelector('#pro-3 .intro-copy')).opacity):block.a;g.fillStyle=token.strong?'#d23a2c':block.kind==='small'?'#bfb7a9':'#ece4d6';g.fillText(token.word,x,y);}
+      x+=token.width;
+    }});}
+    if(hero){
+      const move=exit?smooth(THREE.MathUtils.clamp((performance.now()-exit.bodyEnd)/INTRO_TIMING.titleMove,0,1)):0;
+      const size=Number(hero.font.match(/([\d.]+)px/)[1]),fontSize=THREE.MathUtils.lerp(size,76,move);
+      const x=THREE.MathUtils.lerp(hero.x,W/2,move),y=THREE.MathUtils.lerp(hero.y,H/2,move);
+      g.font=hero.font.replace(/[\d.]+px/,fontSize+'px');g.textAlign='center';g.fillStyle='#d23a2c';
+      g.globalAlpha=exit?Number(getComputedStyle(document.querySelector('#pro-title')).opacity):Number(getComputedStyle(document.querySelector('#pro-3')).opacity);
+      const text=move>0?'The Long Way Home':'the long way home';g.fillText(text,x,y);
+      layout.hero={x,y,size:fontSize,alpha:g.globalAlpha,text,width:g.measureText(text).width,move};
     }
-    if (this.endReady && this.endKind !== 'prologue') {
-      // Prologue already shows its own "Pull the trigger…" line from #pro-click
-      g.globalAlpha = 1;
-      g.textAlign = 'center';
-      g.font = '400 26px "Gowun Batang", Georgia, serif';
-      g.fillStyle = '#d8d0c0';
-      g.fillText('Pull the trigger to leave VR', W / 2, y + 44);
-    }
-    g.globalAlpha = 1;
-    this.endTex.needsUpdate = true;
+    g.globalAlpha=1;this.endLayout=layout;this.endTex.needsUpdate=true;
   }
 }

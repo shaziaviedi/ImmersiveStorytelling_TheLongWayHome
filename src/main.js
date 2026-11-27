@@ -16,6 +16,10 @@ import { LightPool } from './rendering/lights.js';
 import { makePost } from './rendering/post-processing.js';
 import { makeSky } from './rendering/sky.js';
 
+import { CarriedFood } from './systems/carried-food.js';
+import { buildMarketContinuity } from './world/market-continuity.js';
+import { blendChaseEntry } from './rendering/chase-entry.mjs';
+import { fabricLibrary } from './world/fabric-library.js';
 import { Hands, BagCtl } from './characters/first-person.js';
 import { makePolice, makePerson, poseSit, poseStand, animateWalk } from './characters/people.js';
 import { Thread } from './world/builders.js';
@@ -91,6 +95,8 @@ audio.stopAll =
 const player = new Player({ camera, scene, canvas, audio, settings });
 const interactor = new Interactor(camera, canvas);
 interactor.onUse = () => {
+  ui.clearGuidance();
+  $('#fhint').classList.add('gone');
   ui.pulse();
   if (audio.ready) audio.oneShot('tap', { volume: 0.35, rate: 0.95 + Math.random() * 0.1 });
 }; // every use answers: a ripple and a soft tap
@@ -197,7 +203,9 @@ let cur = 0,
   built = 0,
   allBuilt = null;
 ctx.refreshColliders = () => {
-  player.colliders = spaces.filter(Boolean).flatMap((sp) => sp.getColliders());
+  const active=spaces[cur];
+  player.colliders=active?active.getColliders():[];
+  if(active?.name==='nightmare'&&spaces[4])player.colliders=[...player.colliders,...spaces[4].getColliders()];
 };
 
 // ---------- build: the factory now, everything else in the background ----------
@@ -218,6 +226,12 @@ async function build() {
   await step(0.1, 'Weaving cloth…');
   bagCtl = new BagCtl(camera, bagCloth(), hands);
   ctx.bagCtl = bagCtl;
+  ctx.foodItem = new CarriedFood(ctx);bagCtl.foodItem=ctx.foodItem;
+  await ctx.foodItem.ready;
+  bagCtl.bag.userData.food.clear();
+  const fabrics=await fabricLibrary();
+  bagCtl.bag.userData.scraps.clear();
+  for(let i=0;i<3;i++){const piece=fabrics.piece({width:.09,height:.012,depth:.07,variant:i+1});piece.position.set((i-1)*.035,.12+i*.012,0);bagCtl.bag.userData.scraps.add(piece);}
   await step(0.3, 'Building the workshop…');
   spaces[0] = buildSweatshop(ctx);
   built = 1;
@@ -283,9 +297,10 @@ async function buildRest() {
         console.warn('[load] space assets failed', sp.name || i, e);
       }
     }
+    if(sp.name==='nightmare')sp.referenceData.continuity=buildMarketContinuity(sp.root,spaces[1]);
     atmosphere.install(sp.root);
     sp.root.visible = false;
-    sp.onEnd((next) => onSpaceEnd(next));
+    sp.onEnd((next) => {if(sp===spaces[cur])onSpaceEnd(next);});
     if (sp.setQuality) sp.setQuality(quality);
     ctx.refreshColliders();
     await idle(120);
@@ -315,12 +330,18 @@ function onSpaceEnd(next) {
   if (next === 'finale') return finale();
   goTo(next);
 }
+let transitionVersion=0;
 async function goTo(name) {
+  const version=++transitionVersion;
+  ui.clearGuidance();
   const i = ORDER.indexOf(name);
+  if(i<0)throw Error(`Unknown scene: ${name}`);
   if (!spaces[i]) {
     await allBuilt;
   }
   if (spaces[i].ready) await spaces[i].ready;
+  if(version!==transitionVersion)return false;
+  interactor.release();
   // stop what is behind you; the street keeps the factory and the nightmare keeps the street for one
   // more space (their sounds fade out behind you). The light and the home leave everything behind.
   const keepPrev = name === 'street' || name === 'nightmare';
@@ -332,6 +353,7 @@ async function goTo(name) {
   spaces[i].start();
   ctx.refreshColliders();
   updateVisibility();
+  return true;
 }
 // only the current space and its neighbours are drawn
 ctx.hideSpace = (n) => {
@@ -348,10 +370,13 @@ function updateVisibility(title = false) {
     let on = title ? i === 0 : Math.abs(i - cur) <= 1;
     if (!title && cur === V) on = i === V; // the light stands alone
     if (!title && i === V && cur !== V) on = false;
+    if (!title && cur === N && i === 1) on = false; // A trimmed static market view replaces the intruding full market.
     if (!title && cur === N && i === H) on = true; // the home's glowing door is seen from the last lane
     if (!title && cur === H && i === N) on = true;
     sp.root.visible = on;
   });
+  const marketMemory=spaces[N]?.referenceData?.continuity;
+  if(marketMemory)marketMemory.group.visible=!title&&cur===N&&!spaces[1]?.root.visible;
   police.forEach((p) => {
     p.visible = !title && (cur === 1 || cur === 2);
   });
@@ -369,10 +394,13 @@ function zoneAt(x) {
 function updateAtmosphere(dt, title) {
   player.headWorld(headV);
   const zi = title ? 0 : exploring ? zoneAt(headV.x) : cur;
-  const a = spaces[zi] ? spaces[zi].atmosphere(headV.x) : spaces[0].atmosphere();
+  const marketMemory=spaces[2]?.referenceData?.continuity;
+  if(marketMemory&&!exploring)marketMemory.group.visible=!title&&cur===2&&headV.x<54.25&&headV.z>6.3;
+  let a = spaces[zi] ? spaces[zi].atmosphere(headV.x) : spaces[0].atmosphere();
+  if(zi===2&&spaces[1])a=blendChaseEntry(spaces[1].atmosphere(40.4,1),a,headV.x);
   // slow, eased blending: moving between spaces never snaps suddenly brighter or darker
   const k = Math.min(1, dt * (title ? 2.5 : 0.9));
-  atmosphere.update(dt, elapsed, ORDER[zi], a.doorWarmth || 0);
+  atmosphere.update(dt, elapsed, ORDER[zi], a.doorWarmth || 0,a.marketBlend??1);
   fogTarget.copy(a.fog);
   scene.fog.color.lerp(fogTarget, k);
   scene.background.copy(scene.fog.color);
@@ -407,7 +435,10 @@ function updateAtmosphere(dt, title) {
   lights.update(dt, headV, activeSpaces);
 }
 
-function startJourney() {
+async function startJourney(selected=pendingScene||1) {
+  pendingScene=0;const journeyVersion=++transitionVersion;
+  if(selected>1)await allBuilt;
+  if(journeyVersion!==transitionVersion)return false;
   spaces.forEach((sp) => {
     if (sp) {
       sp.stop();
@@ -423,10 +454,17 @@ function startJourney() {
   player.canRun = true;
   player.speedScale = 1;
   player.jogAllowed = false;
-  cur = 0;
-  spaces[0].start();
-  ctx.refreshColliders();
-  updateVisibility();
+  player.keys={};player.qHeld=false;player.qHeldXR=false;player.xrPostureLock=false;player.bounds=null;player.noclip=false;
+  ctx.carryFear=0;ctx.homeDoorAngle=0;ui.clearGuidance();interactor.release();
+  cur=0;
+  const target=['sweatshop','street','nightmare','home'][selected-1];
+  if(!target)throw Error(`Invalid scene selection: ${selected}`);
+  if(selected>1){bagCtl.take();bagCtl.takeK=1;bagCtl.setContents({coins:3,scraps:selected>=3,food:selected>=3});}
+  if(!await goTo(target))return false;
+  if(selected===2)player.place(21.5,3.9,-Math.PI/2,1.52);
+  if(selected===3)spaces[2].sceneStart(false);
+  ctx.refreshColliders();updateVisibility();return true;
+
 }
 function finale() {
   setMode('end');
@@ -529,7 +567,7 @@ document.addEventListener('click', (e) => {
   if (act === 'scene') {
     ui.show('scenes', false);
     pendingScene = +a.dataset.n;
-    begin();
+    begin(true);
   }
   if (act === 'vr') enterVR();
   if (act === 'edition-open') edOpen(!$('#ed').classList.contains('open'));
@@ -568,9 +606,17 @@ $('#hints').addEventListener('change', (e) => {
   settings.hints = e.target.checked;
   saveSettings();
 });
+$('#vr-seated-alternative').checked=settings.vrSeatedAlternative;
+$('#vr-seated-alternative').addEventListener('change',e=>{settings.vrSeatedAlternative=e.target.checked;saveSettings();});
 
-async function begin() {
+async function begin(direct=false) {
   if (mode !== 'title') return;
+  if(direct){
+    const selected=pendingScene||1,launchId=ui.state.prologueId;pendingScene=0;
+    setMode('loading');ui.show('title',false);ui.fade(true);player.lock();
+    await audio.init();if(mode!=='loading'||launchId!==ui.state.prologueId)return;
+    if(!await startJourney(selected))return;post.setCamera(camera);setMode('play');playTime=0;ui.fade(false);return;
+  }
   ui.clearPrologue();
   ui.show('title', false);
   ui.show('intro', true);
@@ -579,14 +625,16 @@ async function begin() {
   clickEl.textContent = 'Preparing sound…';
   // Story lines fade in like the end card while audio warms up
   const cueAt = ui.prologue();
+  const introId=ui.state.prologueId;
   const sound = audio.init().catch(() => {
     /* placeholders if decode fails */
   });
   await Promise.all([sound, new Promise((r) => setTimeout(r, cueAt))]);
-  if (mode !== 'intro') return;
-  clickEl.textContent = 'Click anywhere to sit down.';
+  if (mode !== 'intro'||ui.state.prologueId!==introId) return;
+  clickEl.textContent = 'Click to begin.';
   clickEl.classList.add('on');
   $('#intro').classList.add('ready');
+  $('#intro').removeEventListener('click',sitDown);
   $('#intro').addEventListener('click', sitDown, { once: true });
 }
 let vrStarting = false;
@@ -617,17 +665,19 @@ async function enterVR() {
             if (!xrRig.active || mode !== 'intro') return;
             // Same prologue lines on the VR board; trigger continues into the seat
             const cueAt = ui.prologue();
-            $('#pro-click').textContent = 'Pull the trigger to sit down.';
+            const introId=ui.state.prologueId;
+            $('#pro-click').textContent = 'Pull the trigger to begin.';
             setTimeout(() => {
-              if (mode === 'intro') $('#pro-click').classList.add('on');
+              if (mode === 'intro'&&ui.state.prologueId===introId&&!ui.state.introExit) $('#pro-click').classList.add('on');
             }, cueAt);
-            xrRig.showPrologue(() => {
+            xrRig.showPrologue(async () => {
               if (!xrRig.active || mode !== 'intro') return;
+              if(!await ui.dismissPrologue()||!xrRig.active||mode!=='intro')return;
+              xrRig.finishPrologue();
               ui.show('intro', false);
               ui.clearPrologue();
-              startJourney();
+              if(!await startJourney())return;
               post.setCamera(camera);
-              jumpScene();
               setMode('play');
               playTime = 0;
               autoChecked = true;
@@ -652,33 +702,22 @@ async function enterVR() {
     ui.error('Could not start VR: ' + e.message);
   }
 }
-function sitDown() {
+async function sitDown() {
+  if(mode!=='intro'||ui.state.introExit)return;
+  player.lock(); // retain the click's user activation while the title finishes fading
+  if(!await ui.dismissPrologue()||mode!=='intro')return;
   ui.fade(true);
   ui.show('intro', false);
   ui.clearPrologue();
   player.lock();
-  startJourney();
+  if(!await startJourney())return;
   post.setCamera(camera);
-  jumpScene();
   setMode('play');
   playTime = 0;
   setTimeout(() => ui.fade(false), 1500);
 }
-// ---------- scene select: start later in the story (Scene 2 the market · 3 the run · 4 the door) ----------
+// Scene numbers are menu identifiers, independent of the internal Extra-only void slot.
 let pendingScene = 0;
-async function jumpScene() {
-  const n = pendingScene;
-  pendingScene = 0;
-  if (n < 2) return;
-  spaces[0].sceneOutside(); // the shift is done: bag, three coins, outside the door
-  if (n === 2) return; // walking on takes you into the lane and the market
-  await allBuilt;
-  await goTo('nightmare');
-  bagCtl.setContents({ coins: 3, scraps: true, food: true }); // the stolen food is in the bag
-  spaces[ORDER.indexOf('nightmare')].sceneStart(n === 4);
-  ctx.refreshColliders();
-  updateVisibility();
-}
 let pausedAt = 0;
 function pause() {
   if (mode !== 'play') return;
@@ -703,19 +742,21 @@ canvas.addEventListener('click', () => {
   if (mode === 'play' && !player.locked && !player.xr) player.lock();
 });
 function restart() {
+  const restartVersion=++transitionVersion;
   ui.show('pause', false);
   ui.show('endcard', false);
   ui.fade(true);
   player.lock();
   if (exploring) setExplore(false);
-  setTimeout(() => {
-    startJourney();
+  setTimeout(async () => {
+    if(restartVersion!==transitionVersion||!await startJourney(1))return;
     post.setCamera(camera);
     setMode('play');
     ui.fade(false);
   }, 700);
 }
 function quit() {
+  ++transitionVersion;pendingScene=0;
   ui.show('pause', false);
   ui.show('endcard', false);
   ui.show('intro', false);
@@ -777,6 +818,7 @@ function setExplore(on) {
     spaces.forEach((sp) => {
       if (sp) sp.root.visible = true;
     });
+    if(spaces[2]?.referenceData?.continuity)spaces[2].referenceData.continuity.group.visible=false;
     ui.hint('');
     ui.thought('');
     hands.hide(); // free hands while you wander
@@ -852,12 +894,15 @@ let elapsed = 0;
 const fwd = new THREE.Vector3(),
   head = new THREE.Vector3();
 renderer.setAnimationLoop(() => {
+  ui.presentationFrame();
   const dt = Math.min(clock.getDelta(), DT_MAX);
   elapsed += dt;
   if (!spaces[0] || !post) return;
   const playing = mode === 'play';
   const inXR = renderer.xr.isPresenting;
   if (inXR && xrRig.blurred) {
+    ctx.xrInput=null;
+    if(spaces[cur]?.suspendXR)spaces[cur].suspendXR();
     try {
       xrRig.update(dt);
     } catch (e) {
@@ -866,33 +911,39 @@ renderer.setAnimationLoop(() => {
     renderer.render(scene, camera);
     return;
   } // headset menu open: the story waits
-  spaces.forEach((sp, i) => sp && sp.update(dt, elapsed, playing && !exploring && i === cur));
   if (inXR) {
+    const physicalTask=(cur===0&&['pick','placing','push'].includes(spaces[0].phase))||(cur===1&&['sitting','begging','standUp'].includes(spaces[1].phase));
     // a VR-only fault must never freeze the headset: report it once and carry on
     try {
+      player.xrManipulating=playing&&physicalTask;
       xrRig.update(dt);
+      ctx.xrInput=xrRig.interactionPose();
     } catch (e) {
+      ctx.xrInput=null;
       if (!xrRig.faulted) {
         xrRig.faulted = true;
         console.error('[vr]', e);
       }
     }
-    // VR stand-ins for keys: hold the trigger to beg; squeeze both grips to close your eyes
+    // Shared tracked poses are sampled before scene updates. Grips still close the eyes at Home.
     const st = xrRig.state,
       tr = Math.max(st[0].trigger, st[1].trigger),
       sq = Math.min(st[0].squeeze, st[1].squeeze);
-    if (spaces[1]) spaces[1].setXRBeg(tr > 0.5);
     ctx.xrTrigger = tr > 0.5;
-    player.qHeldXR = Math.max(st[0].squeeze, st[1].squeeze) > 0.6; // a grip hugs the bag (Extra hide)
+    player.qHeldXR = !physicalTask&&Math.max(st[0].squeeze, st[1].squeeze) > 0.6;
     if (spaces[4]) spaces[4].setXRClose(sq > 0.6);
   } else {
+    ctx.xrInput=null;
     player.qHeldXR = false;
     ctx.xrTrigger = false;
   }
+  spaces.forEach((sp, i) => sp && sp.update(dt, elapsed, playing && !exploring && i === cur));
   if (playing) {
+    ctx.refreshColliders();
     player.update(dt);
+    if(player.moving)ui.observeAction('walk');
     const h = interactor.update();
-    ui.label(h && !inXR ? h.label : '');
+    ui.label(h && !inXR && !interactor.pressed ? h.label : '');
     player.headWorld(head);
     player.forward(fwd);
     thread.update(dt, elapsed, head, fwd);
@@ -905,6 +956,7 @@ renderer.setAnimationLoop(() => {
     ui.stamina(cur === 2 && spaces[2] ? spaces[2].stamina : null);
     autoQuality(dt);
   } else thread.update(dt, elapsed, head, fwd);
+  if(ctx.foodItem)ctx.foodItem.update();
   hands.update(dt);
   updateShadowBody(dt, mode === 'play' || mode === 'paused');
   const title = mode === 'title' || mode === 'intro' || mode === 'end' || mode === 'loading';
@@ -913,9 +965,7 @@ renderer.setAnimationLoop(() => {
   if (inXR)
     renderer.render(scene, camera); // no screen-space effects in a headset: the lighting carries the look
   else post.render(elapsed);
-  if (DEBUG)
-    $('#debug').textContent =
-      `${ctx.edition} · ${ORDER[cur]} · ${spaces[cur] ? spaces[cur].phase : ''} · ${quality} · ${Math.round(1 / Math.max(dt, 1e-3))} fps · built ${built}/5`;
+
 });
 
 // one-frame render statistics (draw calls and triangles across every pass)
@@ -942,6 +992,7 @@ if (DEBUG)
     },
     spaces,
     goTo,
+    startScene:async n=>{if(!await startJourney(n))return false;post.setCamera(camera);setMode('play');ui.show('title',false);ui.show('intro',false);ui.clearPrologue();ui.fade(false);},
     get cur() {
       return cur;
     },
@@ -979,6 +1030,6 @@ if (DEBUG)
   };
 build()
   .then(() => {
-    spaces[0].onEnd((next) => onSpaceEnd(next));
+    spaces[0].onEnd((next) => {if(cur===0)onSpaceEnd(next);});
   })
   .catch((e) => ui.error('Could not build the scene: ' + e.message + '\n' + e.stack));

@@ -47,7 +47,7 @@ export const schema = [
   {
     key: 'fpsCap',
     label: 'Frame rate limit',
-    note: 'Desktop only — headsets run at their own rate',
+    note: 'Desktop only. Headsets run at their own rate',
     type: 'seg',
     options: [
       [30, '30'],

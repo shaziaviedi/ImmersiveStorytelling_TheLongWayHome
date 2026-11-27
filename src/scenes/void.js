@@ -1,3 +1,4 @@
+import { getFabricLibrary } from '../world/fabric-library.js';
 // Extra-edition interlude between the chase and home.
 // Keep the player stationary in VR; only the surrounding dream objects move.
 import * as THREE from 'three';
@@ -126,19 +127,10 @@ export function buildVoid(ctx) {
   const sewObj = new THREE.Object3D();
   root.add(sewObj);
   // cut cloth flying past
-  const fabMs = ['buti', 'stripe', 'check', 'paisley', 'border', 'buti'].map(
-    (k, i) =>
-      new THREE.MeshBasicMaterial({
-        map: TX.fabric(k, i, 128),
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.9,
-        fog: false,
-      }),
-  );
   const cloths = [];
   for (let i = 0; i < 46; i++) {
-    const c = new THREE.Mesh(new THREE.PlaneGeometry(0.34, 0.26), fabMs[i % 6]);
+    const c = getFabricLibrary().hanging(.34,.26,i);
+    c.material=c.material.clone();c.material.transparent=true;c.material.opacity=.9;
     c.userData = {
       r: 1.4 + rnd() * 9,
       a: rnd() * Math.PI * 2,
@@ -354,6 +346,7 @@ export function buildVoid(ctx) {
     tmp = new THREE.Vector3();
   const lids = document.getElementById('eyelids');
   function setPhase(p) {
+    if(S.phase!==p)ui.clearGuidance();
     S.phase = p;
     S.t = 0;
   }
@@ -606,7 +599,7 @@ export function buildVoid(ctx) {
         });
         if (S.t > 0.7 && S.t - dt <= 0.7) {
           ui.hint('');
-          ui.thought(S.tries === 1 ? 'No— wait—' : 'Please…', 2.5);
+          ui.thought(S.tries === 1 ? 'No, wait…' : 'Please…', 2.5);
         }
         if (S.t > 1.2 && S.t - dt <= 1.2 && f) {
           dissolve(f);

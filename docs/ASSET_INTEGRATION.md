@@ -1,6 +1,7 @@
 # Scene asset integration
 
-Current runtime packaging: Home and market load optimized self-contained `.glb`
+Current runtime folders are `public/models/scene1/` through `scene4/`, with paths
+centralized in `src/config/scene-assets.mjs`. Home and market load optimized self-contained `.glb`
 files. The original source paths described below have moved, unchanged, under
 `_raw_assets/`. See [model optimization and archival](MODEL_ASSETS.md) for current
 paths, texture budgets, reports and source restoration. Earlier sections record
@@ -344,6 +345,10 @@ results remain recorded above.
 
 
 ## Scene 3: chase source integration
+
+The layout/scaling and collider approach recorded below is superseded by
+[the recovered-layout reconstruction](CHASE_RECONSTRUCTION.md). Original route/block definitions
+are now authoritative, with fixed family scales and direct Home selection.
 
 The supplied `public/models/scene3/Scene 3.glb` and matching `Scene 3.gltf` share
 1,104 nodes, 87 mesh definitions, 60 materials and 86 images. No editable `.unity`

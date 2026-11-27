@@ -567,7 +567,7 @@ export function ledger() {
   for (let y = 26; y < H; y += 11) {
     if (rnd() < 0.8)
       g.fillText(
-        '— ' + (Math.floor(rnd() * 9) + 1) + ' pcs ·· ' + (Math.floor(rnd() * 4) + 1),
+        '' + (Math.floor(rnd() * 9) + 1) + ' pcs ·· ' + (Math.floor(rnd() * 4) + 1),
         46,
         y,
       );

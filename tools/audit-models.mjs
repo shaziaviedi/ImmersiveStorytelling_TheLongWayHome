@@ -31,7 +31,7 @@ for(const file of [...await walk('src'),...await walk('public')].filter(p=>/\.(j
 }
 // Refuse cleanup if the expected self-contained runtime catalogs do not exist.
 for(const file of active)if(!await exists(file))throw Error('Run npm run optimize:models first: '+file);
-const keep=file=>active.has(file)||(/^public\/models\/(home|factory|market|chase)\/[^/]+\.json$/.test(file));
+const keep=file=>active.has(file)||(/^public\/models\/scene[1-4]\/[^/]+\.(json|md)$/.test(file))||file==='public/models/README.md';
 const unused=files.filter(f=>!keep(f)),unusedSet=new Set(unused),stats=await Promise.all(files.map(async file=>({file,bytes:(await fs.stat(file)).size})));
 const total=stats.reduce((n,s)=>n+s.bytes,0);
 const report={runtimeEntryPoints:[...active],references,totalBytes:total,totalFiles:files.length,
@@ -46,7 +46,7 @@ console.log(`All ${report.filesOver5MiB.length} files over 5 MiB and ${report.un
 if(archive){
  // Whole source projects move atomically where no archive already exists.
  const moved=[];
- for(const dir of ['public/models/scene1','public/models/scene2','public/models/scene4'])if(await exists(dir)&&!await exists(backupPath(dir))){
+ for(const dir of ['public/models/scene1','public/models/scene2','public/models/scene4'])if(await exists(dir)&&!files.some(f=>f.startsWith(dir+'/')&&keep(f))&&!await exists(backupPath(dir))){
   await fs.mkdir(path.dirname(backupPath(dir)),{recursive:true});await fs.rename(dir,backupPath(dir));moved.push(dir+'/');
  }
  for(const file of unused){

@@ -1,14 +1,18 @@
 # Runtime model assets
 
 The browser loads six self-contained GLBs: factory, market, chase, Home, the Home
-door/frame catalog, and the food plate. `tools/model-assets.mjs` lists these entry
-points; `src/world/gltf-assets.js` supplies the local Draco decoder and versions
+door/frame catalog, and the food plate. Runtime folders are `public/models/scene1/`
+(factory), `scene2/` (market), `scene3/` (chase) and `scene4/` (Home).
+`src/config/scene-assets.mjs` defines their paths; `tools/model-assets.mjs` pairs
+those runtime outputs with original preparation/archive inputs.
+`src/world/gltf-assets.js` supplies the local Draco decoder and versions
 requests using generated content hashes. Home and market no longer fetch external
 geometry or texture files. The normal application build needs only `src/`, `public/`
 and installed dependencies; it does not read `_raw_assets/`.
 
 The initial inventory contained 23,903 files / 3,754.4 MiB under `public/models/`.
-After packaging and cleanup, the folder contains 14 files / approximately 58.4 MiB.
+After packaging and cleanup, the folder contained 14 runtime/report files / approximately
+58.4 MiB. A top-level README now explains the four scene folders.
 Active scene transfer size falls from 428.9 MiB to approximately 58.3 MiB (86.4%).
 The original scene contents, including the unused `scene2/Scene2_Plaza.glb`, original
 `scene3/Scene 3.glb`, Unity projects/caches, standalone Home donor models, source
@@ -56,6 +60,10 @@ not provide GPU block compression. Physical standalone-headset performance still
 needs an on-device check.
 
 ## Updating source environments
+
+The input paths in the commands below are deliberate legacy preparation paths,
+not runtime locations. Keep their archived originals at those paths: the optimizer
+reads the existing backups and writes into the new `scene1`–`scene4` folders.
 
 `node tools/audit-models.mjs --restore` copies absent archived source files back to
 their original locations without replacing existing runtime models. Before running

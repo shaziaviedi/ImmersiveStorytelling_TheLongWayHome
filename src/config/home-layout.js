@@ -8,3 +8,9 @@ export const HOME = {
   x0: a[0], x1: b[0], z0: a[2], z1: b[2], h: b[1],
   door: { z0: homePoint(0, 0, -4.019)[2], z1: homePoint(0, 0, -5.0522)[2], h: 1.576 * HOME_SCALE },
 };
+
+// Destination tests use tracked head X/Z, independent of XR height and origin.
+export function atHomeApproach(point){
+  const z=(HOME.door.z0+HOME.door.z1)/2;
+  return point.x>=HOME.x0-2.5&&point.x<=HOME.x0+.35&&Math.abs(point.z-z)<1.1;
+}

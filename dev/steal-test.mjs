@@ -8,14 +8,9 @@ p.on('pageerror', (e) => console.log('PAGEERROR ' + e.message));
 await p.goto(`${TEST_URL}/index.html?debug&q=low&dtmax=0.25`);
 await p.waitForFunction(() => document.querySelector('#title.show'), null, { timeout: 120000 });
 await p.evaluate(() => document.querySelector('[data-action="scene"][data-n="2"]').click());
-await p.waitForFunction(
-  () => document.querySelector('#intro-2').textContent.includes('Click'),
-  null,
-  { timeout: 60000 },
-);
-await p.evaluate(() => document.querySelector('#intro').click());
+await p.waitForFunction(()=>window.__tlwh.mode==='play'&&window.__tlwh.world.name==='street',null,{timeout:180000});
 await p.waitForTimeout(3000);
-// walk out into the market
+// Direct selection already starts in the market.
 await p.evaluate(() => window.__tlwh.player.place(23, 4, -Math.PI / 2, 1.52));
 await p.waitForFunction(() => window.__tlwh.cur === 1, null, { timeout: 60000 });
 for (let i = 0; i < 40; i++) {

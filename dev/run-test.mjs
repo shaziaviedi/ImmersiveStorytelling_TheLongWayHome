@@ -14,18 +14,8 @@ await p.goto(`${TEST_URL}/index.html?debug&q=low&dtmax=` + (process.env.DTMAX ||
 await p.waitForFunction(() => document.querySelector('#title.show'), null, { timeout: 120000 });
 await p.screenshot({ path: out + '-title.png' });
 await p.evaluate((e) => document.querySelector(`[data-ed="${e}"]`).click(), ed);
-if (scene === '1') await p.evaluate(() => document.querySelector('[data-action="begin"]').click());
-else
-  await p.evaluate(
-    (n) => document.querySelector(`[data-action="scene"][data-n="${n}"]`).click(),
-    scene,
-  );
-await p.waitForFunction(
-  () => document.querySelector('#intro-2').textContent.includes('Click'),
-  null,
-  { timeout: 60000 },
-);
-await p.evaluate(() => document.querySelector('#intro').click());
+await p.evaluate(n=>document.querySelector(`[data-action="scene"][data-n="${n}"]`).click(),scene);
+await p.waitForFunction(()=>window.__tlwh.mode==='play',null,{timeout:180000});
 const T = () =>
   p.evaluate(() => {
     const w = window.__tlwh;

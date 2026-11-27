@@ -100,8 +100,8 @@
 }
 
 #intro .intro-inner {
-  width: min(1180px, 100%);
-  max-width: 1180px;
+  width: min(1000px, 100%);
+  max-width: 1000px;
   max-height: 100dvh;
   overflow-y: auto;
   padding: clamp(20px, 4vw, 56px);
@@ -109,10 +109,10 @@
 }
 
 #intro .end-stat {
-  font-size: clamp(27px, 3.2vw, 48px);
-  line-height: 1.35;
+  font-size: clamp(20px, 2.2vw, 30px);
+  line-height: 1.4;
   max-width: 1050px;
-  margin: 0 auto 22px;
+  margin: 0 auto 14px;
   text-wrap: balance;
 }
 
@@ -123,3 +123,8 @@
 #intro.ready {
   cursor: pointer;
 }
+
+/* The inline phrase is the only title, lifted onto the same screen plane on exit. */
+#pro-title { color: #d23a2c; white-space: nowrap; display: inline-block; }
+#pro-title.intro-hero { position: fixed; z-index: 2; margin: 0; line-height: 1.4;
+  transform: translate(-50%, -50%); pointer-events: none; }

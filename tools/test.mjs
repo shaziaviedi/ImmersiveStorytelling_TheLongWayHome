@@ -4,6 +4,17 @@ import { buildOptions } from './build-options.mjs';
 import { readCompleteFile } from './read-complete-file.mjs';
 
 const suites = {
+  'city-boundaries': [['dev/city-boundaries-test.mjs']],
+  'market-fixes': [['dev/market-navigation-test.mjs'],['dev/market-corrections-test.mjs']],
+  story: [['dev/story-regression-test.mjs']],
+  selection: [['dev/scene-selection-test.mjs']],
+  'chase-navigation-vr': [['dev/chase-navigation-vr-test.mjs']],
+  'chase-route': [['dev/chase-route-test.mjs']],
+  continuity: [['dev/continuity-test.mjs']],
+  'continuity-vr': [['dev/continuity-vr-test.mjs']],
+  presentation: [['dev/presentation-test.mjs']],
+  'presentation-vr': [['dev/presentation-vr-test.mjs']],
+  physical: [['dev/physical-actions-test.mjs'],['dev/physical-vr-test.mjs']],
   ui: [['dev/ui-test.mjs']],
   factory: [['dev/factory-assets-test.mjs']],
   home: [['dev/home-assets-test.mjs']],

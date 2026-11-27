@@ -1,6 +1,9 @@
-// Emulated Quest walkthrough. Run both editions with npm run test:vr.
+// Emulated Quest integration walkthrough. Focused physical tests retain the 0.05s step;
+// the broader story allows a 0.1s debug step, below the physical discontinuity guard.
+// Run both editions with npm run test:vr.
 import { launchTestBrowser, TEST_URL, ARTIFACT_DIR } from './helpers/browser.mjs';
 import { continueVRPrologue, readXRRuntime } from './helpers/vr.mjs';
+import {sewPhysicalVR,placeFoodVR} from './helpers/physical-vr.mjs';
 const [ED = 'normal', OUT = `${ARTIFACT_DIR}/vr-${ED}`] = process.argv.slice(2);
 const IWER = await readXRRuntime();
 const b = await launchTestBrowser({
@@ -28,7 +31,7 @@ await p.addInitScript({
   d.position.set(0.6, 1.62, 0.3); const a = Math.PI / 4; d.quaternion.set(0, Math.sin(a), 0, Math.cos(a));
   d.controllers.left.position.set(0.4, 1.2, 0.1); d.controllers.right.position.set(0.8, 1.2, 0.1); window.__xrdev = d; })();`,
 });
-await p.goto(`${TEST_URL}/index.html?debug&q=low&dtmax=0.25`);
+await p.goto(`${TEST_URL}/index.html?debug&q=low&dtmax=0.1`);
 await p.waitForFunction(() => document.querySelector('#title.show'), null, { timeout: 180000 });
 let fails = 0;
 const ok = (c, m) => {
@@ -109,6 +112,8 @@ await p.evaluate(() => {
 } // a real click (the headset needs a user gesture)
 await p.waitForFunction(() => window.__tlwh.renderer.xr.isPresenting, null, { timeout: 60000 });
 ok(true, 'immersive-vr session started from the title click');
+// Debug-assisted traversal must not introduce random catches after position jumps.
+await p.evaluate(()=>window.__tlwh.ctx.noCatch=true);
 await continueVRPrologue(p);
 await p.waitForFunction(() => window.__tlwh.mode === 'play', null, { timeout: 120000 });
 const S = () => p.evaluate(() => window.__st());
@@ -132,49 +137,18 @@ ok(
   `eyes at the seated child height (${s.head[1]} vs ${s.eye})`,
 );
 await p.screenshot({ path: OUT + '-0.png' });
-// the first beat: take the fabric with the trigger
-await p.waitForFunction(() => window.__tlwh.world.phase === 'pick', null, { timeout: 120000 });
-s = await S();
-console.log('pick', JSON.stringify(s));
-ok(
-  /trigger/.test(s.hint) && !/mouse|click/i.test(s.hint),
-  'hint worded for controllers: "' + s.hint + '"',
-);
-console.log(await p.evaluate(() => window.__aim('Take a piece of fabric')));
-await p.waitForTimeout(1500);
-s = await S();
-ok(s.rays.some(Boolean), 'pointer ray shows on the fabric');
-await p.screenshot({ path: OUT + '-1.png' });
-await p.evaluate(() => window.__btn('right', 'trigger', 1));
-await p.waitForTimeout(800);
-await p.evaluate(() => window.__btn('right', 'trigger', 0));
-await p
-  .waitForFunction(() => ['placing', 'push'].includes(window.__tlwh.world.phase), null, {
-    timeout: 30000,
-  })
-  .then(() => ok(true, 'trigger took the fabric'))
-  .catch(() => ok(false, 'trigger took the fabric'));
-await p.waitForFunction(() => window.__tlwh.world.phase === 'push', null, { timeout: 60000 });
-console.log(await p.evaluate(() => window.__aim('Hold to sew')));
-await p.waitForTimeout(800);
-await p.evaluate(() => window.__btn('right', 'trigger', 1));
-await p.waitForTimeout(4000);
-s = await S();
-// A fast render can finish the piece before this sample, resetting the progress indicator to zero.
-const piecesSewn = await p.evaluate(() => window.__tlwh.world.S.pieces);
-ok(
-  s.prog > 0.05 || piecesSewn > 0 || s.phase === 'folding',
-  `holding the trigger sews (progress ${s.prog.toFixed(2)}, completed pieces ${piecesSewn})`,
-);
-await p.screenshot({ path: OUT + '-2.png' });
-await p
-  .waitForFunction(() => window.__tlwh.world.phase !== 'push', null, { timeout: 120000 })
-  .catch(() => {});
-await p.evaluate(() => window.__btn('right', 'trigger', 0));
-s = await S();
-console.log('after sewing', s.phase);
+// Grab, place and feed one piece with tracked grip-space movement.
+await p.waitForFunction(()=>window.__tlwh.world.phase==='pick',null,{timeout:120000});
+s=await S();ok(/grip|reach/i.test(s.hint),'VR sewing hint describes physical grip/reach');
+await p.evaluate(()=>window.__btn('right','trigger',1));await p.waitForTimeout(500);
+ok((await S()).phase==='pick','trigger alone cannot pick or sew');
+await p.evaluate(()=>window.__btn('right','trigger',0));
+await sewPhysicalVR(p);
+ok(await p.evaluate(()=>window.__tlwh.world.S.pieces===1),'physical grip/carry/feed completes one piece');
+await p.screenshot({path:OUT+'-2.png'});
 // skip to standing up and walking
 for (let i = 0; i < 40; i++) {
+  if(await p.evaluate(()=>window.__tlwh.world.phase==='pick')){await sewPhysicalVR(p);continue;}
   const ph = await p.evaluate(() => {
     const w = window.__tlwh.world;
     if (w.phase !== 'toBag') w.skip();
@@ -289,20 +263,26 @@ for (let i = 0; i < 400; i++) {
   )
     sawWhite++;
   const key = s.cur + ' ' + s.phase;
-  if (key !== last)
+  if (key !== last || i%20===0)
     console.log(i, key, '|', s.hint, '| fade', s.fade, 'lid', s.lid, 'head', s.head.join(','));
   same = key === last ? same + 1 : 0;
   last = key;
   if (s.mode === 'end') break;
-  if (s.cur === 4 && s.phase === 'toTable') homeEye = s.head[1];
+  if (s.cur === 4 && s.phase === 'toTable') {
+    homeEye=s.head[1];await placeFoodVR(p);
+    ok(await p.evaluate(()=>{const w=window.__tlwh;return w.ctx.foodItem.object.parent===w.world.anchors.meal&&w.world.anchors.meal.children.length===1;}),'same food physically placed onto the table');
+    continue;
+  }
   if (same >= 3) {
     same = 0;
     await p.evaluate(() => {
       const w = window.__tlwh;
+      // Do not restart the opening timer every polling cycle on a slow renderer.
+      if(w.world?.name==='nightmare'&&w.world.lanes.S.doorOpen)return;
       if (w.world && w.world.skip) w.world.skip();
     });
   }
-  if (s.phase === 'begging') await p.evaluate(() => window.__btn('right', 'trigger', 1));
+  if (['sitting','begging','standUp'].includes(s.phase)) await p.evaluate(()=>{window.__btn('left','trigger',1);window.__btn('right','trigger',1);});
   if (s.phase === 'rest')
     await p.evaluate(() => {
       window.__btn('left', 'squeeze', 1);

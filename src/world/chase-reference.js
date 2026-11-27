@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { loadGltf, fitModel, prepareShadows } from './gltf-assets.js';
-import { CHASE_ASSET_VERSION } from '../config/chase-assets.js';
+import { SCENE_ASSETS } from '../config/scene-assets.mjs';
+import { MODEL_VERSIONS } from '../config/optimized-assets.js';
+import { closeChaseBoundaries } from './chase-boundaries.js';
 import { HOME } from '../config/home-layout.js';
 
 const box = o => { o.updateWorldMatrix(true, true); return new THREE.Box3().setFromObject(o); };
@@ -9,8 +11,8 @@ function hideSurface(o) {
   o.children.forEach(c => { c.visible = false; });
   o.userData.environmentProxy = true;
 }
-export async function loadChaseReference({ root, buildings, statics, grounds, obstacles, route, laundry, lanes, placeholderWires }) {
-  const gltf = await loadGltf(`models/scene3/Scene%203.glb?v=${CHASE_ASSET_VERSION}`);
+export async function loadChaseReference({ root, buildings, statics, grounds, obstacles, route, laundry, lanes, placeholderWires, blockRegions }) {
+  const gltf = await loadGltf(SCENE_ASSETS.scene3.environment);
   const byNode = new Map();
   gltf.scene.traverse(o => { const a = gltf.parser.associations.get(o); if (a?.nodes !== undefined) byNode.set(a.nodes, o); });
   const json = gltf.parser.json, byName = new Map();
@@ -42,23 +44,53 @@ export async function loadChaseReference({ root, buildings, statics, grounds, ob
     });
     return result;
   }
-  const families = ['slum_house', 'tower_block_balconies', 'shanty_two_storey_wooden', 'concrete_apartment_block', 'shanty_house_enterable'];
-  buildings.forEach((owner,i) => {
-    owner.geometry.computeBoundingBox();
-    const lot = owner.geometry.boundingBox.getSize(new THREE.Vector3()), toward = nearest(owner.position.x,owner.position.z);
-    const dx = toward.x-owner.position.x, dz = toward.z-owner.position.z, faceX = Math.abs(dx)>Math.abs(dz);
-    // Repeating-lane selection also repeats every four owners, matching the existing 8 m loop.
-    const family = families[(toward.segment===3 ? i%4 : i)%families.length];
-    const model = clone(family), angle = Math.atan2(dz,-dx);
-    const oriented = new THREE.Group(); oriented.rotation.y = angle; oriented.add(model);
-    const size = box(oriented).getSize(new THREE.Vector3()); oriented.remove(model);
-    const width = faceX ? lot.z : lot.x, nativeWidth = faceX ? size.z : size.x;
-    const height = Math.min(lot.y, Math.max(2.8,size.y*width/nativeWidth));
-    const fitted = fitModel(model,{size:{x:lot.x,z:lot.z},height,rotation:[0,angle,0]});
-    fitted.name = `scene3-building-${i}`; fitted.userData.sourceAsset = family;
-    hideSurface(owner); owner.add(fitted);
-    instances.push({ object:fitted, owner, source:family, type:'building', lot:{x:lot.x,z:lot.z} });
-  });
+  // Normalize every family once by its storey count; never stretch a building to a lot.
+  const storeys={slum_house:1,tower_block_balconies:9,shanty_two_storey_wooden:2,concrete_apartment_block:5,shanty_house_enterable:2,metal_container_shack:1};
+  const familyMetrics=Object.fromEntries(Object.entries(storeys).map(([name,floors])=>{
+    const model=clone(name),native=box(model).getSize(new THREE.Vector3());
+    let door;model.traverse(o=>{if(o.isMesh&&/^Door_/.test(o.name))door=o;});
+    const doorHeight=door?box(door).getSize(new THREE.Vector3()).y:null;
+    const scale=doorHeight?2.05/doorHeight:floors*2.65/native.y;
+    return [name,{height:native.y*scale,scale,native:native.toArray(),storeys:floors,doorHeight,reference:door?'2.05m authored door':'2.65m storey'}];
+  }));
+  const concrete=clone('concrete_block');let backingMaterial;
+  concrete.traverse(o=>{if(!backingMaterial&&o.isMesh)backingMaterial=Array.isArray(o.material)?o.material[0]:o.material;});
+  if(!backingMaterial)throw Error('Source concrete surface missing');
+  buildings.forEach(hideSurface);
+  const plots=[];
+  for(const [index,region]of blockRegions.entries()){
+    const {x0,x1,z0,z1,owners}=region;if(!owners.length)continue;
+    const owner=owners[0],group=new THREE.Group();group.name=`original-chase-block-${index}`;group.position.copy(owner.position).negate();owner.add(group);
+    const center=new THREE.Vector3((x0+x1)/2,0,(z0+z1)/2),toward=nearest(center.x,center.z);
+    const dx=toward.x-center.x,dz=toward.z-center.z,faceX=Math.abs(dx)>Math.abs(dz);
+    const angle=Math.atan2(dz,-dx),length=faceX?z1-z0:x1-x0,depth=faceX?x1-x0:z1-z0;
+    // A continuous source-material foundation marks the exact original solid footprint.
+    const plinth=new THREE.Mesh(new THREE.BoxGeometry(x1-x0,.42,z1-z0),backingMaterial);
+    plinth.position.set(center.x,.21,center.z);plinth.castShadow=plinth.receiveShadow=true;plinth.name='source-block-foundation';group.add(plinth);
+    const metrics=Object.entries(familyMetrics).map(([name,m])=>{
+      const o=fitModel(clone(name),{height:m.height,rotation:[0,angle,0]}),size=box(o).getSize(new THREE.Vector3());
+      return {name,object:o,width:faceX?size.z:size.x,depth:faceX?size.x:size.z,height:m.height};
+    }).filter(m=>m.depth<=depth+.001);
+    let cursor=0,step=0;
+    while(cursor<length-.1){
+      const available=metrics.filter(m=>m.width<=length-cursor+.001).sort((a,b)=>a.width-b.width);
+      if(!available.length)break;
+      // Family selection is deterministic for the original block, not an imported Unity arrangement.
+      const preferred=['tower_block_balconies','shanty_two_storey_wooden','slum_house','shanty_house_enterable','concrete_apartment_block'][(region.originalBlock??index)%5];
+      const m=(step===0&&available.find(m=>m.name===preferred))||available[(index+step)%available.length],model=m.object.clone(true);
+      const x=faceX?(dx>0?x1-m.depth/2:x0+m.depth/2):x0+cursor+m.width/2;
+      const z=faceX?z0+cursor+m.width/2:(dz>0?z1-m.depth/2:z0+m.depth/2);
+      model.position.set(x,.42,z);model.name=`scene3-building-${index}-${step}`;model.userData.sourceAsset=m.name;group.add(model);
+      instances.push({object:model,owner,source:m.name,type:'building',region,lot:{x:x1-x0,z:z1-z0},uniformScale:familyMetrics[m.name].scale});
+      cursor+=m.width;step++;
+    }
+    if(cursor<length-.02){
+      const gap=length-cursor,height=7.8+(region.originalBlock%3)*1.15,wall=new THREE.Mesh(new THREE.BoxGeometry(faceX?.12:gap,height,faceX?gap:.12),backingMaterial);
+      wall.position.set(faceX?(dx>0?x1-.06:x0+.06):x0+cursor+gap/2,.42+height/2,faceX?z0+cursor+gap/2:(dz>0?z1-.06:z0+.06));
+      wall.name='source-boundary-infill';wall.castShadow=wall.receiveShadow=true;group.add(wall);
+    }
+    plots.push({region,group,plinth});
+  }
   const dressing = new THREE.Group(); dressing.name = 'scene3-source-dressing';
   statics.forEach(hideSurface); statics[0].add(dressing);
   const industrial = source('industrial_clutter_pack');
@@ -77,12 +109,7 @@ export async function loadChaseReference({ root, buildings, statics, grounds, ob
     const name = i%3===1 ? 'burlap_sacks' : 'cardboard_boxes_set (1)';
     prop(clone(name),name,x,z,w,d,i%3===1?.68:(i%2?.85:1.05));
   });
-  [[70.5,13.6,.4,.6],[76.4,11.675,.4,.55],[80.6,13.6,.4,.6]].forEach(([x,z,w,d]) => prop(industrialPart('PropaneTank'),'propane-tank',x,z,w,d,.3));
-  // Source container homes form the final row; place them behind the lane boundary,
-  // leaving the existing story doorways/lamps and the Home exterior unobstructed.
-  for (let x=69.2,i=0; x<HOME.x0-1.4; x+=3.25,i++) for (const z of [10.5,14.9]) {
-    prop(clone(i%2 ? 'slum_house':'metal_container_shack'),'final-lane-house',x,z,2.95,1.8,2.8);
-  }
+  [[70.5,13.7,.4,.6],[76.4,11.675,.4,.55],[80.6,13.7,.4,.6]].forEach(([x,z,w,d]) => prop(industrialPart('PropaneTank'),'propane-tank',x,z,w,d,.3));
   const floorSource = source('floor_material'); let floorMaterial;
   floorSource.traverse(o => { if (!floorMaterial && o.isMesh) floorMaterial=Array.isArray(o.material)?o.material[0]:o.material; });
   if (!floorMaterial?.map) throw Error('Scene 3 floor PBR maps missing');
@@ -99,10 +126,10 @@ export async function loadChaseReference({ root, buildings, statics, grounds, ob
   const apronMaterial=floorMaterial.clone();
   for(const key of ['map','normalMap','roughnessMap','metalnessMap','aoMap'])if(apronMaterial[key]){
     apronMaterial[key]=apronMaterial[key].clone();apronMaterial[key].wrapS=apronMaterial[key].wrapT=THREE.RepeatWrapping;
-    apronMaterial[key].repeat.set(56/3,36/3);apronMaterial[key].needsUpdate=true;
+    apronMaterial[key].repeat.set(140/3,92/3);apronMaterial[key].needsUpdate=true;
   }
-  const apron=new THREE.Mesh(new THREE.PlaneGeometry(56,36),apronMaterial);
-  apron.name='scene3-ground-apron';apron.rotation.x=-Math.PI/2;apron.position.set(68,-.006,6);apron.receiveShadow=true;apron.userData.baseY=-.006;
+  const apron=new THREE.Mesh(new THREE.PlaneGeometry(140,92),apronMaterial);
+  apron.name='scene3-ground-apron';apron.rotation.x=-Math.PI/2;apron.position.set(56,-.025,6);apron.receiveShadow=true;apron.userData.baseY=-.025;
   root.add(apron);grounds.push(apron);
   placeholderWires.forEach(o=>{o.visible=false;});
   route.forEach((r,i)=>{
@@ -115,16 +142,19 @@ export async function loadChaseReference({ root, buildings, statics, grounds, ob
     const cable=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),32,.012,5,false),new THREE.MeshStandardMaterial({color:0x24201c,roughness:1}));cable.name='scene3-supported-power-cable';dressing.add(cable);
   });
   // Keep the animated laundry, and give every row an actual connecting support line.
-  for (const x of [71,74.6,78.2]) {
+  const laundrySpans=[];
+  for (const [row,x] of [71,74.6,78.2].entries()) {
     const a=new THREE.Vector3(x,2.6,11.3),b=new THREE.Vector3(x+.4,2.6,14.1);
     const points=Array.from({length:17},(_,i)=>a.clone().lerp(b,i/16).add(new THREE.Vector3(0,-.25*Math.sin(i/16*Math.PI),0)));
-    const rope=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),24,.012,5,false),new THREE.MeshStandardMaterial({color:0x24201c,roughness:1}));
+    const curve=new THREE.CatmullRomCurve3(points);
+    const rope=new THREE.Mesh(new THREE.TubeGeometry(curve,24,.012,5,false),new THREE.MeshStandardMaterial({color:0x24201c,roughness:1}));
+    const cloth=laundry.slice(row*3,row*3+3);
+    cloth.forEach((piece,i)=>{piece.position.copy(curve.getPoint((i+.5)/cloth.length));piece.rotation.y=Math.atan2(b.x-a.x,b.z-a.z)+Math.PI/2;});
+    laundrySpans.push({a,b,curve,cloth});
     dressing.add(rope);
     for (const p of [a,b]) { const pole=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,2.65,6),rope.material);pole.position.set(p.x,1.325,p.z);dressing.add(pole); }
   }
   // Native architectural backings support the retained animated story surfaces.
-  const concrete = clone('concrete_block'); let backingMaterial;
-  concrete.traverse(o=>{if(!backingMaterial&&o.isMesh)backingMaterial=o.material;});
   const anchors=lanes.anchors();
   const backing = new THREE.Group(); backing.name='scene3-story-wall-backing'; dressing.add(backing);
   for (const a of anchors) {
@@ -136,6 +166,7 @@ export async function loadChaseReference({ root, buildings, statics, grounds, ob
     wall.position.set(a.x+direction.x*.12,1.325,a.z+direction.z*.12);wall.castShadow=true;wall.receiveShadow=true;backing.add(wall);
   }
   for (const x of [65.28,68.12]) { const wall=new THREE.Mesh(new THREE.BoxGeometry(.12,5.7,14.6),backingMaterial);wall.position.set(x,2.85,4.0);backing.add(wall); }
-  return {instances,dressing,backing,compatibility,sourceMeshes:json.meshes.length,sourceImages:json.images.length,
-    missingPrefabs:json.nodes.filter(n=>n.name?.includes('Missing Prefab')).map(n=>n.name), sourceVersion:CHASE_ASSET_VERSION};
+  const boundaries=closeChaseBoundaries(root,{clone,familyMetrics,backingMaterial,plots,grounds});
+  return {instances,dressing,backing,plots,boundaries,familyMetrics,laundrySpans,compatibility,sourceMeshes:json.meshes.length,sourceImages:json.images.length,
+    missingPrefabs:json.nodes.filter(n=>n.name?.includes('Missing Prefab')).map(n=>n.name), sourceVersion:MODEL_VERSIONS[SCENE_ASSETS.scene3.environment]};
 }

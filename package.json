@@ -10,14 +10,23 @@
     "test:vr": "node tools/test.mjs vr",
     "test:ui": "node tools/test.mjs ui",
     "test:atmosphere": "node tools/test.mjs atmosphere",
-    "test": "node tools/verify-optimized-models.mjs && node tools/test.mjs ui factory home street chase atmosphere",
+    "test": "node dev/physical-actions-test.mjs && node tools/verify-optimized-models.mjs && node tools/test.mjs ui presentation continuity chase-route selection factory home street chase atmosphere && node tools/audit-player-text.mjs",
     "test:home": "node tools/test.mjs home",
     "test:street": "node tools/test.mjs street",
     "test:chase": "node tools/test.mjs chase",
     "test:factory": "node tools/test.mjs factory",
     "optimize:models": "node tools/optimize-models.mjs",
     "audit:models": "node tools/audit-models.mjs",
-    "test:models": "node tools/verify-optimized-models.mjs"
+    "test:models": "node tools/verify-optimized-models.mjs",
+    "test:physical": "node tools/test.mjs physical",
+    "test:physical-logic": "node dev/physical-actions-test.mjs",
+    "audit:text": "node tools/audit-player-text.mjs",
+    "test:presentation": "node tools/test.mjs presentation",
+    "test:presentation:vr": "node tools/test.mjs presentation-vr",
+    "test:continuity": "node tools/test.mjs continuity continuity-vr",
+    "test:chase:route": "node tools/test.mjs chase-route selection chase-navigation-vr",
+    "test:story": "node tools/test.mjs story",
+    "test:regression:vr": "node tools/test.mjs physical presentation-vr continuity-vr chase-navigation-vr home-vr vr"
   },
   "dependencies": {
     "three": "0.169.0"

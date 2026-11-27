@@ -1,9 +1,10 @@
+import { SCENE_ASSETS } from '../config/scene-assets.mjs';
 import * as THREE from 'three';
 import { loadGltf, loadModel, prepareShadows } from './gltf-assets.js';
 import { HOME, HOME_SCALE, homePoint } from '../config/home-layout.js';
 
 export async function loadHomeReference(parent) {
-  const gltf = await loadGltf('models/home/unity-home.glb');
+  const gltf = await loadGltf(SCENE_ASSETS.scene4.environment);
   const reference = gltf.scene;
   reference.name = 'unity-home-reference';
   reference.position.set(...homePoint(0, 0, 0));
@@ -67,7 +68,7 @@ export async function loadHomeReference(parent) {
   door.name = 'home-door-model';
   // Transfer the matching frame from the same source pack by the leaf's exact affine transform.
   // Handles protrude beyond the leaf and must never define the structural opening.
-  const pack = await loadModel('models/home/front_doors_pack.glb');
+  const pack = await loadModel(SCENE_ASSETS.scene4.door);
   pack.updateMatrixWorld(true);
   const nativeLeaf = pack.getObjectByName('Front_Door_007_Doors_0');
   let sourceLeaf, nativeFrame;

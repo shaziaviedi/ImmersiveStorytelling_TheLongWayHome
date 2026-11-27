@@ -1,3 +1,4 @@
+import { SCENE_ASSETS } from '../config/scene-assets.mjs';
 // Home: the supplied Unity/glTF hierarchy at one uniform WebXR scale.
 // Story systems remain here; source geometry, materials and placement come from the reference.
 import * as THREE from 'three';
@@ -5,7 +6,6 @@ import { slab, lerp, ease, damp, clamp } from '../world/builders.js';
 import { makePerson, poseFloor, poseLie, poseStand, animateIdle } from '../characters/people.js';
 import * as TX from '../world/textures.js';
 import { GRIP } from '../characters/first-person.js';
-import { loadModel, fitModel } from '../world/gltf-assets.js';
 import { loadHomeReference } from '../world/home-reference.js';
 import { HOME, HOME_SCALE, homePoint } from '../config/home-layout.js';
 export { HOME } from '../config/home-layout.js';
@@ -25,7 +25,7 @@ export function buildHome(ctx) {
   const table = new THREE.Group(); table.name = 'home-table-anchor';
   table.position.set(...homePoint(1.8433, 0, -6.042)); root.add(table);
   const meal = new THREE.Group(); meal.visible = false; table.add(meal);
-  meal.add(new THREE.Mesh(slab(0.24, 0.18, 0.1, 0.03, 0.01), new THREE.MeshStandardMaterial({ color: 0xd8b070, roughness: 0.8 })));
+  meal.name='home-food-placement';
   const mat = proxy('brother-mat', 1.6, 0.9, homePoint(-0.227, 0.02, -6.166));
   const myMat = proxy('player-mat', 1.6, 0.9, homePoint(0.5875, 0.02, -5.589));
   const sib = makePerson({
@@ -144,12 +144,12 @@ export function buildHome(ctx) {
       floor.name='home-floor-backing'; floor.rotation.x=-Math.PI/2; floor.position.set((x0+x1)/2,-0.004,(z0+z1)/2); floor.receiveShadow=true; root.add(floor);
       // The reference material is recovered; every physical wall is visible from both sides.
       meal.position.set(0,tb.max.y+0.008,0);
-      const food=fitModel(await loadModel('models/home/thali.glb'),{span:0.42}); meal.clear();meal.add(food);
+      await ctx.foodItem.ready;
       const motherBox=box(mother);colliders.push({minX:motherBox.min.x,maxX:motherBox.max.x,minZ:motherBox.min.z,maxZ:motherBox.max.z,source:'mother'});
       ctx.homeDoorVisual=doorPivot;
       assetStatus.loaded.push('unity-home.glb','thali.glb');
       gltfSource='reconstructed Unity/glTF hierarchy, uniform scale 1.4';
-      window.__homeGltf={url:'models/home/unity-home.glb',source:gltfSource,mode:'unity-reference',corrections:referenceData.corrections,materials:referenceData.materialCompatibility};
+      window.__homeGltf={url:SCENE_ASSETS.scene4.environment,source:gltfSource,mode:'unity-reference',corrections:referenceData.corrections,materials:referenceData.materialCompatibility};
       ctx.refreshColliders();
     } catch(e) { assetStatus.failed.push('unity-home.glb'); console.error('[home] reference failed',e); throw e; }
   })();
@@ -160,7 +160,10 @@ export function buildHome(ctx) {
     object: table,
     label: 'Put the food down',
     enabled: () => S.phase === 'toTable',
-    onPress: () => setPhase('giving'),
+    onPress: () => {
+      if(!player.xr || (ctx.xrInput?.valid&&ctx.xrInput.hands[0]?.tracked&&ctx.foodItem.near(meal))){if(player.xr){meal.visible=true;ctx.foodItem.place(meal);bagCtl.setContents({food:false});}setPhase('giving');}
+      else hint('Bring the plate over the table, then release your left grip',5);
+    },
     maxDist: 2.6,
   });
   interactor.add({
@@ -210,6 +213,7 @@ export function buildHome(ctx) {
   const eyelids = document.getElementById('eyelids');
   const hint = (t, s = 5) => ui.hint(t, s);
   function setPhase(p) {
+    if(S.phase!==p)ui.clearGuidance();
     S.phase = p;
     S.t = 0;
     S.idle = 0;
@@ -222,6 +226,8 @@ export function buildHome(ctx) {
   function reset() {
     Object.assign(S, {
       phase: 'idle',
+      foodGripHeld:false,
+      xrClose:false,
       t: 0,
       idle: 0,
       holdC: 0,
@@ -289,6 +295,7 @@ export function buildHome(ctx) {
     setPhase('arrive');
   }
   function stop() {
+    S.xrClose=false;S.foodGripHeld=false;S.holdC=0;
     audio.stopAll(sounds);
     sounds = [];
     snd = {};
@@ -352,6 +359,16 @@ export function buildHome(ctx) {
     }
     if (snd.bgm && S.relief != null) snd.bgm.setVolume(0.12 + 0.12 * (S.relief || 0));
 
+    if(player.xr&&S.phase==='toTable'){
+      const hand=ctx.xrInput?.hands[0];
+      if(ctx.xrInput?.valid&&hand?.tracked){
+        if(hand.squeeze>.6)S.foodGripHeld=true;
+        if(S.foodGripHeld&&hand.squeeze<.25&&ctx.foodItem.near(meal)){
+          meal.visible=true;ctx.foodItem.place(meal);bagCtl.setContents({food:false});setPhase('giving');return;
+        }
+        if(hand.squeeze<.25)S.foodGripHeld=false;
+      }else S.foodGripHeld=false;
+    }
     switch (S.phase) {
       // ---------- Extra edition ----------
       case 'wake': {
@@ -371,7 +388,7 @@ export function buildHome(ctx) {
           player.canMove = true;
           setPhase('toTable');
           thread.set(table.position.clone().setY(meal.position.y + 0.15));
-          hint('Put the food on the table', 6);
+          hint(player.xr?'Bring the plate over the table, then release your left grip':'Put the food on the table', 6);
         }
         break;
       }
@@ -447,7 +464,7 @@ export function buildHome(ctx) {
           player.canMove = true;
           setPhase('toTable');
           thread.set(table.position.clone().setY(meal.position.y + 0.15));
-          hint('Put the food on the table', 6);
+          hint(player.xr?'Bring the plate over the table, then release your left grip':'Put the food on the table', 6);
         }
         break;
       case 'giving':
@@ -465,16 +482,14 @@ export function buildHome(ctx) {
             : new THREE.Vector3(tx,0,tz+(S.from.z<tz?-1:1)*(half.z+0.4));
           S.toYaw = Math.atan2(-(tx-S.to.x),-(tz-S.to.z));
         }
-        {
+        if (!player.xr) {
           const k = ease(Math.min(1, S.t / 0.6));
           tmp.copy(S.from).lerp(S.to, k);
           player.dolly.position.x = tmp.x;
           player.dolly.position.z = tmp.z;
-          if (!player.xr) {
-            const dy = Math.atan2(Math.sin(S.toYaw - S.fromYaw), Math.cos(S.toYaw - S.fromYaw));
-            player.yaw = S.fromYaw + dy * k;
-            player.pitch = lerp(player.pitch, -0.45, Math.min(1, S.t * 3));
-          }
+          const dy = Math.atan2(Math.sin(S.toYaw - S.fromYaw), Math.cos(S.toYaw - S.fromYaw));
+          player.yaw = S.fromYaw + dy * k;
+          player.pitch = lerp(player.pitch, -0.45, Math.min(1, S.t * 3));
         }
         if (S.t > 0.5 && S.t < 1.5)
           hands.set(0, {
@@ -487,7 +502,7 @@ export function buildHome(ctx) {
           });
         if (S.t > 0.95 && S.t - dt <= 0.95) {
           bagCtl.setContents({ food: false });
-          meal.visible = true;
+          meal.visible = true;ctx.foodItem.place(meal);
           audio.oneShot('fabric', { volume: 0.6 });
         }
         if (S.t > 1.5 && S.t - dt <= 1.5) {
@@ -501,7 +516,7 @@ export function buildHome(ctx) {
         if (S.t > 7) setPhase('eating');
         break;
       case 'rest':
-        if (player.keys.KeyC || S.xrClose) S.holdC += dt;
+        if (player.keys.KeyC || (player.xr && S.xrClose)) S.holdC += dt;
         else S.holdC = 0;
         if (eyelids)
           eyelids.style.setProperty('--lid', String(Math.min(0.35, (S.holdC / 1.5) * 0.35)));
@@ -554,7 +569,7 @@ export function buildHome(ctx) {
     ready,
     assetStatus,
     get referenceData() { return referenceData; },
-    anchors: { table, mat, myMat, mother, chulha },
+    anchors: { table, meal, mat, myMat, mother, chulha },
     doorCollider,
     get gltfSource() {
       return gltfSource;

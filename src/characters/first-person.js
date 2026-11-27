@@ -304,9 +304,10 @@ export class BagCtl {
     const u = this.bag.userData;
     if (coins !== undefined) this.setCoins(coins);
     if (scraps !== undefined) u.scraps.visible = scraps;
-    if (food !== undefined) u.food.visible = food;
+    if (food !== undefined) {u.food.visible = this.foodItem ? false : food;if(food)this.foodItem?.carry();}
   }
   resetContents() {
+    this.foodItem?.reset();
     this.setContents({ coins: 0, scraps: false, food: false });
     this.glow = 0;
     this.heavy = 0;

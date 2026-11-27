@@ -1,3 +1,4 @@
+import { getFabricLibrary } from './fabric-library.js';
 // CITY KIT — painted textures and builders for the lanes, the market and the nightmare.
 // Buildings are simple faceted boxes with painted windows; their street side gets real depth
 // (ledges, balconies, AC units, shutters, signs, awnings) merged into one or two meshes each,
@@ -486,8 +487,6 @@ export function wires(root, list, mat = M(0x111111, { roughness: 0.6 })) {
 // laundry hanging from a line (cloth textures from the factory set)
 export function clothLine(root, a, b, fabMats, n = 4) {
   const out = [];
-  const g = new THREE.PlaneGeometry(0.42, 0.6, 2, 2);
-  g.translate(0, -0.3, 0);
   for (let k = 0; k < n; k++) {
     const t = (k + 0.5) / n,
       p = a.clone().lerp(b, t);
@@ -496,7 +495,7 @@ export function clothLine(root, a, b, fabMats, n = 4) {
     piv.position.copy(p);
     piv.rotation.y = Math.atan2(b.x - a.x, b.z - a.z) + Math.PI / 2;
     root.add(piv);
-    const c = new THREE.Mesh(g, fabMats[k % fabMats.length]);
+    const c = getFabricLibrary().hanging(.42,.6,k);
     c.castShadow = true;
     piv.add(c);
     out.push(piv);
