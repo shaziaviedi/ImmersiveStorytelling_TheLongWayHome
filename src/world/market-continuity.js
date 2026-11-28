@@ -1,8 +1,9 @@
 import * as THREE from 'three';
+import {mergeGeometries} from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 const bounds=o=>{o.updateWorldMatrix(true,true);return new THREE.Box3().setFromObject(o);};
 const CUT=39.96;
-// Clip only the few meshes crossing the join. Fully retained meshes share GPU
-// geometry/materials with Scene 2; no actors, lights or interactions are copied.
+// Clip only meshes crossing the join. Retain source materials/textures, then
+// consolidate opaque scenery by material; no actors, lights or interactions are copied.
 function clipAtJoin(mesh){
  const source=mesh.geometry.index?mesh.geometry.toNonIndexed():mesh.geometry,attributes=source.attributes,out=Object.fromEntries(Object.keys(attributes).map(k=>[k,[]])),groups=[];
  const vertex=i=>Object.fromEntries(Object.entries(attributes).map(([k,a])=>[k,Array.from({length:a.itemSize},(_,c)=>a[['getX','getY','getZ','getW'][c]](i))]));
@@ -35,7 +36,22 @@ export function buildMarketContinuity(root,street){
   let owner=mesh;while(owner.parent&&owner.parent!==source)owner=owner.parent;retainedSources.add(owner.userData.sourceName||owner.name);retainedSources.add(source.userData.sourceName||source.name);
   triangles+=(retained.geometry.index?.count||retained.geometry.attributes.position.count)/3;
  });}
+ // Baking this small static view costs a few MB but avoids hundreds of draw calls
+ // in stereo. Keep transparent and mirrored meshes separate to preserve sorting/culling.
+ group.updateWorldMatrix(true,true);const batches=new Map();let mergedBatches=0,bufferBytes=0;
+ for(const mesh of group.children){if(Array.isArray(mesh.material)||mesh.material.transparent||mesh.matrixWorld.determinant()<0)continue;
+  const signature=Object.entries(mesh.geometry.attributes).map(([k,a])=>[k,a.itemSize,a.normalized,a.array.constructor.name].join(':')).sort().join('|'),key=mesh.material.uuid+'|'+signature;
+  if(!batches.has(key))batches.set(key,[]);batches.get(key).push(mesh);
+ }
+ for(const meshes of batches.values()){if(meshes.length<2)continue;
+  const pieces=meshes.map(mesh=>{const geometry=mesh.geometry.index?mesh.geometry.toNonIndexed():mesh.geometry.clone();geometry.applyMatrix4(mesh.matrixWorld);return geometry;}),geometry=mergeGeometries(pieces,false);
+  if(!geometry)throw Error('Market continuity geometry batching failed');
+  geometry.computeBoundingBox();geometry.computeBoundingSphere();
+  const mesh=new THREE.Mesh(geometry,meshes[0].material);mesh.name='market-memory-batch-'+mesh.material.name;mesh.receiveShadow=true;mesh.userData.visualContinuity=true;
+  meshes.forEach(m=>group.remove(m));group.add(mesh);pieces.forEach(g=>g.dispose());mergedBatches++;
+  bufferBytes+=Object.values(geometry.attributes).reduce((n,a)=>n+a.array.byteLength,0);
+ }
  const colliders=d.colliders.filter(c=>retainedSources.has(c.source)&&c.minX<CUT&&c.maxX>=8).map(c=>({...c,maxX:Math.min(CUT,c.maxX),source:'retained market: '+(c.source||'solid')}));
  for(const lane of laneSources){const b=bounds(lane);colliders.push({minX:b.min.x,maxX:b.max.x,minZ:b.min.z,maxZ:b.max.z,source:'retained market lane house'});}
- return{group,shared,clipped,triangles,colliders,cutX:CUT};
+ return{group,shared,clipped,triangles,mergedBatches,bufferBytes,colliders,cutX:CUT};
 }

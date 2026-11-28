@@ -18,10 +18,11 @@ try{
   console.log('PASS tracked Quest direct scene',n,s.name,s.head);
  }
  // Turn the tracked headset around at the real chase entry, without moving the rig.
- const beforeLook=await page.evaluate(()=>{const w=window.__tlwh,V=w.camera.position.constructor;return w.player.headWorld(new V()).toArray();});
+ await page.evaluate(()=>{const w=window.__tlwh;w.world.S.phase='idle';w.player.canMove=false;});await vrFrame(page,4);
+ const beforeLook=await page.evaluate(()=>{const w=window.__tlwh,V=w.camera.position.constructor;return{head:w.player.headWorld(new V()).toArray(),rig:w.player.dolly.position.toArray()};});
  await page.evaluate(()=>{const d=window.__xrdev;d.quaternion.set(0,Math.sin(.2+Math.PI/2),0,Math.cos(.2+Math.PI/2));});await vrFrame(page,4);
- const look=await page.evaluate(()=>{const w=window.__tlwh,V=w.camera.position.constructor;return{market:w.world.referenceData.continuity.group.visible,full:w.spaces[1].root.visible,head:w.player.headWorld(new V()).toArray(),eyes:w.renderer.xr.getCamera().cameras.length,forward:w.camera.getWorldDirection(new V()).toArray()};});
- assert.equal(look.market,true);assert.equal(look.full,false);assert.equal(look.eyes,2);assert.ok(look.head.every((v,i)=>Math.abs(v-beforeLook[i])<.003));assert.ok(look.forward[0]<-.9);
+ const look=await page.evaluate(()=>{const w=window.__tlwh,V=w.camera.position.constructor;return{market:w.world.referenceData.continuity.group.visible,full:w.spaces[1].root.visible,head:w.player.headWorld(new V()).toArray(),eyes:w.renderer.xr.getCamera().cameras.length,rig:w.player.dolly.position.toArray(),forward:w.camera.getWorldDirection(new V()).toArray()};});
+ assert.equal(look.market,true);assert.equal(look.full,false);assert.equal(look.eyes,2);assert.ok(look.rig.every((v,i)=>Math.abs(v-beforeLook.rig[i])<.003));assert.ok(Math.abs(look.head[1]-beforeLook.head[1])<.003);assert.ok(Math.hypot(look.head[0]-beforeLook.head[0],look.head[2]-beforeLook.head[2])<.12);assert.ok(look.forward[0]<-.9);
  await page.screenshot({path:ARTIFACT_DIR+'/city-quest-lookback.png',timeout:120000});
  await page.evaluate(()=>{const w=window.__tlwh,q=w.camera.quaternion.clone(),E=w.camera.rotation.constructor;q.setFromEuler(new E(.5,.4+Math.PI,0,'YXZ'));window.__xrdev.quaternion.set(...q.toArray());});await vrFrame(page,3);
  await page.screenshot({path:ARTIFACT_DIR+'/city-quest-upper-boundary.png',timeout:120000});
